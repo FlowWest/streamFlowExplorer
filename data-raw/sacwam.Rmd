@@ -1,0 +1,137 @@
+---
+title: "SacWam Overview"
+date: "1/3/2024"
+output:
+  html_document:
+     code_folding: hide
+     theme: flatly
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, fig.width=15, fig.height=10)
+library(tidyverse)
+library(lubridate)
+library(googleCloudStorageR)
+library(ggplot2)
+library(scales)
+```
+
+## SacWam Summary 
+Sacramento Water Allocation Model (SacWam) provides simulated flows at a monthly timestep,
+and was developed to support the State Water Board in updates to the Bay-Delta Plan 
+by enabling comparative analysis of potential alternatives. The monthly output from
+SacWam is used to estimate changes in reservoir storage, streamflows, and water supply
+resulting from potential Bay-Delta Plan modifications (https://www.waterboards.ca.gov/waterrights/water_issues/programs/bay_delta/sacwam/docs/sacwam-2023.06.12-doc.pdf)
+
+* **Source:** State Water Resources and Control Board
+* **Accessibility:** (public, open and accessible online, if it is a model, can you run it independently?)
+* **Coverage:**
+* **Temporal Coverage:** [max temporal range (min date - max date)] - describe variation across gages if relevant 1922-2015 (period of simulation)
+* **Spatial Coverage:** [x out of x watersheds; use Yoshiama historical extent] The model represents the Sacramento River Hydrologic Region, the Trinity River watershed above the Lewiston gauge (USGS 11525500), and the northern part of the San Joaquin River Hydrologic Region downstream from the gauge at Vernalis (USGS 11303500). TODO Table 3-1 for all tribs
+* **Maintenance:** Is it maintained? And how often? By who (if different than source)
+* **Contact: ** Data / Model Contact (think about if worth expanding to a larger list of people / orgs) - think about having table section below with projects/contacts 
+* **Utilized By:** What process is it used in: (list processes that use this data) 
+
+## SacWam Model Summary 
+[CONDITIONALLY NEEDED - If it is modeled data - follow with a model summary]
+Couple sentence overview of model synthesizing what you know about modeled data source. Then subsections to describe the what. 
+
+SacWam simulates the following:
+- unimpaired flows (the amount of what the would flow down a river in the absence of dams and diversions)
+- stream flows throughout the Sacramento and Delta Eastside Tributary Watersheds
+- stream flows at United States Geological Survey (USGS) and California Department of Water Resources (DWR) gauges located on the Sacramento River
+- Delta inflow, net Delta outflow, and flows within the south Delta
+- major water infrastructure and storage regulation
+- water allocations, diversions, and return flows on the valley floor
+- groundwater pumping; and tracking of changes to groundwater storage through mass-balance accounting
+- stream-aquifer interaction
+
+SacWAM simplifies the depiction of stream flows by aggregating surface water diversions, return flows, and groundwater inflows to the stream network.
+
+### Architecture 
+(What type of model is it?) 
+
+Chapter 3 - Schematic
+Watersheds in SacWam are categorized as either Upper or Valley Floor watersheds:
+- Upper: foothill and mountain watersheds characterized by steep slopes, shallow soils, limited aquifer, not developed
+- Valley Floor: located between Upper watersheds and Delta; extensively developed, highly managed, rich agricultural land, urban areas
+
+The following *System Components* are defined in SacWam:
+- rivers and diversions - shapefiles to trace hydrologic features (river miles and canal miles) using aerial imagery, identify points of diversion. Rule: unidirectional upstream to downstream, may not divide into two or more distributaries. diversion arcs used for manmade canals as well as canal losses (groundwater or evap), water treatment plant intake, bias correction, delta depletions, stream losses, consumptive use
+- reservoirs - storgage capacity greater than 50,000 AF are represented and where reservoirs used for hydropower; smaller reservoirs may also be included to define points of diversion
+- groundwater - ten groundwater basins simulated; inflows and outflows include deep percolation from demand catchment, return flows from urban demand sites, seepage losses on surface water distribution systems, interaction with stream network through groundwater inflow and outflow parameters, groundwater pumping to meet water demands
+- other suppliers - limited to san joaquin valley and provide water to lands on souther boundary
+- demand site - represent urban water demans and deliveries to water users located outsite model domain
+- catchments - valley floor domain divided into smaller geographic regions known as Water Budget Areas
+- runoff and infiltration
+- transmission links - connect water supplies to demands (Demand Site objects and Catchment objects)
+- Central Valley Project deliveries: settlement contractors, exchange contractors, water right holders in san joaquin valley, M&I water service contractors, wildlife refuges
+- water treatment plants - represented indirectly using combination of diversion arcs and transmission links
+- wastewater treatment plants - there is an object but it is mostly not used
+- return flows - associated with urban Demand Units and represent discharge of treated wastewater to surface water or underlying aquifer
+- flow requirements - Instream Flow Requirement object: REG flow requirements that are regulatory, OPS flow requirements used to drive simulated upstream storage or simulated diversions, SWRCB potential new regulatory flow requirements specified as fraction of unimpaired flow
+- run of river hydro plants - simulate hydropower genertation, not used in SacWam, represented with diversion arcs
+- streamflow gages - allow rapid comparison of simulated flows to historical observed data HIS means historical observed, FNF for full natural flow data EST have been estimated from a water balance based on reservoir releases
+- dummy arcs and nodes: priority based constraints (constraints activated or inactivated to an assigned priority), switches, minimization, maximization
+### Accessibility 
+(How accessible is the documentation, and how easy is it to interpret) 
+
+Chapter 2 - WEAP; Chapter 8 - User Defined Linear Programming; Chapter 9 Key Assumptions
+Water Evaluation and Planning system (WEAP) is a simulation model that includes robust and flexible representation of water demands and the ability to program infrastructure elements nested within underlying hydrological processes
+(Figure 2-1 might be helpful)
+
+Current accounts = Existing conditions; requires calibration to run
+
+TODO try running WEAP to provide description
+
+### Update procedure 
+There is no standard update schedule for SacWam; rather, updates follow updates
+in regulations. The following summarizes the updates that have been made.
+
+- October 2017: SacWam 1.05 released; incorporates refinements suggested by peer review
+panel (e.g. simulation period extended from Sep 2009 to Sep 2015)
+- 2018-2019: Model development to incoporate updates to upper watershed hydrology and operations
+and CVP and SWP operations based on updates related to CalSim 3 by DWR
+- April 2019: SacWam 1.2 released; incorporates above refinements
+- November 2019: SacWam 2019.11.22 released; included draft scenarios of the Voluntary Agreement,
+45 and 55 percent unimpaired flow
+- 2019-2023: Updates related to updated regulations including the 2019 Biological Opinion
+and refining model logic to support simulation of Voluntary Agreement alternative
+
+### QA/QC procedures 
+
+### Data Inputs 
+Data needed to run 
+Timestep of each input 
+
+Agricultural water demands
+- 20 crop types, average irrigated acreage 1998-2007
+
+Urban water demands
+- historical purveyor production data for 2006-2010 for major cities and towns; based on population data for smaller communities
+
+### Model Outputs 
+File source
+Timestep 
+
+## Spatial & Temporal Coverage
+
+Plot and Chart that show coverage over watersheds, map here to show temporal coverage for a site # years or something 
+Hilighting major limitations, full time periods missing across many watersheds 
+
+**Coverage** The model includes the entire Sacramento-San Joaquin Delta (Delta), and the Delta Eastside streams comprising the Cosumnes, Mokelumne, and Calaveras rivers. SacWAM also includes the Delta-Mendota Canal, California Aqueduct, and San Luis Reservoir. Flows in the San Joaquin River entering the SacWAM model domain at Vernalis are specified based a CalSim 3 simulation by Stantec in 2022. SacWAM represents the water resources within the model domain using a comprehensive approach in which hydrology, water infrastructure, and water management are all contained within the simulation model. 
+
+
+
+## Quality Checks 
+
+[CONDITIONALLY NEEDED - if gage / if not already described in model section]
+What quality assurance checks are implemented by monitoring agency 
+What quality control checks are implemented by monitoring agency 
+
+## Data use and limitations 
+(build out once we play around with the data a bit more) 
+Pros and cons table for each use case 
+
+Chapter 11 Model Use and Limitations
+
