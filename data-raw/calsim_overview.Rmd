@@ -1,0 +1,139 @@
+---
+title: "CalSim Overview"
+date: "01/03/23"
+output:
+  html_document:
+     code_folding: hide
+     theme: flatly
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, fig.width=15, fig.height=10)
+library(tidyverse)
+library(lubridate)
+library(googleCloudStorageR)
+library(ggplot2)
+library(scales)
+```
+
+## CalSim Summary 
+CalSim is a water resources planning model, developed by the California Department of Water Resources (DWR) and the Mid-Pacific Region of the U.S. Bureau of Reclamation (Reclamation), to simulate operations of the State Water Project (SWP) and the Central Valley Project (CVP). CalSim 3 is the newest version of the model so this document will focus on the CalSim 3 version but will highlight differences between CalSim 3 and the prior modeling version CalSim-II (released in 2022). 
+
+* **Source:** Jointly developed by DWR and Reclamation. Information in this document pulled from [CalSim 3 main report](https://og-production-open-data-cnra-892364687672.s3.amazonaws.com/resources/2d4160d7-cbe1-4e63-8cdd-98f322e74cf2/calsim-3-report-final.pdf?Content-Type=application%2Fpdf&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAJJIENTAPKHZMIPXQ%2F20240103%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20240103T175526Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=37958f394ed72b67a74b7951391dca289e568cf433930a8a5cc249ef593afa82) and x 
+* **Accessibility:** 
+  * Model available on [GitHub](https://github.com/usbr/CM3/tree/master/CalSim_3_0721_benchmark_model). However high level of effort to run model independently. 
+  * Extensive model documentation can be found [here.](https://og-production-open-data-cnra-892364687672.s3.amazonaws.com/resources/2d4160d7-cbe1-4e63-8cdd-98f322e74cf2/calsim-3-report-final.pdf?Content-Type=application%2Fpdf&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAJJIENTAPKHZMIPXQ%2F20240103%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20240103T175526Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=37958f394ed72b67a74b7951391dca289e568cf433930a8a5cc249ef593afa82)
+  * Results? 
+* **Coverage:** 
+  * **Temporal Coverage:** 1922 - 2015
+  * **Spatial Coverage:** Covers all DWR and Reclamation Operated watersheds ([see full schematic](https://data.cnra.ca.gov/dataset/2395530a-5421-487e-921e-d6e594f23ac6/resource/3ec8338e-31d9-4dd3-93df-8d60ee6ec3d2/download/cs3_networkschematic_integrated_10_11_2022.pdf)). Includes __ out of Yoshiyama et all watersheds. 
+* **Maintenance:** Maintained by Reclamation and DWR. New modeled scenarios are released as needed by Reclamation and DWR efforts.  
+* **Contact: ** Data / Model Contact (think about if worth expanding to a larger list of people / orgs) - think about having table section below with projects/contacts 
+* **Utilized By:** Primarily developed for conducting planning studies relating to operations of the SWP and CVP. Modeling results are utilized in many efforts including the Central Valley Improvement Act Science Integration Team modeling processes (CalSim-II), DWR's Voluntary Agreements process (CalSim 3), and Reorienting to Recovery CA Central Valley Salmon Recovery Project. ---ADD MORE---
+
+## CalSim Model Summary 
+TODO Couple sentence overview of model synthesizing what you know about modeled data source. Then subsections to describe the what. 
+
+### Architecture 
+(What type of model is it?) 
+- WRIMS
+- mass balance 
+
+### Assumptions 
+- Hydrologic assumptions (fill in based on pg 111 of main report)
+  * Rim watersheds 
+    * 
+  * Valley floor watersheds 
+    * 
+
+### Accessibility 
+(How accessible is the documentation, and how easy is it to interpret) 
+
+### Update procedure 
+
+#### Version Update 
+- Describe update from CalSim-II to CalSim 3 
+- List historical versions and table summarizing difference between versions 
+
+#### Scenarios Produced 
+- list scenarios modeled (as much as you can...) - are these avaliable 
+
+### QA/QC procedures 
+
+### Data Inputs 
+Data Inputs to CalSim 3 were summarised based on Chapters 4, 5, and 6 of the main report. Fill in additional info based on page 169. 
+
+#### Rim Watershed Modeling Inputs 
+**Data Sources** 
+Rim watersheds - modeled using unimpaired runoff, utlize gage data directly where avaliable. 
+Valley Floor watersheds
+* USGS (?)
+* DWR (?)
+* USACE (?)
+* Reclamation (?)
+* Data stored in text files as part of DWR’s “COMP” model (?)
+Figure out how to fully represent this using inflow summary table (5 - 1) from main report on page 127
+
+
+#### Valley Floor Watershed Modeling Inputs 
+##### Water Demand - Monthly 
+**Agricultural Water Demand Data Sources**
+
+* Water district and water agency boundaries and service areas obtained from the Cal-Atlas
+Geospatial Clearinghouse (formerly the California Spatial Information Library), which
+comprises separate GIS layers for Federal, State, and private water districts. These data
+are also available from DWR (2022a).
+* County LAFCO reports on water purveyors in their respective counties (LAFCO, 2022)
+* County land-use surveys undertaken by DWR’s Division of Regional Assistance
+(formerly Division of Planning and Local Assistance) (DWR, 2022b).
+* County and regional integrated water resources plans and integrated water management
+plans.
+* CalSim II documentation (Reclamation, 2007).
+* Reclamation CVP water supply contract renewal and supporting environmental
+documents (Reclamation, 2022).
+
+**Urban Water Demand Data Sources**
+
+* Urban Water Management Plans (UWMP)
+* Integrated Regional Water Management Plans (IRWMP)
+* Drinking Water Source Assessments
+* U.S. Environmental Protection Agency (EPA)
+* California Water Plan, Update 2018
+
+**Wetland Water Demand Data Sources** 
+
+* Report on Refuge Water Supply Investigations, Central Valley Hydrologic Basin,
+California (Reclamation, 1989a)
+* San Joaquin Basin Action Plan/Kesterson Mitigation Plan (Reclamation, 1989b)
+* Central Valley Joint Venture Implementation Plan (USFWS, 2006)
+* Refuge water management plans (Reclamation, 2022a)
+* Refuge water supply environmental documentation (Reclamation, 2022b)
+* Reclamation water supply contract documents with Grassland WD, CDFW, USFWS, and
+MOUs with USFWS (Reclamation, 2022c)
+
+
+
+Add timestep of each input (or range for each category)
+
+### Model Outputs 
+File source
+Timestep 
+
+## Spatial & Temporal Coverage
+- Watershed boundaries were developed using CalWater 2.2.1 and the USGS 12-digit Hydrologic
+Unit Code (HUC) watersheds. 
+
+Plot and Chart that show coverage over watersheds, map here to show temporal coverage for a site # years or something 
+Hilighting major limitations, full time periods missing across many watersheds 
+
+link to georeferenced schema 
+
+## Quality Checks 
+
+[CONDITIONALLY NEEDED - if gage / if not already described in model section]
+What quality assurance checks are implemented by monitoring agency 
+What quality control checks are implemented by monitoring agency 
+
+## Data use and limitations 
+(build out once we play around with the data a bit more) 
+Pros and cons table for each use case 
