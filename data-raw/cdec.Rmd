@@ -138,6 +138,13 @@ cdec_station_sensors <-
   filter(sensor_number %in% selected_sensors) |>
   st_as_sf(coords = c("longitude", "latitude"), crs="EPSG:4269") |>
   st_transform("EPSG:3310")
+
+cdec_stations <- cdec_station_sensors |>
+  group_by(station_id, name, county, operator) |> # also summarize list of sensors included
+  summarize(sensors = list(unique(sensor_number))) |>
+  st_union(by_feature = TRUE) 
+
+#cdec_stations |> st_write("out/cdec_stations.shp", append=FALSE)
 ```
 
 ### Temporal Coverage
@@ -169,7 +176,9 @@ data_avail_by_water_year |>
 
 ### Spatial Coverage
 
-```{r import-watersheds, echo=TRUE, message=FALSE, warning=FALSE, include=FALSE}
+```{r import-watersheds, message=FALSE, warning=FALSE}
+# import a few different watershed files
+# use intersection with these polys to detect if in the basin
 watersheds_huc8 <- 
   st_read("shp/calw221_huc_8_selected.shp", as_tibble=TRUE) |>
   janitor::clean_names() |>
@@ -183,16 +192,36 @@ subwatersheds_calw221 <-
   st_read("shp/calw221_selected.shp", as_tibble=TRUE) |>
   janitor::clean_names() |>
   st_transform("EPSG:3310")
+watershed_labels <- 
+  st_read("shp/wbd_huc10_group_by_river_name.shp", as_tibble=TRUE) |>
+  janitor::clean_names() |>
+  st_transform("EPSG:3310") |>
+  rename(river_basin = river_name)
+
+# import river and creek stream lines
+# use intersection with buffered flowline shapefile to detect if on the mainstem
+stream_flowlines <- 
+  st_read("shp/ca_streams_selected.shp", as_tibble=TRUE) |>
+  janitor::clean_names() |>
+  st_zm() |>
+  st_transform("EPSG:3310") |>
+  mutate(label = coalesce(name, paste0("Tributary of ",down_name)))
+
 ```
 
 ```{r map-sensors}
 if (interactive()) {
   leaflet::leaflet() |> 
   leaflet::addTiles() |> 
-  leaflet::addPolygons(data=st_transform(watersheds_huc8, "EPSG:4326")) |>
-  leaflet::addMarkers(data=st_transform(cdec_station_sensors, "EPSG:4326"))
+  leaflet::addPolygons(data=st_transform(watershed_labels, "EPSG:4326"), label=~river_basin, color="gray") |>
+  leaflet::addPolylines(data=st_transform(stream_flowlines, "EPSG:4326"), label=~label, color="darkblue") |>
+  leaflet::addMarkers(data=st_transform(cdec_stations, "EPSG:4326"), 
+                      label=~paste(station_id, name, operator, paste(sensors), sep="<br>") |> lapply(htmltools::HTML)) 
 } else {
- ggplot() + geom_sf(data=watersheds_huc8) + geom_sf(data=cdec_station_sensors)
+ ggplot() + 
+    geom_sf(data=watershed_labels, color="gray") + 
+    geom_sf(data=stream_flowlines, color="darkblue") + 
+    geom_sf(data=cdec_stations, color="darkred")
 }
 ```
 

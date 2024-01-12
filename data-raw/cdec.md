@@ -1,7 +1,7 @@
 CDEC Overview
 ================
 [Skyler Lewis](mailto:slewis@flowwest.com)
-2024-01-10
+2024-01-12
 
 ## CDEC Summary
 
@@ -145,6 +145,18 @@ cdec_station_sensors <-
   filter(sensor_number %in% selected_sensors) |>
   st_as_sf(coords = c("longitude", "latitude"), crs="EPSG:4269") |>
   st_transform("EPSG:3310")
+
+cdec_stations <- cdec_station_sensors |>
+  group_by(station_id, name, county, operator) |> # also summarize list of sensors included
+  summarize(sensors = list(unique(sensor_number))) |>
+  st_union(by_feature = TRUE) 
+```
+
+    ## `summarise()` has grouped output by 'station_id', 'name', 'county'. You can
+    ## override using the `.groups` argument.
+
+``` r
+#cdec_stations |> st_write("out/cdec_stations.shp", append=FALSE)
 ```
 
 ### Temporal Coverage
@@ -179,13 +191,107 @@ data_avail_by_water_year |>
 ### Spatial Coverage
 
 ``` r
+# import a few different watershed files
+# use intersection with these polys to detect if in the basin
+watersheds_huc8 <- 
+  st_read("shp/calw221_huc_8_selected.shp", as_tibble=TRUE) |>
+  janitor::clean_names() |>
+  st_transform("EPSG:3310") |>
+  select(huc_8, huc_8_name, wshed_id)
+```
+
+    ## Reading layer `calw221_huc_8_selected' from data source 
+    ##   `C:\Users\skylerlewis\Github\mwd-interoperable-flows\data-raw\shp\calw221_huc_8_selected.shp' 
+    ##   using driver `ESRI Shapefile'
+    ## Simple feature collection with 60 features and 5 fields
+    ## Geometry type: POLYGON
+    ## Dimension:     XY
+    ## Bounding box:  xmin: -267648.5 ymin: -359620.2 xmax: 182116.2 ymax: 423148.3
+    ## Projected CRS: NAD83 / California Albers
+
+``` r
+subwatersheds_huc12 <- 
+  st_read("shp/wbd_subwatershed_selected.shp", as_tibble=TRUE) |>
+  janitor::clean_names() |>
+  st_transform("EPSG:3310")
+```
+
+    ## Reading layer `wbd_subwatershed_selected' from data source 
+    ##   `C:\Users\skylerlewis\Github\mwd-interoperable-flows\data-raw\shp\wbd_subwatershed_selected.shp' 
+    ##   using driver `ESRI Shapefile'
+    ## Simple feature collection with 1737 features and 21 fields
+    ## Geometry type: POLYGON
+    ## Dimension:     XY
+    ## Bounding box:  xmin: -123.0976 ymin: 34.77517 xmax: -117.9808 ymax: 41.82645
+    ## Geodetic CRS:  NAD83
+
+``` r
+subwatersheds_calw221 <-
+  st_read("shp/calw221_selected.shp", as_tibble=TRUE) |>
+  janitor::clean_names() |>
+  st_transform("EPSG:3310")
+```
+
+    ## Reading layer `calw221_selected' from data source 
+    ##   `C:\Users\skylerlewis\Github\mwd-interoperable-flows\data-raw\shp\calw221_selected.shp' 
+    ##   using driver `ESRI Shapefile'
+    ## Simple feature collection with 3005 features and 38 fields
+    ## Geometry type: POLYGON
+    ## Dimension:     XY
+    ## Bounding box:  xmin: -267648.5 ymin: -359620.2 xmax: 182116.2 ymax: 423148.3
+    ## Projected CRS: NAD83 / California Albers
+
+``` r
+watershed_labels <- 
+  st_read("shp/wbd_huc10_group_by_river_name.shp", as_tibble=TRUE) |>
+  janitor::clean_names() |>
+  st_transform("EPSG:3310") |>
+  rename(river_basin = river_name)
+```
+
+    ## Reading layer `wbd_huc10_group_by_river_name' from data source 
+    ##   `C:\Users\skylerlewis\Github\mwd-interoperable-flows\data-raw\shp\wbd_huc10_group_by_river_name.shp' 
+    ##   using driver `ESRI Shapefile'
+    ## Simple feature collection with 37 features and 1 field
+    ## Geometry type: POLYGON
+    ## Dimension:     XY
+    ## Bounding box:  xmin: -123.0976 ymin: 34.77517 xmax: -117.9808 ymax: 41.82645
+    ## Geodetic CRS:  NAD83
+
+``` r
+# import river and creek stream lines
+# use intersection with buffered flowline shapefile to detect if on the mainstem
+stream_flowlines <- 
+  st_read("shp/ca_streams_selected.shp", as_tibble=TRUE) |>
+  janitor::clean_names() |>
+  st_zm() |>
+  st_transform("EPSG:3310") |>
+  mutate(label = coalesce(name, paste0("Tributary of ",down_name)))
+```
+
+    ## Reading layer `ca_streams_selected' from data source 
+    ##   `C:\Users\skylerlewis\Github\mwd-interoperable-flows\data-raw\shp\ca_streams_selected.shp' 
+    ##   using driver `ESRI Shapefile'
+    ## Simple feature collection with 74 features and 20 fields
+    ## Geometry type: LINESTRING
+    ## Dimension:     XYM
+    ## Bounding box:  xmin: -257718.9 ymin: -139292.4 xmax: 72094.83 ymax: 386351.3
+    ## m_range:       mmin: 0 mmax: 597993.6
+    ## Projected CRS: NAD83 / California Albers
+
+``` r
 if (interactive()) {
   leaflet::leaflet() |> 
   leaflet::addTiles() |> 
-  leaflet::addPolygons(data=st_transform(watersheds_huc8, "EPSG:4326")) |>
-  leaflet::addMarkers(data=st_transform(cdec_station_sensors, "EPSG:4326"))
+  leaflet::addPolygons(data=st_transform(watershed_labels, "EPSG:4326"), label=~river_basin, color="gray") |>
+  leaflet::addPolylines(data=st_transform(stream_flowlines, "EPSG:4326"), label=~label, color="darkblue") |>
+  leaflet::addMarkers(data=st_transform(cdec_stations, "EPSG:4326"), 
+                      label=~paste(station_id, name, operator, paste(sensors), sep="<br>") |> lapply(htmltools::HTML)) 
 } else {
- ggplot() + geom_sf(data=watersheds_huc8) + geom_sf(data=cdec_station_sensors)
+ ggplot() + 
+    geom_sf(data=watershed_labels, color="gray") + 
+    geom_sf(data=stream_flowlines, color="darkblue") + 
+    geom_sf(data=cdec_stations, color="darkred")
 }
 ```
 
