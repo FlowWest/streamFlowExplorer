@@ -1,7 +1,7 @@
 CDEC Overview
 ================
 [Skyler Lewis](mailto:slewis@flowwest.com)
-2024-01-12
+2024-01-16
 
 ## CDEC Summary
 
@@ -159,12 +159,41 @@ cdec_stations <- cdec_station_sensors |>
 #cdec_stations |> st_write("out/cdec_stations.shp", append=FALSE)
 ```
 
-### Temporal Coverage
+``` r
+manual_station_list <- 
+  read_csv("cdec_mainstem_stations.csv") |>
+  janitor::clean_names() |>
+  filter(!is.na(channel) & channel != "???") |>
+  mutate(station_id = str_to_lower(station_id),
+         mainstem = TRUE)
+```
+
+    ## Rows: 235 Columns: 5
+    ## ── Column specification ────────────────────────────────────────────────────────
+    ## Delimiter: ","
+    ## chr (5): Section, Channel, Station ID, Station Name, Notes
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 
 ``` r
-check_for_overlap <- function(wy, rb) {
+cdec_stations <- cdec_stations |>
+  left_join(manual_station_list, join_by(station_id == station_id)) |>
+  mutate(mainstem = coalesce(mainstem, FALSE))
+
+cdec_station_sensors <- cdec_station_sensors |>
+  left_join(manual_station_list, join_by(station_id == station_id)) |>
+  mutate(mainstem = coalesce(mainstem, FALSE))
+```
+
+### Temporal Coverage
+
+Version with only verified mainstem data
+
+``` r
+check_for_overlap <- function(wy, chan, sec) {
   cdec_station_sensors |>
-    filter(river_basin == rb) |>
+    filter(channel == chan & section == sec) |>
     mutate(in_range = (wy >= min_wy) & (wy <= max_wy)) |>
     pull(in_range) |>
     any()
@@ -172,21 +201,46 @@ check_for_overlap <- function(wy, rb) {
 
 data_avail_by_water_year <- 
   expand_grid(water_year = seq(1949,2024,1), 
-            river_basin = unique(cdec_station_sensor_list$river_basin)) |>
-  mutate(has_data = map2_lgl(water_year, river_basin, check_for_overlap))
+              manual_station_list |> select(channel, section) |> unique()) |>
+  mutate(has_data = pmap_lgl(list(water_year, channel, section), check_for_overlap))
 
 data_avail_by_water_year |>
+  filter(!is.na(channel)) |>
   ggplot() + 
-  geom_tile(aes(x = factor(water_year), y = factor(river_basin), fill = has_data)) +
+  facet_grid(rows = vars(channel), scales="free_y", space="free_y") +
+  geom_tile(aes(x = factor(water_year), y = factor(section), fill = has_data)) +
   xlab("Water Year") + 
-  ylab("CDEC River Basin") + 
+  ylab("") + 
   theme_minimal() + 
-  theme(legend.position = "top", axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + 
+  theme(legend.position = "top", 
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), 
+        strip.text = element_blank(),
+        panel.margin=unit(0,"lines")) + 
   scale_y_discrete(limits=rev, position="right") +
   scale_fill_manual(values = c("FALSE" = "white", "TRUE" = "darkgray"))
 ```
 
-![](cdec_files/figure-gfm/plot-wy-avail-1.png)<!-- -->
+![](cdec_files/figure-gfm/plot-wy-avail-v2-1.png)<!-- -->
+
+``` r
+station_table <- 
+  cdec_station_sensors |>
+  filter(mainstem) |>
+  group_by(channel, section, station_id, station_name) |>
+  summarize(start_date = min(start),
+            end_date = min(end),
+            sensors = list(unique(sensor_number)),
+            ) |>
+  mutate(freq_avail = paste(map(sensors, function(x) if_else(20 %in% x, "hourly", "daily")))) |>
+  select(channel, section, station_id, station_name, start_date, end_date, freq_avail)
+```
+
+    ## `summarise()` has grouped output by 'channel', 'section', 'station_id'. You can
+    ## override using the `.groups` argument.
+
+``` r
+station_table |> write_csv("out/station_table.csv")
+```
 
 ### Spatial Coverage
 
@@ -252,7 +306,7 @@ watershed_labels <-
     ## Reading layer `wbd_huc10_group_by_river_name' from data source 
     ##   `C:\Users\skylerlewis\Github\mwd-interoperable-flows\data-raw\shp\wbd_huc10_group_by_river_name.shp' 
     ##   using driver `ESRI Shapefile'
-    ## Simple feature collection with 37 features and 1 field
+    ## Simple feature collection with 40 features and 1 field
     ## Geometry type: POLYGON
     ## Dimension:     XY
     ## Bounding box:  xmin: -123.0976 ymin: 34.77517 xmax: -117.9808 ymax: 41.82645
@@ -272,32 +326,104 @@ stream_flowlines <-
     ## Reading layer `ca_streams_selected' from data source 
     ##   `C:\Users\skylerlewis\Github\mwd-interoperable-flows\data-raw\shp\ca_streams_selected.shp' 
     ##   using driver `ESRI Shapefile'
-    ## Simple feature collection with 74 features and 20 fields
+    ## Simple feature collection with 87 features and 20 fields
     ## Geometry type: LINESTRING
     ## Dimension:     XYM
-    ## Bounding box:  xmin: -257718.9 ymin: -139292.4 xmax: 72094.83 ymax: 386351.3
+    ## Bounding box:  xmin: -257718.9 ymin: -305264.9 xmax: 171875.1 ymax: 386351.3
     ## m_range:       mmin: 0 mmax: 597993.6
     ## Projected CRS: NAD83 / California Albers
+
+``` r
+bypass_polys <- 
+  st_read("shp/yolo_sutter_bypass_extents.shp", as_tibble=TRUE) |>
+  janitor::clean_names() |>
+  st_transform("EPSG:3310") |>
+  mutate(name = map(area_name, function(x) str_split_1(x, " - ")[1])) |> 
+  unnest() |>
+  group_by(name) |>
+  summarize() |>
+  st_union(by_feature = TRUE)
+```
+
+    ## Reading layer `yolo_sutter_bypass_extents' from data source 
+    ##   `C:\Users\skylerlewis\Github\mwd-interoperable-flows\data-raw\shp\yolo_sutter_bypass_extents.shp' 
+    ##   using driver `ESRI Shapefile'
+    ## Simple feature collection with 8 features and 7 fields
+    ## Geometry type: POLYGON
+    ## Dimension:     XY
+    ## Bounding box:  xmin: 6554790 ymin: 1876136 xmax: 6688689 ymax: 2368307
+    ## Projected CRS: NAD83(2011) / California zone 2 (ftUS)
+
+#### Geographic distribution of sensors
 
 ``` r
 if (interactive()) {
   leaflet::leaflet() |> 
   leaflet::addTiles() |> 
   leaflet::addPolygons(data=st_transform(watershed_labels, "EPSG:4326"), label=~river_basin, color="gray") |>
+  leaflet::addPolygons(data=st_transform(bypass_polys, "EPSG:4326"), label=~name, fillColor="darkblue", opacity=0.5, color=NA) |>
   leaflet::addPolylines(data=st_transform(stream_flowlines, "EPSG:4326"), label=~label, color="darkblue") |>
-  leaflet::addMarkers(data=st_transform(cdec_stations, "EPSG:4326"), 
-                      label=~paste(station_id, name, operator, paste(sensors), sep="<br>") |> lapply(htmltools::HTML)) 
+  leaflet::addCircleMarkers(data=st_transform(cdec_stations, "EPSG:4326"), 
+                            label=~paste(station_id, name, operator, paste(sensors), sep="<br>") |> lapply(htmltools::HTML),
+                            color = ~if_else(mainstem, "darkred", "darkgray")) 
 } else {
  ggplot() + 
     geom_sf(data=watershed_labels, color="gray") + 
+    geom_sf(data=bypass_polys, fill="darkblue", color=NA, alpha=0.5) +
     geom_sf(data=stream_flowlines, color="darkblue") + 
-    geom_sf(data=cdec_stations, color="darkred")
+    geom_sf(data=cdec_stations, aes(color=mainstem)) +
+    scale_color_manual(values = c("TRUE" = "darkred", "FALSE" = "darkgray"))
 }
 ```
 
 ![](cdec_files/figure-gfm/map-sensors-1.png)<!-- -->
 
-Using watersheds from <https://doi.org/10.15447/sfews.2006v4iss1art3>
+#### Years of data available by stream
+
+``` r
+first_year_available <- data_avail_by_water_year |>
+  filter(has_data) |>
+  group_by(channel, water_year) |>
+  summarize(has_data = any(has_data)) |>
+  group_by(channel) |>
+  summarize(first_year = min(water_year),
+            n_years = n())
+```
+
+    ## `summarise()` has grouped output by 'channel'. You can override using the
+    ## `.groups` argument.
+
+``` r
+river_names <- watershed_labels$river_basin |> unique() |> c("Yolo Bypass", "Sutter Bypass")
+match_name <- function(x) paste0(river_names[which(str_detect(x, river_names))][1],"")
+flowlines_first_year_available <- 
+  stream_flowlines |>
+  mutate(
+    river_name = coalesce(name, down_name),
+    matched = map_lgl(river_name, function(x) any(str_detect(x, river_names))),
+    river_name = if_else(matched, map_chr(river_name, match_name), NA)) |>
+  filter(!is.na(river_name)) |>
+  group_by(river_name) |>
+  summarize() |>
+  st_union(by_feature = TRUE) |>
+  left_join(first_year_available, by = join_by(river_name == channel)) |>
+  mutate(n_years = coalesce(n_years, 0)) 
+
+bypasses_first_year_available <- 
+  bypass_polys |>
+  filter(name %in% c("Yolo Bypass", "Sutter Bypass")) |>
+  left_join(first_year_available, by = join_by(name == channel)) |>
+  mutate(n_years = coalesce(n_years, 0)) 
+
+ggplot() +
+  geom_sf(data = bypasses_first_year_available, aes(fill = n_years), color=NA) + 
+  geom_sf(data = bypasses_first_year_available |> filter(n_years==0), fill="red", color=NA) +
+  geom_sf(data = flowlines_first_year_available, aes(color = n_years)) + 
+  geom_sf(data = flowlines_first_year_available |> filter(n_years==0), color="red") +
+  scale_color_viridis_c(direction=-1, aesthetics = c("color", "fill"))
+```
+
+![](cdec_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 ## Quality Checks
 
