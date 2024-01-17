@@ -1,7 +1,7 @@
 CDEC Overview
 ================
 [Skyler Lewis](mailto:slewis@flowwest.com)
-2024-01-16
+2024-01-17
 
 ## CDEC Summary
 
@@ -10,17 +10,26 @@ purpose.\]
 
 - **Source:** California Department of Water Resources (DWR),
   aggregating hydrologic datasets from many sources including counties,
-  water districts, CDFW, NPS, USFS, USGS, USACE, and DWR itself
+  water districts, CDFW, NPS, USFS, USGS, USACE, and DWR itself.
 - **Accessibility:** Public, open and accessible online
 - **Coverage:** State of California, where data is available
-- **Temporal Coverage:** \[max temporal range (min date - max date)\] -
-  describe variation across gages if relevant
-- **Spatial Coverage:** \[x out of x watersheds\]
-- **Maintenance:** Is it maintained? And how often? By who (if different
-  than source)
-- **Contact: ** Data / Model Contact (think about if worth expanding to
-  a larger list of people / orgs) - think about having table section
-  below with projects/contacts
+- **Temporal Coverage:** Max temporal range is 1949-present. The Lower
+  Sacramento River has data back to 1949 and the American River back
+  to 1970. 38% of reaches have data from 1984 or earlier. 81% of reaches
+  have data for 1997 or earlier. 97% of reaches have data from 2015 or
+  earlier.
+- **Spatial Coverage:** 37 of 40 tested reaches have data available.
+  Reach definitions are the 34 SIT reaches (including Yolo Bypass and
+  Sutter Bypass) plus the western Delta tributaries (Putah Creek and
+  Cache Creek), major Tulare Basin rivers (Kings River and Kern River),
+  and major upper Sacramento basin rivers (McCloud River and Pit River).
+- **Maintenance:** Each gauge has a maintaining agency which may or may
+  not include DWR. CDEC staff will report issues and forward maintenance
+  requests to the relevant agency. Level of maintenance likewise varies
+  by gauge.
+- **Contact:** Data / Model Contact (think about if worth expanding to a
+  larger list of people / orgs) - think about having table section below
+  with projects/contacts
 - **Utilized By:** What process is it used in: (list processes that use
   this data)
 
@@ -30,15 +39,28 @@ purpose.\]
 
 #### Stations
 
-Station IDs follow a 3-digit format
+Station IDs follow a 3-character alphanumeric format. When the ID is
+known, the station metadata can be looked up using the following URL
+pattern:
 
-Station Lookup:
 `https://cdec.water.ca.gov/dynamicapp/staMeta?station_id={XXX}`
 
-Station locator map:
+CDEC has an interactive station locator map located at
 <https://cdec.water.ca.gov/webgis/?appid=cdecstation>
 
-Stations can be searched by river basin
+Stations can also be queried by river basin, which include the following
+options:
+
+``` r
+river_basins <- read_csv("cdec_river_basins.csv")
+if(interactive()){
+  river_basins |> DT::datatable()
+} else {
+  river_basins |> pull(river_basin) |> paste(collapse=", ") |> cat()
+}
+```
+
+    ## ALAMEDA CREEK, AMARGOSA RIVER, AMERICAN RIVER, ANTELOPE VALLEY, ARROYO GRANDE CREEK, ARROYO PASAJERO, BATTLE CREEK, BEAR RIVER, BUTTE CREEK, CACHE CREEK, CALAVERAS RIVER, CALIENTE CREEK, CALLEGUAS CREEK, CANTUA CREEK, CARMEL RIVER, CARRIZO CREEK, CARSON RIVER, CHINA LAKE, CHOWCHILLA RIVER, COAST-MARIN, COAST-MORRO BAY, COAST-SAN MATEO, COLORADO RIVER, COSUMNES RIVER, COTTONWOOD CREEK, COYOTE WASH, CUYAMA RIVER, DELTA, EAST BAY, EEL RIVER, FEATHER RIVER, FRESNO RIVER, GARCIA RIVER, GUADALUPE RIVER, GUALALA RIVER, HAT CREEK, JACALITOS CR, KAWEAH RIVER, KELLOGG CREEK, KERN RIVER, KINGS RIVER, KLAMATH RIVER, LAKE TAHOE, LITTLEJOHN CREEK, LOS ANGELES RIVER, LOS GATOS CR (NEAR COALINGA), LOS GATOS CR (NEAR SAN JOSE), LYTLE CREEK, MAD RIVER, MATTOLE RIVER, MC CLOUD RIVER, MERCED RIVER, MOJAVE DESERT, MOJAVE RIVER, MOKELUMNE RIVER, MONO LAKE, MONTEREY COAST, NACIMIENTO RIVER, NAPA RIVER, NAVARRO RIVER, NOYO RIVER, OTAY RIVER, OWENS RIVER, PAJARO RIVER, PETALUMA RIVER, PIRU CREEK, PIT RIVER, PUTAH CREEK, REDWOOD CREEK, RUBICON RIVER, RUSSIAN RIVER, S BARBARA COAST, SACRAMENTO RIVER, SACTO VLY NE, SACTO VLY WEST, SALINAS RIVER, SALMON RIVER, SAN ANTONIO CR (SF BAY), SAN ANTONIO CR (SOUTH COAST), SAN BENITO RIVER, SAN DIEGO RIVER, SAN DIEGUITO RIVER, SAN FRANCISCO BAY, SAN GABRIEL RIVER, SAN GREGORIO CREEK, SAN JACINTO RIVER, SAN JOAQUIN FLOOR, SAN JOAQUIN RIVER, SAN JOAQUIN VLY WEST, SAN LORENZO RIVER, SAN LUIS CREEK, SAN LUIS OBISPO CREEK, SAN LUIS REY RIVER, SAN MATEO CREEK, SANTA ANA AB NARROWS, SANTA ANA RIVER, SANTA CLARA RIVER, SANTA CLARA VALLEY, SANTA CRUZ CO COAST, SANTA MARGARITA RIVER, SANTA MARIA RIVER, SANTA YNEZ RIVER, SCOTT RIVER, SHASTA RIVER, SISQUOC RIVER, SMITH RIVER, SODA CREEK, STANISLAUS RIVER, STEVENS CREEK, STONY CREEK, SURPRISE VALLEY, SUSAN RIVER, SWEETWATER RIVER, TEHACHAPI MOUNTAINS, TRINITY RIVER, TRUCKEE RIVER, TULARE LAKE, TULARE LAKE WESTSIDE, TULE RIVER, TUOLUMNE RIVER, U SANTA CLARA RIVER, ULATIS CREEK, UPPER SALINAS RIVER, VAN DUZEN RIVER, VENTURA LA COASTAL, VENTURA RIVER, WALKER RIVER, WEST SALTON SEA, WHITE RIVER, WHITEWATER RIVER, YUBA RIVER
 
 #### Sensors
 
@@ -49,15 +71,20 @@ Following are the sensor codes that report some variation of flow in
 cfs. There are many other codes not listed here including stage,
 temperature, turbidity, etc.
 
+*Most common sensor codes, mapped in this report:*
+
 - **`20`** = **FLOW** = FLOW, RIVER DISCHARGE, CFS
 - **`41`** = **MFLOW** = FLOW, MEAN DAILY, CFS
-- **`165`** = **FLOW.XX** = FLOW, RIVER DISCHARGE PRECISE, CFS (rarely
-  used)
+- **`110`** = **DIVERSN** = FLOW, CANAL DIVERSION, CFS
+
+*Others reporting flow data in CFS:*
+
 - **`76`** = **INFLOW** = RESERVOIR INFLOW, CFS
 - **`23`** = **OUTFLOW** = RESERVOIR OUTFLOW, CFS
 - **`7`** = **REL SCH** = SCHEDULED RELEASE, CFS (manually reported)
-- **\`110** = **DIVERSN** = FLOW, CANAL DIVERSION, CFS
 - **`210`** = **AUXFLOW** = FLOW AUX, CFS
+- **`165`** = **FLOW.XX** = FLOW, RIVER DISCHARGE PRECISE, CFS (rarely
+  used)
 - **`8`** = **FNF** = FULL NATURAL FLOW, CFS (modeled)
 
 #### Durations (timesteps)
@@ -80,35 +107,42 @@ format (sensor `41`, duration `D`).
 
 #### CSV web service
 
+Data can be queried in CSV format using the following URL template,
+including the 3-digit station ID, the sensor and duration codes
+described above, and the start and end dates.
+
 `https://cdec.water.ca.gov/dynamicapp/req/CSVDataServlet?Stations={XXX}&SensorNums={XX}&dur_code={X}&Start={YYYY-MM-DD}&End={YYYY-MM-DD}`
 
 #### Web API
 
-Documented in PDFs linked at <https://cdec.water.ca.gov/queryTools.html>
+Data can be queried via the CDEC API. This is documented in PDFs linked
+at <https://cdec.water.ca.gov/queryTools.html>
 
 #### Visual Interface
 
-Real-time, daily, monthly query options:
-<https://cdec.water.ca.gov/queryTools.html> /
-<https://cdec.water.ca.gov/riv_flows.html>
+Real-time, daily, monthly query options are available at the following
+link: <https://cdec.water.ca.gov/queryTools.html>
 
-Query most recent data by sensor for entire river basin:
+An alternate interface allows the user to query the most recent data by
+each sensor, listed out for an entire river basin:
 <https://cdec.water.ca.gov/dynamicapp/getAll>
-<https://cdec.water.ca.gov/dynamicapp/getAll?sens_num=%7BXX%7D>
 
 #### R package `CDECRetrieve`
 
-<https://github.com/FlowWest/CDECRetrieve>
+FlowWest developed the R package `CDECRetrieve` for querying CDEC data.
+This package is documented at <https://github.com/FlowWest/CDECRetrieve>
+and can be installed via:
+
+``` r
+remotes::install_github("flowwest/CDECRetrieve")
+```
 
 ## Spatial & Temporal Coverage
 
-Plot and Chart that show coverage over watersheds, map here to show
-temporal coverage for a site \# years or something Hilighting major
-limitations, full time periods missing across many watersheds
+The following section assesses spatial and temporal coverage. Still need
+to assess presence of `NA`s within the start and end time windows.
 
 ``` r
-river_basins <- read_csv("cdec_river_basins.csv")
-
 cdec_station_sensor_list_filename <- "cdec_station_sensor_list.Rds"
 
 if(!file.exists(cdec_station_sensor_list_filename)){
@@ -188,6 +222,8 @@ cdec_station_sensors <- cdec_station_sensors |>
 
 ### Temporal Coverage
 
+Not shown:
+
 Version with only verified mainstem data
 
 ``` r
@@ -220,7 +256,8 @@ data_avail_by_water_year |>
   scale_fill_manual(values = c("FALSE" = "white", "TRUE" = "darkgray"))
 ```
 
-![](cdec_files/figure-gfm/plot-wy-avail-v2-1.png)<!-- -->
+![](cdec_files/figure-gfm/plot-wy-avail-v2-1.png)<!-- --> Not listed:
+Bear Creek, Paynes Creek, Calaveras River
 
 ``` r
 station_table <- 
@@ -423,20 +460,65 @@ ggplot() +
   scale_color_viridis_c(direction=-1, aesthetics = c("color", "fill"))
 ```
 
-![](cdec_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+![](cdec_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+
+``` r
+first_year_available_by_section <- data_avail_by_water_year |>
+  filter(has_data) |>
+  group_by(channel, section, water_year) |>
+  summarize(has_data = any(has_data)) |>
+  group_by(channel, section) |>
+  summarize(first_year = min(water_year),
+            n_years = n())
+```
+
+    ## `summarise()` has grouped output by 'channel', 'section'. You can override
+    ## using the `.groups` argument.
+    ## `summarise()` has grouped output by 'channel'. You can override using the
+    ## `.groups` argument.
+
+``` r
+tibble(yr = c(1949, 1984, 1997, 2015)) |>
+  mutate(percent_of_data = map(yr, function(x) mean(coalesce(first_year_available_by_section$first_year,0)<=x))) |>
+  unnest() *100
+```
+
+    ##       yr percent_of_data
+    ## 1 194900        2.702703
+    ## 2 198400       37.837838
+    ## 3 199700       81.081081
+    ## 4 201500       97.297297
 
 ## Quality Checks
 
-\[CONDITIONALLY NEEDED - if gage / if not already described in model
-section\] What quality assurance checks are implemented by monitoring
-agency What quality control checks are implemented by monitoring agency
+**What quality assurance checks are implemented by monitoring agency?**
 
-Error codes - May differ by station and sensor
+(expand here)
+
+**What quality control checks are implemented by monitoring agency?**
+
+(expand here)
+
+### Error codes
+
+Flow data include the following error codes when downloaded direct from
+CDEC using the CSV servlet.
+
+- **`-9998`** = Below Rating Table\*
+- **`-9997`** = Above Rating Table\*
+- **`m`** = missing value
+
+\*According to the CDEC FAQ: “River flow data for stations with river
+stage data are computed using a specific rating table/rating curve for
+each particular station. When the river stage is above or below the
+available rating table, a flow cannot be computed.”
 
 ## Data use and limitations
 
-(build out once we play around with the data a bit more) Pros and cons
-table for each use case
+| Use Case                       | Benefits | Limitations |
+|--------------------------------|----------|-------------|
+| Continuous empirical flow data | …        | …           |
+| …                              | …        | …           |
 
 ## Questions for Data Experts
 
