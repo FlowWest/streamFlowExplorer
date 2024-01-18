@@ -23,21 +23,22 @@ by enabling comparative analysis of potential alternatives. The monthly output f
 SacWam is used to estimate changes in reservoir storage, streamflows, and water supply
 resulting from potential Bay-Delta Plan modifications (https://www.waterboards.ca.gov/waterrights/water_issues/programs/bay_delta/sacwam/docs/sacwam-2023.06.12-doc.pdf)
 
-* **Source:** State Water Resources and Control Board
+* **Source:** State Water Resources and Control Board (SWRCB)
 * **Accessibility:** (public, open and accessible online, if it is a model, can you run it independently?)
 * **Coverage:**
 * **Temporal Coverage:** [max temporal range (min date - max date)] - describe variation across gages if relevant 1922-2015 (period of simulation)
 * **Spatial Coverage:** [x out of x watersheds; use Yoshiama historical extent] The model represents the Sacramento River Hydrologic Region, the Trinity River watershed above the Lewiston gauge (USGS 11525500), and the northern part of the San Joaquin River Hydrologic Region downstream from the gauge at Vernalis (USGS 11303500). TODO Table 3-1 for all tribs
-* **Maintenance:** Is it maintained? And how often? By who (if different than source)
+* **Maintenance:** Is it maintained? And how often? By who (if different than source) Updated by SWRCB based on regulatory needs
 * **Contact: ** Data / Model Contact (think about if worth expanding to a larger list of people / orgs) - think about having table section below with projects/contacts 
 * **Utilized By:** What process is it used in: (list processes that use this data) 
 
 ## SacWam Model Summary 
-[CONDITIONALLY NEEDED - If it is modeled data - follow with a model summary]
-Couple sentence overview of model synthesizing what you know about modeled data source. Then subsections to describe the what. 
+*Couple sentence overview of model synthesizing what you know about modeled data source. Then subsections to describe the what.*
+
+SacWAM simplifies the depiction of stream flows by aggregating surface water diversions, return flows, and groundwater inflows to the stream network.
 
 SacWam simulates the following:
-- unimpaired flows (the amount of what the would flow down a river in the absence of dams and diversions)
+- unimpaired flows (the amount of what would flow down a river in the absence of dams and diversions)
 - stream flows throughout the Sacramento and Delta Eastside Tributary Watersheds
 - stream flows at United States Geological Survey (USGS) and California Department of Water Resources (DWR) gauges located on the Sacramento River
 - Delta inflow, net Delta outflow, and flows within the south Delta
@@ -46,47 +47,81 @@ SacWam simulates the following:
 - groundwater pumping; and tracking of changes to groundwater storage through mass-balance accounting
 - stream-aquifer interaction
 
-SacWAM simplifies the depiction of stream flows by aggregating surface water diversions, return flows, and groundwater inflows to the stream network.
-
 ### Architecture 
-(What type of model is it?) 
+*Description of model components*
 
-Chapter 3 - Schematic
+#### WEAP
+Water Evaluation and Planning system (WEAP) provides the modeling framework and software for SacWam. WEAP is a simulation model that includes robust and flexible representation of water demands and the ability to program infrastructure elements nested within underlying hydrological processes (Note Figure 2-1 might be helpful).
+
+WEAP is organized into five views:
+- Schematic View - spatial layout of the model is created, edited, viewed
+- Data View - hierachical tree that organizes modeling data into six categories: Key Assumptions, Demand Sites and Catchments, Hydrology, Supply and Resources, Water Quality, Other Assumptions, User-Defined LP Constraints
+- Results View - display of all model outputs in customizable tables and charts
+- Scenario Explorer View - results or data across many scenarios can be grouped together to show relative impacts of multiple scenarios
+- Notes View - documentation 
+
+##### Water Allocation
+Demand priorities and supply preferences used used to determine allocations of water supplies. 
+
+- Demand priority - attached to demand site, catchment, reservoir, or flow requirement. Ranges from 1 (highest priority) to 99 (lowest priority). Demand sites can share the same priority (during times of shortage supplies shared equally). When demand sites or catchments are connected to more than one supply source, supply preferences determine the order of withdrawl.
+
+- Supply preferences - Used to determine order of withdrawl when demand sites or catchments are connected to more than one supply source. Ranges from 1 (highest priority) to 99 (lowest priority). Assignment of preferences usually reflects economic, environmental, historical, legal, and/or political realities
+
+WEAP must assess available water supplies at each time step. Built-in reservoir routines control the release of stored water which impact the available water supplies.
+
+- Flood control zone - evacuated so that volume of water cannot exceed top of consevation zone
+- Conservation zone - available to meet water requirements in full
+- Buffer zone - depends on buffer coefficient (fraction of water in zone available each month for release) to conserve the reservoir's dwindling supplies
+- Inactive zone - not used for allocations
+
+##### Hydrology
+Spatially continuous catchments that cover the entire extent of the river basin overlayed with water management network of rivers, canals, reservoirs, demand centers, aquifers, and other feathers. Each catchment is divided into independent land use classes that sum to 100 percent of catchment.
+
+Hydrological processes in SacWam use two approaches:
+
+- Soil moisture methods - used in the Upper Watersheds to represent rainfall-runoff processes. Used here because of ability to simulate snow accumulation and melt processes.
+- MABAIA method - used on the Valley floor to represent agricultural crops and irrigation management. Allows user to specify several irrigation parameters.
+
+##### Solution Methodology
+1. Compute horizontal and vertical fluxes using the catchment objects
+- These are then passed to each river and groundwater object
+2. Water allocations made by passing constraints to linear programming optimization routine that maximizes demand *satisfaction*
+- All flows assumed to occur instantaneously: withdraw water, use water, and return water within the same timestep. Model timestep should be at least the length of the water residence time in study area.
+- Mixed integer linear programming (MILP) used to solve allocations which allows multiple demands with the same priority to be allocated supplies equally and suspends allocation of lower priority groups until the first group is met. 
+
+#### System Components
 Watersheds in SacWam are categorized as either Upper or Valley Floor watersheds:
 - Upper: foothill and mountain watersheds characterized by steep slopes, shallow soils, limited aquifer, not developed
 - Valley Floor: located between Upper watersheds and Delta; extensively developed, highly managed, rich agricultural land, urban areas
 
 The following *System Components* are defined in SacWam:
-- rivers and diversions - shapefiles to trace hydrologic features (river miles and canal miles) using aerial imagery, identify points of diversion. Rule: unidirectional upstream to downstream, may not divide into two or more distributaries. diversion arcs used for manmade canals as well as canal losses (groundwater or evap), water treatment plant intake, bias correction, delta depletions, stream losses, consumptive use
-- reservoirs - storgage capacity greater than 50,000 AF are represented and where reservoirs used for hydropower; smaller reservoirs may also be included to define points of diversion
-- groundwater - ten groundwater basins simulated; inflows and outflows include deep percolation from demand catchment, return flows from urban demand sites, seepage losses on surface water distribution systems, interaction with stream network through groundwater inflow and outflow parameters, groundwater pumping to meet water demands
-- other suppliers - limited to san joaquin valley and provide water to lands on souther boundary
-- demand site - represent urban water demans and deliveries to water users located outsite model domain
-- catchments - valley floor domain divided into smaller geographic regions known as Water Budget Areas
+- rivers and diversions - aerial imagery used to trace hydrologic features (river miles and canal miles), and identify points of diversion. Rule: unidirectional upstream to downstream, may not divide into two or more distributaries. Diversion arcs used for manmade canals as well as canal losses (groundwater or evaporation), water treatment plant intake, bias correction, delta depletions, stream losses, consumptive use.
+- reservoirs - reservoirs with storage capacity greater than 50,000 AF and/or used for hydropower are represented in SacWam. Smaller reservoirs may also be included to define points of diversion.
+- groundwater - ten groundwater basins are simulated. Inflows and outflows include deep percolation from demand catchment, return flows from urban demand sites, seepage losses on surface water distribution systems, interaction with stream network through groundwater inflow and outflow parameters, groundwater pumping to meet water demands.
+- other suppliers - limited to San Joaquin valley and provide water to lands on southern boundary
+- demand site - represents urban water demands and deliveries to water users located outside model domain
+- catchments - valley floor domain divided into smaller geographic regions known as Water Budget Areas (WBA). WBAs represent a single water demand or those who rely on groundwater/self-produced water; and defines spatial resolution of hydrologic input data. There are 25 WBAs (aggregated versions of the WBAs defined by DWR); except for 61N where Sacwam only represents the area north of the Stanislaus
 - runoff and infiltration
 - transmission links - connect water supplies to demands (Demand Site objects and Catchment objects)
-- Central Valley Project deliveries: settlement contractors, exchange contractors, water right holders in san joaquin valley, M&I water service contractors, wildlife refuges
+- Central Valley Project deliveries - settlement contractors, exchange contractors, water right holders in San Joaquin valley, M&I water service contractors, wildlife refuges
 - water treatment plants - represented indirectly using combination of diversion arcs and transmission links
 - wastewater treatment plants - there is an object but it is mostly not used
-- return flows - associated with urban Demand Units and represent discharge of treated wastewater to surface water or underlying aquifer
+- return flows - associated with urban Demand Units and represents discharge of treated wastewater to surface water or underlying aquifer
 - flow requirements - Instream Flow Requirement object: REG flow requirements that are regulatory, OPS flow requirements used to drive simulated upstream storage or simulated diversions, SWRCB potential new regulatory flow requirements specified as fraction of unimpaired flow
 - run of river hydro plants - simulate hydropower genertation, not used in SacWam, represented with diversion arcs
-- streamflow gages - allow rapid comparison of simulated flows to historical observed data HIS means historical observed, FNF for full natural flow data EST have been estimated from a water balance based on reservoir releases
-- dummy arcs and nodes: priority based constraints (constraints activated or inactivated to an assigned priority), switches, minimization, maximization
+- streamflow gages - allow rapid comparison of simulated flows to historical observed data. HIS means historical observed, FNF for full natural flow data, EST have been estimated from a water balance based on reservoir releases
+- dummy arcs and nodes - priority based constraints (constraints activated or inactivated to an assigned priority), switches, minimization, maximization
+
 ### Accessibility 
-(How accessible is the documentation, and how easy is it to interpret) 
+*How accessible is the documentation, and how easy is it to interpret*
 
-Chapter 2 - WEAP; Chapter 8 - User Defined Linear Programming; Chapter 9 Key Assumptions
-Water Evaluation and Planning system (WEAP) is a simulation model that includes robust and flexible representation of water demands and the ability to program infrastructure elements nested within underlying hydrological processes
-(Figure 2-1 might be helpful)
-
-Current accounts = Existing conditions; requires calibration to run
+www.weap21.org (TODO check out this site)
 
 TODO try running WEAP to provide description
 
 ### Update procedure 
-There is no standard update schedule for SacWam; rather, updates follow updates
-in regulations. The following summarizes the updates that have been made.
+There is no standard update schedule for SacWam; rather, model updates follow updates
+in regulations. The following summarizes the updates that have been made:
 
 - October 2017: SacWam 1.05 released; incorporates refinements suggested by peer review
 panel (e.g. simulation period extended from Sep 2009 to Sep 2015)
@@ -104,11 +139,16 @@ and refining model logic to support simulation of Voluntary Agreement alternativ
 Data needed to run 
 Timestep of each input 
 
-Agricultural water demands
-- 20 crop types, average irrigated acreage 1998-2007
+#### Agricultural Water Use
+Table 4-8 is helpful in summarizing flow arcs for agricultural water use
+Keeping track of methods used:
+- MABIA method for crop ET
+- SCS curve for rainfall-runoff
+- Sacramento - San Joaquin Basin Study (Reclamation, 2014C) for crop coefficients
+- NRCS lower quarter method (average of lowest quarter of the districution to the average of the distribution) for defining distribution uniformity
 
-Urban water demands
-- historical purveyor production data for 2006-2010 for major cities and towns; based on population data for smaller communities
+Keeping track of parameters that can be adjusted
+- Seepage loss factor
 
 ### Model Outputs 
 File source
@@ -135,3 +175,16 @@ Pros and cons table for each use case
 
 Chapter 11 Model Use and Limitations
 
+- Ideally operational spills and lateral flows would be a function of the surface water deliveries rather than the applied water; however, currently there is no mechanism in the WEAP software to account for these flows explicitly so operational spills and lateral flows have been included in the irrigation efficiency.
+
+### Assumptions
+- Groundwater pumping considered at field elevation and not subject to losses
+- No reuse of operational spills and lateral flows
+- Scaling land use: 10-year historical average for wheat in DAU X = 10,000 acres; GIS data from the land use mosaic shows 8,000 acres of wheat in DAU X; GIS data from the land use mosaic shows 500 acres of wheat in DU A; If DU A is located withing DAU X, the existing level acreage for wheat = 500 * (10,000/8,000) acres
+- All flows assumed to occur instantaneously
+
+## Questions
+- How do are crop types assigned to specific locations? Or maybe it doesn't matter and a proportion for the WBA or DU is assigned
+- Is climate variables static or is there a model to simulate?
+- How are supply preferences assigned?
+- How are buffer coefficients assigned?
