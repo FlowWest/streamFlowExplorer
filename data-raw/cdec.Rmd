@@ -27,7 +27,7 @@ library(sf)
 * **Source:** California Department of Water Resources (DWR), aggregating hydrologic datasets from many sources including counties, water districts, CDFW, NPS, USFS, USGS, USACE, and DWR itself. 
 * **Accessibility:** Public, open and accessible online
 * **Coverage:** State of California, where data is available
-* **Temporal Coverage:** Max temporal range is 1949-present. The Lower Sacramento River has data back to 1949 and the American River back to 1970. 38% of reaches have data from 1984 or earlier. 81% of reaches have data for 1997 or earlier. 97% of reaches have data from 2015 or earlier.
+* **Temporal Coverage:** Max temporal range is 1949-present. The Lower Sacramento River has data back to 1949 and the American River back to 1970. 35% of reaches have data from 1984 or earlier. 75% of reaches have data for 1997 or earlier. 90% of reaches have data from 2015 or earlier.
 * **Spatial Coverage:** 37 of 40 tested reaches have data available. Reach definitions are the 34 SIT reaches (including Yolo Bypass and Sutter Bypass) plus the western Delta tributaries (Putah Creek and Cache Creek), major Tulare Basin rivers (Kings River and Kern River), and major upper Sacramento basin rivers (McCloud River and Pit River).
 * **Maintenance:** Each gauge has a maintaining agency which may or may not include DWR. CDEC staff will report issues and forward maintenance requests to the relevant agency. Level of maintenance likewise varies by gauge.
 * **Contact:** Data / Model Contact (think about if worth expanding to a larger list of people / orgs) - think about having table section below with projects/contacts 
@@ -45,15 +45,11 @@ Station IDs follow a 3-character alphanumeric format. When the ID is known, the 
 
 CDEC has an interactive station locator map located at [https://cdec.water.ca.gov/webgis/?appid=cdecstation](https://cdec.water.ca.gov/webgis/?appid=cdecstation)
 
-Stations can also be queried by river basin, which include the following options:
+Stations can also be queried by river basin. For the greater Sacramento-San Joaquin basin, this includes the following river basins:
 
 ```{r message=FALSE, warning=FALSE}
 river_basins <- read_csv("cdec_river_basins.csv")
-if(interactive()){
-  river_basins |> DT::datatable()
-} else {
-  river_basins |> pull(river_basin) |> paste(collapse=", ") |> cat()
-}
+river_basins |> filter(selected) |> pull(river_basin) |> paste(collapse=", ") |> cat()
 ```
 
 #### Sensors
@@ -62,20 +58,22 @@ Refer to the station ID for which sensors are available at a particular station.
 
 Following are the sensor codes that report some variation of flow in cfs. There are many other codes not listed here including stage, temperature, turbidity, etc.
 
-*Most common sensor codes, mapped in this report:*
+*Codes for standard in-stream flow, mapped and summarized in this report for mainstems:*
 
-* **`20`** = **FLOW** = FLOW, RIVER DISCHARGE, CFS
-* **`41`** = **MFLOW** = FLOW, MEAN DAILY, CFS
-* **`110`** = **DIVERSN** = FLOW, CANAL DIVERSION, CFS
+* **`20`** = **FLOW** = FLOW, RIVER DISCHARGE, CFS*
+* **`41`** = **MFLOW** = FLOW, MEAN DAILY, CFS*
 
-*Others reporting flow data in CFS:*
+*Codes for other flow (cfs) sensors in the CDEC database:*
 
+* **`110`** = **DIVERSN** = FLOW, CANAL DIVERSION, CFS*
+* **`23`** = **OUTFLOW** = RESERVOIR OUTFLOW, CFS*
 * **`76`** = **INFLOW** = RESERVOIR INFLOW, CFS
-* **`23`** = **OUTFLOW** = RESERVOIR OUTFLOW, CFS
 * **`7`** = **REL SCH** = SCHEDULED RELEASE, CFS (manually reported)
 * **`210`** = **AUXFLOW** = FLOW AUX, CFS
 * **`165`** = **FLOW.XX** = FLOW, RIVER DISCHARGE PRECISE, CFS (rarely used)
 * **`8`** = **FNF** = FULL NATURAL FLOW, CFS (modeled)
+
+*sensors indicated are also shown on the map for context but are not included in the summary stats for this report 
 
 #### Durations (timesteps)
 
@@ -115,9 +113,11 @@ remotes::install_github("flowwest/CDECRetrieve")
 
 ## Spatial & Temporal Coverage
 
-The following section assesses spatial and temporal coverage. Still need to assess presence of `NA`s within the start and end time windows.
+The following section assesses spatial and temporal coverage of the stations. 
 
-```{r import-sensors, message=FALSE, warning=FALSE}
+```{r import-sensors, eval=TRUE, echo=TRUE, include=FALSE, message=FALSE, warning=FALSE}
+# Import manually listed stations of interest and query CDEC sensors
+
 cdec_station_sensor_list_filename <- "cdec_station_sensor_list.Rds"
 
 if(!file.exists(cdec_station_sensor_list_filename)){
@@ -142,10 +142,10 @@ if(!file.exists(cdec_station_sensor_list_filename)){
   cdec_station_sensor_list <- readRDS(cdec_station_sensor_list_filename)
   
 }
-```
 
-```{r}
-selected_sensors <- c(20, 41, 110)
+# Create station and station*sensor data frames
+
+selected_sensors <- c(20, 41, 110, 23)
 
 cdec_station_sensors <- 
   cdec_station_sensor_list |> 
@@ -160,15 +160,24 @@ cdec_stations <- cdec_station_sensors |>
   summarize(sensors = list(unique(sensor_number))) |>
   st_union(by_feature = TRUE) 
 
-#cdec_stations |> st_write("out/cdec_stations.shp", append=FALSE)
-```
-```{r}
+cdec_stations |> 
+  mutate(sensors = map_chr(sensors, function(x) paste(x, collapse=", "))) |>
+  st_write("out/cdec_stations.shp", append=FALSE)
+
+# Add manually delineated mainstem identifiers from CSV
+
+all_sections <- read_csv("cdec_mainstem_stations.csv") |>
+  janitor::clean_names() |>
+  arrange(section) |> pull(section) |> unique()
+
 manual_station_list <- 
   read_csv("cdec_mainstem_stations.csv") |>
   janitor::clean_names() |>
   filter(!is.na(channel) & channel != "???") |>
+  #full_join(tibble(section = all_sections)) |> # add back sections with no stations
   mutate(station_id = str_to_lower(station_id),
-         mainstem = TRUE)
+         mainstem = TRUE,
+         section = factor(section, levels=unique(section))) # force order from CSV
 
 cdec_stations <- cdec_stations |>
   left_join(manual_station_list, join_by(station_id == station_id)) |>
@@ -181,33 +190,8 @@ cdec_station_sensors <- cdec_station_sensors |>
 
 ### Temporal Coverage
 
-```{r plot-wy-avail, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
-check_for_overlap <- function(wy, rb) {
-  cdec_station_sensors |>
-    filter(river_basin == rb) |>
-    mutate(in_range = (wy >= min_wy) & (wy <= max_wy)) |>
-    pull(in_range) |>
-    any()
-}
+The following chart summarizes the ranges of data availability. This is based on the published start and end dates and does not account for NA values within these ranges. Not listed in this figure because no stations are present: *Bear Creek, Paynes Creek, Calaveras River*.
 
-data_avail_by_water_year <- 
-  expand_grid(water_year = seq(1949,2024,1), 
-            river_basin = unique(cdec_station_sensor_list$river_basin)) |>
-  mutate(has_data = map2_lgl(water_year, river_basin, check_for_overlap))
-
-data_avail_by_water_year |>
-  ggplot() + 
-  geom_tile(aes(x = factor(water_year), y = factor(river_basin), fill = has_data)) +
-  xlab("Water Year") + 
-  ylab("CDEC River Basin") + 
-  theme_minimal() + 
-  theme(legend.position = "top", axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + 
-  scale_y_discrete(limits=rev, position="right") +
-  scale_fill_manual(values = c("FALSE" = "white", "TRUE" = "darkgray"))
-``` 
-Not shown: 
-
-Version with only verified mainstem data
 
 ```{r plot-wy-avail-v2, message=FALSE, warning=FALSE}
 check_for_overlap <- function(wy, chan, sec) {
@@ -239,9 +223,9 @@ data_avail_by_water_year |>
   scale_fill_manual(values = c("FALSE" = "white", "TRUE" = "darkgray"))
 
 ```
-Not listed: Bear Creek, Paynes Creek, Calaveras River
 
-```{r}
+
+```{r message=FALSE, warning=FALSE}
 station_table <- 
   cdec_station_sensors |>
   filter(mainstem) |>
@@ -254,11 +238,13 @@ station_table <-
   select(channel, section, station_id, station_name, start_date, end_date, freq_avail)
 
 station_table |> write_csv("out/station_table.csv")
+
+station_table |> st_drop_geometry() |> DT::datatable()
 ```
 
 ### Spatial Coverage
 
-```{r import-watersheds, message=FALSE, warning=FALSE}
+```{r import-watersheds, eval=TRUE, echo=TRUE, include=FALSE, message=FALSE, warning=FALSE}
 # import a few different watershed files
 # use intersection with these polys to detect if in the basin
 watersheds_huc8 <- 
@@ -297,34 +283,47 @@ bypass_polys <-
   group_by(name) |>
   summarize() |>
   st_union(by_feature = TRUE)
-
 ```
+
 #### Geographic distribution of sensors 
 
+Also shown on this map for context are in-stream flow sensors on tributaries and secondary channels, as well as canal diversions and reservoir outflow gages. 
+
 ```{r map-sensors}
-if (interactive()) {
+watersheds_wgs84 <- st_transform(watershed_labels, "EPSG:4326")
+flowlines_wgs84 <- st_transform(stream_flowlines, "EPSG:4326")
+stations_wgs84 <- st_transform(cdec_stations, "EPSG:4326")
+bypasses_wgs84 <- st_transform(filter(bypass_polys,name %in% c("Sutter Bypass", "Yolo Bypass")), "EPSG:4326")
+
+#if (interactive()) {
   leaflet::leaflet() |> 
-  leaflet::addTiles() |> 
-  leaflet::addPolygons(data=st_transform(watershed_labels, "EPSG:4326"), label=~river_basin, color="gray") |>
-  leaflet::addPolygons(data=st_transform(bypass_polys, "EPSG:4326"), label=~name, fillColor="darkblue", opacity=0.5, color=NA) |>
-  leaflet::addPolylines(data=st_transform(stream_flowlines, "EPSG:4326"), label=~label, color="darkblue") |>
-  leaflet::addCircleMarkers(data=st_transform(cdec_stations, "EPSG:4326"), 
-                            label=~paste(station_id, name, operator, paste(sensors), sep="<br>") |> lapply(htmltools::HTML),
-                            color = ~if_else(mainstem, "darkred", "darkgray")) 
-} else {
- ggplot() + 
-    geom_sf(data=watershed_labels, color="gray") + 
-    geom_sf(data=bypass_polys, fill="darkblue", color=NA, alpha=0.5) +
-    geom_sf(data=stream_flowlines, color="darkblue") + 
-    geom_sf(data=cdec_stations, aes(color=mainstem)) +
-    scale_color_manual(values = c("TRUE" = "darkred", "FALSE" = "darkgray"))
-}
+  leaflet::addTiles(urlTemplate = 'https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}',
+                 attribution = 'Basemap tiles &copy; Esri &mdash; Sources: GEBCO, NOAA, CHS, OSU, UNH, CSUMB, National Geographic, DeLorme, NAVTEQ, and Esri',
+                 options = leaflet::tileOptions(noWrap = TRUE, opacity = 1.0, maxNativeZoom = 13, maxZoom = 13)) |>
+  leaflet::addTiles(urlTemplate = 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Reference_Overlay/MapServer/tile/{z}/{y}/{x}',
+                 attribution = 'Reference tiles &copy; Esri &mdash; Source: USGS, Esri, TANA, DeLorme, and NPS',
+                 options = leaflet::tileOptions(noWrap = TRUE, opacity = 0.5, maxNativeZoom = 13, maxZoom = 13)) |>  
+  leaflet::addPolygons(data=watersheds_wgs84, label=~paste(river_basin, "watershed"), color="#888888", weight=1, fillOpacity = 0.0) |>
+  leaflet::addPolygons(data=bypasses_wgs84, label=~name, weight=0, fillColor="#2F88A6", fillOpacity=0.5, color=NA) |>
+  leaflet::addPolylines(data=flowlines_wgs84, label=~label, color="#2F88A6") |>
+  leaflet::addCircleMarkers(data=stations_wgs84, 
+                            label=~paste(str_to_upper(station_id), name, operator, paste(sensors), sep="<br>") |> lapply(htmltools::HTML),
+                            color = ~if_else(mainstem, "#A6011F", "#888888")) 
+#} else {
+# ggplot() + 
+#    geom_sf(data=watershed_labels, color="#888888") + 
+#    geom_sf(data=filter(bypass_polys,name %in% c("Sutter Bypass", "Yolo Bypass")), fill="#2F88A6", color=NA, alpha=0.5) +
+#    geom_sf(data=stream_flowlines, color="#2F88A6") + 
+#    geom_sf(data=cdec_stations, aes(color=mainstem)) +
+#    scale_color_manual(values = c("TRUE" = "#A6011F", "FALSE" = "#888888"))
+#}
 ```
 
 #### Years of data available by stream
 
-```{r}
+The following map illustrates the data availability length by stream. This is based on the published start and end dates and does not account for NA values within these ranges. 
 
+```{r map-n-years, message=FALSE, warning=FALSE}
 first_year_available <- data_avail_by_water_year |>
   filter(has_data) |>
   group_by(channel, water_year) |>
@@ -362,18 +361,23 @@ ggplot() +
   scale_color_viridis_c(direction=-1, aesthetics = c("color", "fill"))
 ```
 
-```{r}
+Summary statistics indicating the proportion of major streams that are gaged at various time points.
+
+```{r first-year-available, message=FALSE, warning=FALSE}
 first_year_available_by_section <- data_avail_by_water_year |>
   filter(has_data) |>
   group_by(channel, section, water_year) |>
   summarize(has_data = any(has_data)) |>
   group_by(channel, section) |>
   summarize(first_year = min(water_year),
-            n_years = n())
+            n_years = n()) |>
+  full_join(tibble(section = all_sections)) |>
+  mutate(n_years = coalesce(n_years, 0),
+         first_year = coalesce(first_year, 9999))
 
-tibble(yr = c(1949, 1984, 1997, 2015)) |>
-  mutate(percent_of_data = map(yr, function(x) mean(coalesce(first_year_available_by_section$first_year,0)<=x))) |>
-  unnest() *100
+tibble(yr = c(1949, 1984, 1997, 2015, 2022)) |>
+  mutate(percent_of_data = map(yr, function(x) 100*mean(coalesce(first_year_available_by_section$first_year,0)<=x))) |>
+  unnest(percent_of_data) |> knitr::kable()
 
 ```
 
@@ -401,7 +405,7 @@ Flow data include  the following error codes when downloaded direct from CDEC us
 
 | Use Case | Benefits | Limitations |
 | --- | --- | --- |
-| Continuous empirical flow data | ... | ... |
+| Continuous empirical flow data | Extensive coverage | ... |
 | ... | ... | ... |
 
 ## Questions for Data Experts 
