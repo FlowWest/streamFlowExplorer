@@ -1,0 +1,70 @@
+---
+title: "USGS Overview"
+date: "[Date]"
+output:
+  html_document:
+     code_folding: hide
+     theme: flatly
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, fig.width=15, fig.height=10)
+library(tidyverse)
+library(lubridate)
+library(googleCloudStorageR)
+library(ggplot2)
+library(scales)
+```
+
+## [Data Type] Summary 
+The USGS is responsible for monitoring and providing information on the quantity, quality, distribution, movement, and other characteristics of surface water and groundwater resources across the United States. The NWIS Mapper provides an interface for users to explore and retrieve water data through interactive maps.
+
+* **Source:** National Water Information System (NWIS) Mapper is a tool provided by the United States Geological Survey (USGS)
+* **Accessibility:** Public, open and accessible online
+* **Coverage:**  Approximately 1.9 million sites in all 50 States, the District of Columbia, Puerto Rico, the Virgin Islands, Guam, American Samoa and the Commonwealth of the Northern Mariana Islands.
+* **Temporal Coverage:** [max temporal range (min date - max date)] - describe variation across gages if relevant 
+* **Spatial Coverage:** [x out of x watersheds] 
+* **Maintenance:** Is it maintained? And how often? By who (if different than source)
+* **Contact: ** Data / Model Contact (think about if worth expanding to a larger list of people / orgs) - think about having table section below with projects/contacts 
+* **Utilized By:** What process is it used in: (list processes that use this data) 
+
+## [Data Type] Model Summary 
+[CONDITIONALLY NEEDED - If it is modeled data - follow with a model summary]
+Couple sentence overview of model synthesizing what you know about modeled data source. Then subsections to describe the what. 
+
+### Architecture 
+(What type of model is it?) 
+
+### Accessibility 
+(How accessible is the documentation, and how easy is it to interpret) 
+
+### Update procedure 
+
+### QA/QC procedures 
+
+### Data Inputs 
+Data needed to run 
+Timestep of each input 
+
+### Model Outputs 
+File source
+Timestep 
+
+## Spatial & Temporal Coverage
+
+Plot and Chart that show coverage over watersheds, map here to show temporal coverage for a site # years or something 
+Hilighting major limitations, full time periods missing across many watersheds 
+
+## Quality Checks 
+
+[CONDITIONALLY NEEDED - if gage / if not already described in model section]
+What quality assurance checks are implemented by monitoring agency 
+What quality control checks are implemented by monitoring agency 
+
+## Data use and limitations 
+(build out once we play around with the data a bit more) 
+Pros and cons table for each use case 
+
+## Questions for Data Experts 
+- Please list any questions about the data source. 
+
