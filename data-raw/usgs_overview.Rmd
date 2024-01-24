@@ -14,6 +14,7 @@ library(lubridate)
 library(googleCloudStorageR)
 library(ggplot2)
 library(scales)
+library(janitor)
 ```
 
 ## [Data Type] Summary 
@@ -22,38 +23,39 @@ The USGS is responsible for monitoring and providing information on the quantity
 * **Source:** National Water Information System (NWIS) Mapper is a tool provided by the United States Geological Survey (USGS)
 * **Accessibility:** Public, open and accessible online
 * **Coverage:**  Approximately 1.9 million sites in all 50 States, the District of Columbia, Puerto Rico, the Virgin Islands, Guam, American Samoa and the Commonwealth of the Northern Mariana Islands.
-* **Temporal Coverage:** [max temporal range (min date - max date)] - describe variation across gages if relevant 
-* **Spatial Coverage:** [x out of x watersheds] 
-* **Maintenance:** Is it maintained? And how often? By who (if different than source)
-* **Contact: ** Data / Model Contact (think about if worth expanding to a larger list of people / orgs) - think about having table section below with projects/contacts 
-* **Utilized By:** What process is it used in: (list processes that use this data) 
+-Describe a bit more about California coverage
+* **Temporal Coverage:** temporal coverage is from 1862 to present, however it varies across the different gages. Some of them have big data gaps during those years, or no data at all that goes that far back. Overall not good coverage across the system or across dates
+* **Spatial Coverage:** There is at least one gage with flow data for each of the streams of interest 
+* **Maintenance:** The frequency of data collection can vary depending on the specific site and the importance of the data for water resource management, flood monitoring, and other purposes.
 
-## [Data Type] Model Summary 
-[CONDITIONALLY NEEDED - If it is modeled data - follow with a model summary]
-Couple sentence overview of model synthesizing what you know about modeled data source. Then subsections to describe the what. 
+The frequency of data collection at a particular stream gage can range from hourly to daily, and in some cases, data may be collected more frequently during specific events, such as storms or floods. Real-time data from many stream gages are available on the USGS NWIS website.
+The USGS continually updates and maintains its network of monitoring sites, and data is made available to the public through the NWIS platform.
+* **Contact: ** Data / Model Contact (think about if w
+orth expanding to a larger list of people / orgs) - think about having table section below with projects/contacts 
+* **Utilized By:** data is used for various projects, including SR JPE. 
 
-### Architecture 
-(What type of model is it?) 
-
-### Accessibility 
-(How accessible is the documentation, and how easy is it to interpret) 
-
-### Update procedure 
-
-### QA/QC procedures 
-
-### Data Inputs 
-Data needed to run 
-Timestep of each input 
-
-### Model Outputs 
-File source
-Timestep 
 
 ## Spatial & Temporal Coverage
+```{r}
+usgs_overview <- read_csv(here::here("data-raw", "USGS_station_lookup.csv")) |> 
+  clean_names()|>
+  select(-percent_na_only_something_we_want_to_do_if_we_can_functionalize_this_process) |> 
+  mutate(min_date = as.Date(min_date, format = "%m/%d/%Y"),
+         max_date = as.Date(max_date, format = "%m/%d/%Y")) |> 
+  glimpse()
+```
 
 Plot and Chart that show coverage over watersheds, map here to show temporal coverage for a site # years or something 
 Hilighting major limitations, full time periods missing across many watersheds 
+```{r}
+ggplot(usgs_overview, aes(x = min_date, xend = max_date, y = tributary, yend = tributary)) +
+  geom_segment(size = 3, color = "gray") +
+  labs(title = "Date Coverage for Tributaries",
+       x = "Date",
+       y = "Tributary Name")
+
+```
+
 
 ## Quality Checks 
 
@@ -62,8 +64,7 @@ What quality assurance checks are implemented by monitoring agency
 What quality control checks are implemented by monitoring agency 
 
 ## Data use and limitations 
-(build out once we play around with the data a bit more) 
-Pros and cons table for each use case 
+This data can be used and is mostly reliable, the limitations are data gaps across the system and not consistent dates/years of collection
 
 ## Questions for Data Experts 
 - Please list any questions about the data source. 
