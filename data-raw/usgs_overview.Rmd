@@ -23,7 +23,11 @@ The USGS is responsible for monitoring and providing information on the quantity
 * **Source:** National Water Information System (NWIS) Mapper is a tool provided by the United States Geological Survey (USGS)
 * **Accessibility:** Public, open and accessible online
 * **Coverage:**  Approximately 1.9 million sites in all 50 States, the District of Columbia, Puerto Rico, the Virgin Islands, Guam, American Samoa and the Commonwealth of the Northern Mariana Islands.
--Describe a bit more about California coverage
+Approximately 1,000 gages are operating and reporting data publicly in California. Of
+these, about 60 percent are operated by the United States Geological Survey (USGS),
+with the remaining gages operated by State or other agencies. A substantial number of
+gages are operated by third-party entities that are not publicly reporting data on
+statewide databases or lack sufficient data quality to be reported.
 * **Temporal Coverage:** temporal coverage is from 1862 to present, however it varies across the different gages. Some of them have big data gaps during those years, or no data at all that goes that far back. Overall not good coverage across the system or across dates
 * **Spatial Coverage:** There is at least one gage with flow data for each of the streams of interest 
 * **Maintenance:** The frequency of data collection can vary depending on the specific site and the importance of the data for water resource management, flood monitoring, and other purposes.
@@ -64,7 +68,10 @@ What quality assurance checks are implemented by monitoring agency
 What quality control checks are implemented by monitoring agency 
 
 ## Data use and limitations 
-This data can be used and is mostly reliable, the limitations are data gaps across the system and not consistent dates/years of collection
+This data can be used and is mostly reliable, the limitations are data gaps across the system and not consistent dates/years of collection. Of the approximate 4,500 local sub-watersheds
+(Hydrological Unit Code 12 [HUC12]) in California, more than 3,200 (over 70 percent) of
+watersheds do not have any history of stream gaging. Less than half of the historically
+gaged watersheds currently have active, publicly accessible gages today
 
 ## Questions for Data Experts 
 - Please list any questions about the data source. 
