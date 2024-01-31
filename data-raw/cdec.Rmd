@@ -30,7 +30,7 @@ library(sf)
 * **Temporal Coverage:** Max temporal range is 1949-present. The Lower Sacramento River has data back to 1949 and the American River back to 1970. 35% of reaches have data from 1984 or earlier. 75% of reaches have data for 1997 or earlier. 90% of reaches have data from 2015 or earlier.
 * **Spatial Coverage:** 37 of 40 tested reaches have data available. Reach definitions are the 34 SIT reaches (including Yolo Bypass and Sutter Bypass) plus the western Delta tributaries (Putah Creek and Cache Creek), major Tulare Basin rivers (Kings River and Kern River), and major upper Sacramento basin rivers (McCloud River and Pit River).
 * **Maintenance:** Each gauge has a maintaining agency which may or may not include DWR. CDEC staff will report issues and forward maintenance requests to the relevant agency. Level of maintenance likewise varies by gauge.
-* **Contact:** Data / Model Contact (think about if worth expanding to a larger list of people / orgs) - think about having table section below with projects/contacts 
+* **Contact:** General CDEC contact:(916) 574-1777 / [DWR contact form](https://water.ca.gov/Contact); specific gage data contacts depend on which organization/agency is responsible for maintaining the gage. 
 * **Utilized By:** What process is it used in: (list processes that use this data) 
 
 ## Data Access
@@ -240,6 +240,74 @@ station_table <-
 station_table |> write_csv("out/station_table.csv")
 
 station_table |> st_drop_geometry() |> DT::datatable()
+```
+
+```{r na-count}
+retrieve_cdec_csv <- function(sta=character(), sen=character(), dur=character(), 
+                     start_date=ymd("1900-10-01"), end_date=ymd("2023-09-30"),
+                     dir="temp") {
+  name <- str_to_upper(paste0(sta, "_", sen, "_", dur))
+  filename <- file.path(dir, paste0(name,".csv")) # ".csv.gz"))
+  if(!file.exists(filename)){
+    message(paste0("downloading to ",filename))
+    dir.create(dir, recursive = TRUE)
+    httr::GET(
+      url="https://cdec.water.ca.gov/dynamicapp/req/CSVDataServlet",
+      query=list(Stations=sta, SensorNums=sen, dur_code=dur, 
+                 Start=format(start_date,"%Y-%m-%d"), End=format(end_date,"%Y-%m-%d"))) |> 
+      # httr::content(as="text", type="text/csv", encoding="UTF-8") |> 
+      # crunch::write.csv.gz(filename, eol="\r\n") 
+      httr::content("raw") |> 
+      writeBin(filename)
+  } else {
+    message(paste0(filename, " exists, loading"))
+  }
+  return(filename)
+}
+
+count_na_by_wy <- function(filename) {
+  read_csv(filename, 
+         col_select = c(date_time = "DATE TIME", value = "VALUE"),
+         col_types = list(col_datetime(), col_double())) |>
+    janitor::clean_names() |>
+    mutate(water_year = if_else(month(date_time)>=10, year(date_time)+1, year(date_time))) |>
+    group_by(water_year) |> 
+    summarize(obs=n(),
+              err_brt=sum(value==-9998),
+              err_art=sum(value==-9997),
+              err_mis=sum(is.na(value)),) |>
+    as.list()
+}
+
+if(!file.exists("cdec_obs_counts.Rds")) {
+  
+  obs_counts <- cdec_station_sensors |>
+    st_drop_geometry() |>
+    filter(!is.na(section)) |>
+    #head(5) |>
+    mutate(result = pmap(list(station_id, 
+                              sensor_number, 
+                              case_when(duration=="event"~"E",
+                                        duration=="hourly"~"H",
+                                        duration=="daily"~"D",
+                                        duration=="monthly"~"M"),
+                              start, end),
+      function(sta,sen,dur,start,end) count_na_by_wy(retrieve_cdec_csv(sta,sen,dur,start,end)))) |>
+    unnest_wider(result) |> unnest(c(water_year, obs, err_brt, err_art, err_mis)) |>
+    mutate(n_days = if_else(water_year%%4==0,366,365),
+           hyp_obs = case_when(duration=="event" ~ n_days*24*4,
+                               duration=="hourly" ~ n_days*24,
+                               duration=="daily" ~ n_days,
+                               duration=="monthly" ~ 12),
+           pct_complete = (obs - (err_brt + err_art + err_mis)) / hyp_obs)
+  
+  obs_counts |> saveRDS("cdec_obs_counts.Rds")
+  
+} else {
+  
+  obs_counts <- readRDS("cdec_obs_counts.Rds")
+  
+}
 ```
 
 ### Spatial Coverage
