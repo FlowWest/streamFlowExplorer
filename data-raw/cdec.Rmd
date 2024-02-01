@@ -247,25 +247,26 @@ retrieve_cdec_csv <- function(sta=character(), sen=character(), dur=character(),
                      start_date=ymd("1900-10-01"), end_date=ymd("2023-09-30"),
                      dir="temp") {
   name <- str_to_upper(paste0(sta, "_", sen, "_", dur))
-  filename <- file.path(dir, paste0(name,".csv")) # ".csv.gz"))
+  filename <- file.path(dir, paste0(name,".csv.gz"))
   if(!file.exists(filename)){
     message(paste0("downloading to ",filename))
     dir.create(dir, recursive = TRUE)
-    httr::GET(
+    data_raw <-
+      httr::GET(
       url="https://cdec.water.ca.gov/dynamicapp/req/CSVDataServlet",
       query=list(Stations=sta, SensorNums=sen, dur_code=dur, 
                  Start=format(start_date,"%Y-%m-%d"), End=format(end_date,"%Y-%m-%d"))) |> 
-      # httr::content(as="text", type="text/csv", encoding="UTF-8") |> 
-      # crunch::write.csv.gz(filename, eol="\r\n") 
-      httr::content("raw") |> 
-      writeBin(filename)
+      httr::content("raw") 
+    gzf <- gzcon(file(filename, "wb"))
+    data_raw |> writeBin(gzf)
+    close(gzf)
   } else {
     message(paste0(filename, " exists, loading"))
   }
   return(filename)
 }
 
-count_na_by_wy <- function(filename) {
+count_obs_by_wy <- function(filename) {
   read_csv(filename, 
          col_select = c(date_time = "DATE TIME", value = "VALUE"),
          col_types = list(col_datetime(), col_double())) |>
@@ -292,7 +293,7 @@ if(!file.exists("cdec_obs_counts.Rds")) {
                                         duration=="daily"~"D",
                                         duration=="monthly"~"M"),
                               start, end),
-      function(sta,sen,dur,start,end) count_na_by_wy(retrieve_cdec_csv(sta,sen,dur,start,end)))) |>
+      function(sta,sen,dur,start,end) count_obs_by_wy(retrieve_cdec_csv(sta,sen,dur,start,end)))) |>
     unnest_wider(result) |> unnest(c(water_year, obs, err_brt, err_art, err_mis)) |>
     mutate(n_days = if_else(water_year%%4==0,366,365),
            hyp_obs = case_when(duration=="event" ~ n_days*24*4,
