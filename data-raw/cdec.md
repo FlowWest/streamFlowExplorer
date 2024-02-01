@@ -1,7 +1,7 @@
 CDEC Overview
 ================
 [Skyler Lewis](mailto:slewis@flowwest.com)
-2024-01-17
+2024-02-01
 
 ## CDEC Summary
 
@@ -15,8 +15,8 @@ purpose.\]
 - **Coverage:** State of California, where data is available
 - **Temporal Coverage:** Max temporal range is 1949-present. The Lower
   Sacramento River has data back to 1949 and the American River back
-  to 1970. 38% of reaches have data from 1984 or earlier. 81% of reaches
-  have data for 1997 or earlier. 97% of reaches have data from 2015 or
+  to 1970. 35% of reaches have data from 1984 or earlier. 75% of reaches
+  have data for 1997 or earlier. 90% of reaches have data from 2015 or
   earlier.
 - **Spatial Coverage:** 37 of 40 tested reaches have data available.
   Reach definitions are the 34 SIT reaches (including Yolo Bypass and
@@ -27,9 +27,10 @@ purpose.\]
   not include DWR. CDEC staff will report issues and forward maintenance
   requests to the relevant agency. Level of maintenance likewise varies
   by gauge.
-- **Contact:** Data / Model Contact (think about if worth expanding to a
-  larger list of people / orgs) - think about having table section below
-  with projects/contacts
+- **Contact:** General CDEC contact:(916) 574-1777 / [DWR contact
+  form](https://water.ca.gov/Contact); specific gage data contacts
+  depend on which organization/agency is responsible for maintaining the
+  gage.
 - **Utilized By:** What process is it used in: (list processes that use
   this data)
 
@@ -45,22 +46,18 @@ pattern:
 
 `https://cdec.water.ca.gov/dynamicapp/staMeta?station_id={XXX}`
 
-CDEC has an interactive station locator map located at
+CDEC has an station locator map located at
 <https://cdec.water.ca.gov/webgis/?appid=cdecstation>
 
-Stations can also be queried by river basin, which include the following
-options:
+Stations can also be queried by river basin. For the greater
+Sacramento-San Joaquin basin, this includes the following river basins:
 
 ``` r
 river_basins <- read_csv("cdec_river_basins.csv")
-if(interactive()){
-  river_basins |> DT::datatable()
-} else {
-  river_basins |> pull(river_basin) |> paste(collapse=", ") |> cat()
-}
+river_basins |> filter(selected) |> pull(river_basin) |> paste(collapse=", ") |> cat()
 ```
 
-    ## ALAMEDA CREEK, AMARGOSA RIVER, AMERICAN RIVER, ANTELOPE VALLEY, ARROYO GRANDE CREEK, ARROYO PASAJERO, BATTLE CREEK, BEAR RIVER, BUTTE CREEK, CACHE CREEK, CALAVERAS RIVER, CALIENTE CREEK, CALLEGUAS CREEK, CANTUA CREEK, CARMEL RIVER, CARRIZO CREEK, CARSON RIVER, CHINA LAKE, CHOWCHILLA RIVER, COAST-MARIN, COAST-MORRO BAY, COAST-SAN MATEO, COLORADO RIVER, COSUMNES RIVER, COTTONWOOD CREEK, COYOTE WASH, CUYAMA RIVER, DELTA, EAST BAY, EEL RIVER, FEATHER RIVER, FRESNO RIVER, GARCIA RIVER, GUADALUPE RIVER, GUALALA RIVER, HAT CREEK, JACALITOS CR, KAWEAH RIVER, KELLOGG CREEK, KERN RIVER, KINGS RIVER, KLAMATH RIVER, LAKE TAHOE, LITTLEJOHN CREEK, LOS ANGELES RIVER, LOS GATOS CR (NEAR COALINGA), LOS GATOS CR (NEAR SAN JOSE), LYTLE CREEK, MAD RIVER, MATTOLE RIVER, MC CLOUD RIVER, MERCED RIVER, MOJAVE DESERT, MOJAVE RIVER, MOKELUMNE RIVER, MONO LAKE, MONTEREY COAST, NACIMIENTO RIVER, NAPA RIVER, NAVARRO RIVER, NOYO RIVER, OTAY RIVER, OWENS RIVER, PAJARO RIVER, PETALUMA RIVER, PIRU CREEK, PIT RIVER, PUTAH CREEK, REDWOOD CREEK, RUBICON RIVER, RUSSIAN RIVER, S BARBARA COAST, SACRAMENTO RIVER, SACTO VLY NE, SACTO VLY WEST, SALINAS RIVER, SALMON RIVER, SAN ANTONIO CR (SF BAY), SAN ANTONIO CR (SOUTH COAST), SAN BENITO RIVER, SAN DIEGO RIVER, SAN DIEGUITO RIVER, SAN FRANCISCO BAY, SAN GABRIEL RIVER, SAN GREGORIO CREEK, SAN JACINTO RIVER, SAN JOAQUIN FLOOR, SAN JOAQUIN RIVER, SAN JOAQUIN VLY WEST, SAN LORENZO RIVER, SAN LUIS CREEK, SAN LUIS OBISPO CREEK, SAN LUIS REY RIVER, SAN MATEO CREEK, SANTA ANA AB NARROWS, SANTA ANA RIVER, SANTA CLARA RIVER, SANTA CLARA VALLEY, SANTA CRUZ CO COAST, SANTA MARGARITA RIVER, SANTA MARIA RIVER, SANTA YNEZ RIVER, SCOTT RIVER, SHASTA RIVER, SISQUOC RIVER, SMITH RIVER, SODA CREEK, STANISLAUS RIVER, STEVENS CREEK, STONY CREEK, SURPRISE VALLEY, SUSAN RIVER, SWEETWATER RIVER, TEHACHAPI MOUNTAINS, TRINITY RIVER, TRUCKEE RIVER, TULARE LAKE, TULARE LAKE WESTSIDE, TULE RIVER, TUOLUMNE RIVER, U SANTA CLARA RIVER, ULATIS CREEK, UPPER SALINAS RIVER, VAN DUZEN RIVER, VENTURA LA COASTAL, VENTURA RIVER, WALKER RIVER, WEST SALTON SEA, WHITE RIVER, WHITEWATER RIVER, YUBA RIVER
+    ## AMERICAN RIVER, BATTLE CREEK, BEAR RIVER, BUTTE CREEK, CACHE CREEK, CALAVERAS RIVER, COSUMNES RIVER, COTTONWOOD CREEK, DELTA, FEATHER RIVER, KERN RIVER, KINGS RIVER, MC CLOUD RIVER, MERCED RIVER, MOKELUMNE RIVER, PIT RIVER, PUTAH CREEK, SACRAMENTO RIVER, SACTO VLY NE, SACTO VLY WEST, SAN JOAQUIN FLOOR, SAN JOAQUIN RIVER, SAN JOAQUIN VLY WEST, STANISLAUS RIVER, STONY CREEK, TUOLUMNE RIVER, YUBA RIVER
 
 #### Sensors
 
@@ -71,21 +68,25 @@ Following are the sensor codes that report some variation of flow in
 cfs. There are many other codes not listed here including stage,
 temperature, turbidity, etc.
 
-*Most common sensor codes, mapped in this report:*
+*Codes for standard in-stream flow, mapped and summarized in this report
+for mainstems:*
 
-- **`20`** = **FLOW** = FLOW, RIVER DISCHARGE, CFS
-- **`41`** = **MFLOW** = FLOW, MEAN DAILY, CFS
-- **`110`** = **DIVERSN** = FLOW, CANAL DIVERSION, CFS
+- **`20`** = **FLOW** = FLOW, RIVER DISCHARGE, CFS\*
+- **`41`** = **MFLOW** = FLOW, MEAN DAILY, CFS\*
 
-*Others reporting flow data in CFS:*
+*Codes for other flow (cfs) sensors in the CDEC database:*
 
+- **`110`** = **DIVERSN** = FLOW, CANAL DIVERSION, CFS\*
+- **`23`** = **OUTFLOW** = RESERVOIR OUTFLOW, CFS\*
 - **`76`** = **INFLOW** = RESERVOIR INFLOW, CFS
-- **`23`** = **OUTFLOW** = RESERVOIR OUTFLOW, CFS
 - **`7`** = **REL SCH** = SCHEDULED RELEASE, CFS (manually reported)
 - **`210`** = **AUXFLOW** = FLOW AUX, CFS
 - **`165`** = **FLOW.XX** = FLOW, RIVER DISCHARGE PRECISE, CFS (rarely
   used)
 - **`8`** = **FNF** = FULL NATURAL FLOW, CFS (modeled)
+
+\*sensors indicated are also shown on the map for context but are not
+included in the summary stats for this report
 
 #### Durations (timesteps)
 
@@ -139,92 +140,17 @@ remotes::install_github("flowwest/CDECRetrieve")
 
 ## Spatial & Temporal Coverage
 
-The following section assesses spatial and temporal coverage. Still need
-to assess presence of `NA`s within the start and end time windows.
-
-``` r
-cdec_station_sensor_list_filename <- "cdec_station_sensor_list.Rds"
-
-if(!file.exists(cdec_station_sensor_list_filename)){
-  
-  cdec_station_sensor_list <- 
-    river_basins |>
-      filter(selected) |>
-      mutate(stations = map(river_basin, possibly(function(x) {
-        CDECRetrieve::cdec_stations(river_basin = x) |> 
-          select(-river_basin, -elevation) # dropping elev, CDECRetrieve issue
-        }, otherwise = NA))) |> 
-      unnest(stations) |>
-      mutate(datasets = map(station_id, possibly(function(x) {
-        CDECRetrieve::cdec_datasets(station = x)
-        }, otherwise = NA))) |>
-      unnest(datasets)
-  
-  cdec_station_sensor_list |> saveRDS(cdec_station_sensor_list_filename)
-  
-} else {
-  
-  cdec_station_sensor_list <- readRDS(cdec_station_sensor_list_filename)
-  
-}
-```
-
-``` r
-selected_sensors <- c(20, 41, 110)
-
-cdec_station_sensors <- 
-  cdec_station_sensor_list |> 
-  mutate(min_wy = year(start %m+% months(3)),
-         max_wy = year(end %m+% months(3))) |>
-  filter(sensor_number %in% selected_sensors) |>
-  st_as_sf(coords = c("longitude", "latitude"), crs="EPSG:4269") |>
-  st_transform("EPSG:3310")
-
-cdec_stations <- cdec_station_sensors |>
-  group_by(station_id, name, county, operator) |> # also summarize list of sensors included
-  summarize(sensors = list(unique(sensor_number))) |>
-  st_union(by_feature = TRUE) 
-```
-
-    ## `summarise()` has grouped output by 'station_id', 'name', 'county'. You can
-    ## override using the `.groups` argument.
-
-``` r
-#cdec_stations |> st_write("out/cdec_stations.shp", append=FALSE)
-```
-
-``` r
-manual_station_list <- 
-  read_csv("cdec_mainstem_stations.csv") |>
-  janitor::clean_names() |>
-  filter(!is.na(channel) & channel != "???") |>
-  mutate(station_id = str_to_lower(station_id),
-         mainstem = TRUE)
-```
-
-    ## Rows: 235 Columns: 5
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: ","
-    ## chr (5): Section, Channel, Station ID, Station Name, Notes
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-
-``` r
-cdec_stations <- cdec_stations |>
-  left_join(manual_station_list, join_by(station_id == station_id)) |>
-  mutate(mainstem = coalesce(mainstem, FALSE))
-
-cdec_station_sensors <- cdec_station_sensors |>
-  left_join(manual_station_list, join_by(station_id == station_id)) |>
-  mutate(mainstem = coalesce(mainstem, FALSE))
-```
+The following section assesses spatial and temporal coverage of the
+stations.
 
 ### Temporal Coverage
 
-Not shown:
+#### Sensor date ranges
 
-Version with only verified mainstem data
+The following chart summarizes the ranges of data availability. This is
+based on the published start and end dates and does not account for NA
+values within these ranges. Not listed in this figure because no
+stations are present: *Bear Creek, Paynes Creek, Calaveras River*.
 
 ``` r
 check_for_overlap <- function(wy, chan, sec) {
@@ -239,6 +165,15 @@ data_avail_by_water_year <-
   expand_grid(water_year = seq(1949,2024,1), 
               manual_station_list |> select(channel, section) |> unique()) |>
   mutate(has_data = pmap_lgl(list(water_year, channel, section), check_for_overlap))
+
+first_year_available <- 
+  data_avail_by_water_year |>
+  filter(has_data) |>
+  group_by(channel, water_year) |>
+  summarize(has_data = any(has_data)) |>
+  group_by(channel) |>
+  summarize(first_year = min(water_year),
+            n_years = n())
 
 data_avail_by_water_year |>
   filter(!is.na(channel)) |>
@@ -256,8 +191,155 @@ data_avail_by_water_year |>
   scale_fill_manual(values = c("FALSE" = "white", "TRUE" = "darkgray"))
 ```
 
-![](cdec_files/figure-gfm/plot-wy-avail-v2-1.png)<!-- --> Not listed:
-Bear Creek, Paynes Creek, Calaveras River
+![](cdec_files/figure-gfm/plot-wy-avail-v2-1.png)<!-- -->
+
+#### Percent non-missing
+
+The following table and chart summarize the percentage of non-missing
+observations, within each water year, by station and by channel/section.
+
+``` r
+retrieve_cdec_csv <- function(sta=character(), sen=character(), dur=character(), 
+                     start_date=ymd("1900-10-01"), end_date=ymd("2023-09-30"),
+                     dir="temp") {
+  name <- str_to_upper(paste0(sta, "_", sen, "_", dur))
+  filename <- file.path(dir, paste0(name,".csv.gz"))
+  if(!file.exists(filename)){
+    message(paste0("downloading to ",filename))
+    dir.create(dir, recursive = TRUE)
+    data_raw <-
+      httr::GET(
+      url="https://cdec.water.ca.gov/dynamicapp/req/CSVDataServlet",
+      query=list(Stations=sta, SensorNums=sen, dur_code=dur, 
+                 Start=format(start_date,"%Y-%m-%d"), End=format(end_date,"%Y-%m-%d"))) |> 
+      httr::content("raw") 
+    gzf <- gzcon(file(filename, "wb"))
+    data_raw |> writeBin(gzf)
+    close(gzf)
+  } else {
+    message(paste0(filename, " exists, loading"))
+  }
+  return(filename)
+}
+
+count_obs_by_wy <- function(filename) {
+  read_csv(filename, 
+         col_select = c(date_time = "DATE TIME", value = "VALUE"),
+         col_types = list(col_datetime(), col_double())) |>
+    janitor::clean_names() |>
+    mutate(water_year = if_else(month(date_time)>=10, year(date_time)+1, year(date_time))) |>
+    group_by(water_year) |> 
+    summarize(obs=n(),
+              err_brt=sum(value==-9998),
+              err_art=sum(value==-9997),
+              err_mis=sum(is.na(value)),) |>
+    as.list()
+}
+
+if(!file.exists("cdec_obs_counts.Rds")) {
+  
+  obs_counts <- cdec_station_sensors |>
+    st_drop_geometry() |>
+    filter(!is.na(section)) |>
+    #head(5) |>
+    mutate(result = pmap(list(station_id, 
+                              sensor_number, 
+                              case_when(duration=="event"~"E",
+                                        duration=="hourly"~"H",
+                                        duration=="daily"~"D",
+                                        duration=="monthly"~"M"),
+                              start, end),
+      function(sta,sen,dur,start,end) count_obs_by_wy(retrieve_cdec_csv(sta,sen,dur,start,end)))) |>
+    unnest_wider(result) |> unnest(c(water_year, obs, err_brt, err_art, err_mis)) |>
+    mutate(n_days = if_else(water_year%%4==0,366,365),
+           hyp_obs = case_when(duration=="event" ~ n_days*24*4,
+                               duration=="hourly" ~ n_days*24,
+                               duration=="daily" ~ n_days,
+                               duration=="monthly" ~ 12),
+           pct_complete = (obs - (err_brt + err_art + err_mis)) / hyp_obs)
+  
+  obs_counts |> saveRDS("cdec_obs_counts.Rds")
+  
+} else {
+  
+  obs_counts <- readRDS("cdec_obs_counts.Rds")
+  
+}
+
+if(interactive() | coalesce(knitr::pandoc_to(),"")=="html"){
+  manual_station_list |>
+    select(channel, section, station_id, station_name) |>
+    left_join(select(obs_counts, station_id, water_year, pct_complete)) |>
+    mutate(pct_complete=round(pct_complete*100,1)) |>
+    DT::datatable(filter = list(position = 'top', clear = FALSE),
+                  options = list(pageLength = 5))
+} else {
+  manual_station_list |>
+    select(channel, section, station_id, station_name) |>
+    left_join(select(obs_counts, station_id, water_year, pct_complete)) |>
+    mutate(pct_complete=num(pct_complete, label = "%", scale=100)) |>
+    head(10) |> knitr::kable()
+}
+```
+
+| channel   | section   | station_id | station_name         | water_year | pct_complete |
+|:----------|:----------|:-----------|:---------------------|-----------:|-------------:|
+| Pit River | Pit River | pcn        | Pit River near Canby |       2000 |         20.6 |
+| Pit River | Pit River | pcn        | Pit River near Canby |       2001 |         99.7 |
+| Pit River | Pit River | pcn        | Pit River near Canby |       2002 |        100\. |
+| Pit River | Pit River | pcn        | Pit River near Canby |       2003 |         99.9 |
+| Pit River | Pit River | pcn        | Pit River near Canby |       2004 |         99.7 |
+| Pit River | Pit River | pcn        | Pit River near Canby |       2005 |         93.4 |
+| Pit River | Pit River | pcn        | Pit River near Canby |       2006 |         99.4 |
+| Pit River | Pit River | pcn        | Pit River near Canby |       2007 |         97.4 |
+| Pit River | Pit River | pcn        | Pit River near Canby |       2008 |         98.8 |
+| Pit River | Pit River | pcn        | Pit River near Canby |       2009 |         99.5 |
+
+``` r
+obs_counts_summary <- 
+  obs_counts |> 
+  group_by(station_id, water_year) |>
+  mutate(best_duration = case_when(any(duration=="event")~"event",
+                                   any(duration=="hourly")~"hourly",
+                                   any(duration=="daily")~"daily",
+                                   any(duration=="monthly")~"monthly")) |>
+  filter(duration == best_duration) |>
+  ungroup() |>
+  filter(water_year <= 2023)
+
+overall_pct_complete_by_station <-
+  obs_counts_summary |>
+  group_by(channel, section, station_id) |>
+  summarize(pct_complete = coalesce(mean(pct_complete),0))
+
+overall_pct_complete_by_section <-
+  overall_pct_complete_by_station |>
+  group_by(channel, section) |>
+  summarize(pct_complete = coalesce(max(pct_complete),0))
+
+obs_counts_summary |>
+  group_by(channel, section, water_year) |>
+  summarize(pct_complete = max(pct_complete)) |>
+  ggplot() + 
+  facet_grid(rows = vars(channel), scales="free_y", space="free_y") +
+  geom_tile(aes(x = factor(water_year), y = factor(section), fill = pct_complete*100)) +
+  xlab("Water Year") + 
+  ylab("") + 
+  theme_minimal() + 
+  theme(legend.position = "left", 
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), 
+        strip.text = element_blank(),
+        panel.margin=unit(0,"lines"),
+        panel.grid = element_blank(),
+        ) + 
+  scale_y_discrete(limits=rev, position="right") +
+  scale_fill_gradient(low="lightgray", high = "black") + 
+  guides(fill=guide_colorbar(barwidth=1, barheight=30, label.position = "left", title = "% Complete"))
+```
+
+![](cdec_files/figure-gfm/na-count-plot-1.png)<!-- -->
+
+#### Summary
 
 ``` r
 station_table <- 
@@ -269,170 +351,97 @@ station_table <-
             sensors = list(unique(sensor_number)),
             ) |>
   mutate(freq_avail = paste(map(sensors, function(x) if_else(20 %in% x, "hourly", "daily")))) |>
-  select(channel, section, station_id, station_name, start_date, end_date, freq_avail)
-```
+  select(channel, section, station_id, station_name, start_date, end_date, freq_avail) |>
+  left_join(overall_pct_complete_by_station) |>
+  mutate(pct_complete = coalesce(pct_complete,0))
 
-    ## `summarise()` has grouped output by 'channel', 'section', 'station_id'. You can
-    ## override using the `.groups` argument.
-
-``` r
 station_table |> write_csv("out/station_table.csv")
-```
 
-### Spatial Coverage
-
-``` r
-# import a few different watershed files
-# use intersection with these polys to detect if in the basin
-watersheds_huc8 <- 
-  st_read("shp/calw221_huc_8_selected.shp", as_tibble=TRUE) |>
-  janitor::clean_names() |>
-  st_transform("EPSG:3310") |>
-  select(huc_8, huc_8_name, wshed_id)
-```
-
-    ## Reading layer `calw221_huc_8_selected' from data source 
-    ##   `C:\Users\skylerlewis\Github\mwd-interoperable-flows\data-raw\shp\calw221_huc_8_selected.shp' 
-    ##   using driver `ESRI Shapefile'
-    ## Simple feature collection with 60 features and 5 fields
-    ## Geometry type: POLYGON
-    ## Dimension:     XY
-    ## Bounding box:  xmin: -267648.5 ymin: -359620.2 xmax: 182116.2 ymax: 423148.3
-    ## Projected CRS: NAD83 / California Albers
-
-``` r
-subwatersheds_huc12 <- 
-  st_read("shp/wbd_subwatershed_selected.shp", as_tibble=TRUE) |>
-  janitor::clean_names() |>
-  st_transform("EPSG:3310")
-```
-
-    ## Reading layer `wbd_subwatershed_selected' from data source 
-    ##   `C:\Users\skylerlewis\Github\mwd-interoperable-flows\data-raw\shp\wbd_subwatershed_selected.shp' 
-    ##   using driver `ESRI Shapefile'
-    ## Simple feature collection with 1737 features and 21 fields
-    ## Geometry type: POLYGON
-    ## Dimension:     XY
-    ## Bounding box:  xmin: -123.0976 ymin: 34.77517 xmax: -117.9808 ymax: 41.82645
-    ## Geodetic CRS:  NAD83
-
-``` r
-subwatersheds_calw221 <-
-  st_read("shp/calw221_selected.shp", as_tibble=TRUE) |>
-  janitor::clean_names() |>
-  st_transform("EPSG:3310")
-```
-
-    ## Reading layer `calw221_selected' from data source 
-    ##   `C:\Users\skylerlewis\Github\mwd-interoperable-flows\data-raw\shp\calw221_selected.shp' 
-    ##   using driver `ESRI Shapefile'
-    ## Simple feature collection with 3005 features and 38 fields
-    ## Geometry type: POLYGON
-    ## Dimension:     XY
-    ## Bounding box:  xmin: -267648.5 ymin: -359620.2 xmax: 182116.2 ymax: 423148.3
-    ## Projected CRS: NAD83 / California Albers
-
-``` r
-watershed_labels <- 
-  st_read("shp/wbd_huc10_group_by_river_name.shp", as_tibble=TRUE) |>
-  janitor::clean_names() |>
-  st_transform("EPSG:3310") |>
-  rename(river_basin = river_name)
-```
-
-    ## Reading layer `wbd_huc10_group_by_river_name' from data source 
-    ##   `C:\Users\skylerlewis\Github\mwd-interoperable-flows\data-raw\shp\wbd_huc10_group_by_river_name.shp' 
-    ##   using driver `ESRI Shapefile'
-    ## Simple feature collection with 40 features and 1 field
-    ## Geometry type: POLYGON
-    ## Dimension:     XY
-    ## Bounding box:  xmin: -123.0976 ymin: 34.77517 xmax: -117.9808 ymax: 41.82645
-    ## Geodetic CRS:  NAD83
-
-``` r
-# import river and creek stream lines
-# use intersection with buffered flowline shapefile to detect if on the mainstem
-stream_flowlines <- 
-  st_read("shp/ca_streams_selected.shp", as_tibble=TRUE) |>
-  janitor::clean_names() |>
-  st_zm() |>
-  st_transform("EPSG:3310") |>
-  mutate(label = coalesce(name, paste0("Tributary of ",down_name)))
-```
-
-    ## Reading layer `ca_streams_selected' from data source 
-    ##   `C:\Users\skylerlewis\Github\mwd-interoperable-flows\data-raw\shp\ca_streams_selected.shp' 
-    ##   using driver `ESRI Shapefile'
-    ## Simple feature collection with 87 features and 20 fields
-    ## Geometry type: LINESTRING
-    ## Dimension:     XYM
-    ## Bounding box:  xmin: -257718.9 ymin: -305264.9 xmax: 171875.1 ymax: 386351.3
-    ## m_range:       mmin: 0 mmax: 597993.6
-    ## Projected CRS: NAD83 / California Albers
-
-``` r
-bypass_polys <- 
-  st_read("shp/yolo_sutter_bypass_extents.shp", as_tibble=TRUE) |>
-  janitor::clean_names() |>
-  st_transform("EPSG:3310") |>
-  mutate(name = map(area_name, function(x) str_split_1(x, " - ")[1])) |> 
-  unnest() |>
-  group_by(name) |>
-  summarize() |>
-  st_union(by_feature = TRUE)
-```
-
-    ## Reading layer `yolo_sutter_bypass_extents' from data source 
-    ##   `C:\Users\skylerlewis\Github\mwd-interoperable-flows\data-raw\shp\yolo_sutter_bypass_extents.shp' 
-    ##   using driver `ESRI Shapefile'
-    ## Simple feature collection with 8 features and 7 fields
-    ## Geometry type: POLYGON
-    ## Dimension:     XY
-    ## Bounding box:  xmin: 6554790 ymin: 1876136 xmax: 6688689 ymax: 2368307
-    ## Projected CRS: NAD83(2011) / California zone 2 (ftUS)
-
-#### Geographic distribution of sensors
-
-``` r
-if (interactive()) {
-  leaflet::leaflet() |> 
-  leaflet::addTiles() |> 
-  leaflet::addPolygons(data=st_transform(watershed_labels, "EPSG:4326"), label=~river_basin, color="gray") |>
-  leaflet::addPolygons(data=st_transform(bypass_polys, "EPSG:4326"), label=~name, fillColor="darkblue", opacity=0.5, color=NA) |>
-  leaflet::addPolylines(data=st_transform(stream_flowlines, "EPSG:4326"), label=~label, color="darkblue") |>
-  leaflet::addCircleMarkers(data=st_transform(cdec_stations, "EPSG:4326"), 
-                            label=~paste(station_id, name, operator, paste(sensors), sep="<br>") |> lapply(htmltools::HTML),
-                            color = ~if_else(mainstem, "darkred", "darkgray")) 
+if(interactive() | coalesce(knitr::pandoc_to(),"")=="html"){
+  station_table |> st_drop_geometry() |> 
+    mutate(pct_complete=round(pct_complete*100,1)) |>
+    DT::datatable(filter = list(position = 'top', clear = FALSE),
+                  options = list(pageLength = 5))
 } else {
- ggplot() + 
-    geom_sf(data=watershed_labels, color="gray") + 
-    geom_sf(data=bypass_polys, fill="darkblue", color=NA, alpha=0.5) +
-    geom_sf(data=stream_flowlines, color="darkblue") + 
-    geom_sf(data=cdec_stations, aes(color=mainstem)) +
-    scale_color_manual(values = c("TRUE" = "darkred", "FALSE" = "darkgray"))
+  station_table |> st_drop_geometry() |> 
+    mutate(pct_complete=num(pct_complete, label = "%", scale=100)) |>
+    head(10) |> knitr::kable()
 }
 ```
 
-![](cdec_files/figure-gfm/map-sensors-1.png)<!-- -->
+| channel        | section        | station_id | station_name                                     | start_date | end_date   | freq_avail | pct_complete |
+|:---------------|:---------------|:-----------|:-------------------------------------------------|:-----------|:-----------|:-----------|-------------:|
+| American River | American River | afo        | American River at Fair Oaks                      | 1998-11-02 | 2024-01-16 | hourly     |         98.3 |
+| American River | American River | amf        | American River at Folsom                         | 1995-02-01 | 2001-05-08 | daily      |         87.2 |
+| American River | American River | amk        | South Fork American River near Kyburz            | 2012-10-23 | 2024-01-16 | hourly     |         99.4 |
+| American River | American River | cbr        | South Fork American River at Chili Bar           | 1997-09-10 | 2024-01-16 | hourly     |         96.4 |
+| American River | American River | nfd        | North Fork American River at North Fork Dam      | 1970-01-01 | 2005-11-30 | hourly     |         95.9 |
+| American River | American River | oxb        | Middle Fork American River near Oxbow Powerhouse | 1997-10-21 | 2024-01-16 | hourly     |         97.5 |
+| Antelope Creek | Antelope Creek | atc        | Antelope Creek near Red Bluff                    | 2022-06-28 | 2024-01-16 | hourly     |         62.9 |
+| Battle Creek   | Battle Creek   | bas        | South Fork Battle Creek near Manton              | 2000-07-19 | 2024-01-16 | hourly     |         70.6 |
+| Battle Creek   | Battle Creek   | bat        | Battle Creek                                     | 1986-10-01 | 2024-01-16 | hourly     |            0 |
+| Battle Creek   | Battle Creek   | bnf        | North Fork Battle Creek near Manton              | 2000-09-20 | 2024-01-16 | hourly     |         77.5 |
+
+### Spatial Coverage
+
+#### Geographic distribution of sensors
+
+Also shown on this map for context are in-stream flow sensors on
+tributaries and secondary channels, as well as canal diversions and
+reservoir outflow gages. **(View HTML version for interactive Leaflet
+map)**
+
+``` r
+if(interactive() | coalesce(knitr::pandoc_to(),"")=="html"){
+  watersheds_wgs84 <- st_transform(watershed_labels, "EPSG:4326")
+  flowlines_wgs84 <- st_transform(stream_flowlines, "EPSG:4326")
+  stations_wgs84 <- st_transform(cdec_stations, "EPSG:4326")
+  bypasses_wgs84 <- st_transform(filter(bypass_polys,name %in% c("Sutter Bypass", "Yolo Bypass")), "EPSG:4326")
+
+  leaflet::leaflet() |> 
+  leaflet::addTiles(urlTemplate = 'https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}',
+                 attribution = 'Basemap tiles &copy; Esri &mdash; Sources: GEBCO, NOAA, CHS, OSU, UNH, CSUMB, National Geographic, DeLorme, NAVTEQ, and Esri',
+                 options = leaflet::tileOptions(noWrap = TRUE, opacity = 1.0, maxNativeZoom = 13, maxZoom = 13)) |>
+  leaflet::addTiles(urlTemplate = 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Reference_Overlay/MapServer/tile/{z}/{y}/{x}',
+                 attribution = 'Reference tiles &copy; Esri &mdash; Source: USGS, Esri, TANA, DeLorme, and NPS',
+                 options = leaflet::tileOptions(noWrap = TRUE, opacity = 0.5, maxNativeZoom = 13, maxZoom = 13)) |>  
+  leaflet::addPolygons(data=watersheds_wgs84, label=~paste(river_basin, "watershed"), color="#888888", weight=1, fillOpacity = 0.0) |>
+  leaflet::addPolygons(data=bypasses_wgs84, label=~name, weight=0, fillColor="#2F88A6", fillOpacity=0.5, color=NA) |>
+  leaflet::addPolylines(data=flowlines_wgs84, label=~label, color="#2F88A6") |>
+  leaflet::addCircleMarkers(data=stations_wgs84 |> 
+                              left_join(st_drop_geometry(station_table)), 
+                            label=~paste(str_to_upper(station_id), 
+                                         name, 
+                                         operator, 
+                                         paste(sensors), 
+                                         if_else(!is.na(pct_complete),paste(
+                                           paste(start_date,"-",end_date),
+                                           paste0(round(pct_complete*100),"% complete"),
+                                           sep="<br>"),""),
+                                         sep="<br>") |> lapply(htmltools::HTML),
+                            color = ~if_else(mainstem, "#A6011F", "#888888")) 
+} else {
+ ggplot() + 
+    geom_sf(data=watershed_labels, color="#888888") + 
+    geom_sf(data=filter(bypass_polys,name %in% c("Sutter Bypass", "Yolo Bypass")), fill="#2F88A6", color=NA, alpha=0.5) +
+    geom_sf(data=stream_flowlines, color="#2F88A6") + 
+    geom_sf(data=cdec_stations, aes(color=mainstem)) +
+    scale_color_manual(values = c("TRUE" = "#A6011F", "FALSE" = "#888888"))
+}
+```
+
+<img src="cdec_files/figure-gfm/map-sensors-1.png" width="910px" height="640px" />
 
 #### Years of data available by stream
 
-``` r
-first_year_available <- data_avail_by_water_year |>
-  filter(has_data) |>
-  group_by(channel, water_year) |>
-  summarize(has_data = any(has_data)) |>
-  group_by(channel) |>
-  summarize(first_year = min(water_year),
-            n_years = n())
-```
-
-    ## `summarise()` has grouped output by 'channel'. You can override using the
-    ## `.groups` argument.
+The following map illustrates the data availability length by stream.
+This is based on the published start and end dates and does not account
+for NA values within these ranges.
 
 ``` r
 river_names <- watershed_labels$river_basin |> unique() |> c("Yolo Bypass", "Sutter Bypass")
 match_name <- function(x) paste0(river_names[which(str_detect(x, river_names))][1],"")
+
 flowlines_first_year_available <- 
   stream_flowlines |>
   mutate(
@@ -460,34 +469,36 @@ ggplot() +
   scale_color_viridis_c(direction=-1, aesthetics = c("color", "fill"))
 ```
 
-![](cdec_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](cdec_files/figure-gfm/map-n-years-1.png)<!-- -->
+
+Summary statistics indicating the proportion of major streams that are
+gaged at various time points.
 
 ``` r
-first_year_available_by_section <- data_avail_by_water_year |>
+first_year_available_by_section <- 
+  data_avail_by_water_year |>
   filter(has_data) |>
   group_by(channel, section, water_year) |>
   summarize(has_data = any(has_data)) |>
   group_by(channel, section) |>
   summarize(first_year = min(water_year),
-            n_years = n())
+            n_years = n()) |>
+  full_join(tibble(section = all_sections)) |>
+  mutate(n_years = coalesce(n_years, 0),
+         first_year = coalesce(first_year, 9999))
+
+tibble(yr = c(1949, 1984, 1997, 2015, 2022)) |>
+  mutate(percent_of_data = map(yr, function(x) 100*mean(coalesce(first_year_available_by_section$first_year,0)<=x))) |>
+  unnest(percent_of_data) |> knitr::kable()
 ```
 
-    ## `summarise()` has grouped output by 'channel', 'section'. You can override
-    ## using the `.groups` argument.
-    ## `summarise()` has grouped output by 'channel'. You can override using the
-    ## `.groups` argument.
-
-``` r
-tibble(yr = c(1949, 1984, 1997, 2015)) |>
-  mutate(percent_of_data = map(yr, function(x) mean(coalesce(first_year_available_by_section$first_year,0)<=x))) |>
-  unnest() *100
-```
-
-    ##       yr percent_of_data
-    ## 1 194900        2.702703
-    ## 2 198400       37.837838
-    ## 3 199700       81.081081
-    ## 4 201500       97.297297
+|   yr | percent_of_data |
+|-----:|----------------:|
+| 1949 |             2.5 |
+| 1984 |            35.0 |
+| 1997 |            75.0 |
+| 2015 |            90.0 |
+| 2022 |            92.5 |
 
 ## Quality Checks
 
@@ -515,10 +526,10 @@ available rating table, a flow cannot be computed.”
 
 ## Data use and limitations
 
-| Use Case                       | Benefits | Limitations |
-|--------------------------------|----------|-------------|
-| Continuous empirical flow data | …        | …           |
-| …                              | …        | …           |
+| Use Case                       | Benefits           | Limitations |
+|--------------------------------|--------------------|-------------|
+| Continuous empirical flow data | Extensive coverage | …           |
+| …                              | …                  | …           |
 
 ## Questions for Data Experts
 

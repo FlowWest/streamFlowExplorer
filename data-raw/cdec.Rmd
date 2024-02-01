@@ -3,11 +3,11 @@ title: "CDEC Overview"
 author: "[Skyler Lewis](mailto:slewis@flowwest.com)"
 date: "`r Sys.Date()`"
 output:
+  github_document:
+    default
   html_document:
     code_folding: hide
     theme: flatly
-  github_document:
-    default
 ---
 
 ```{r setup, include=FALSE}
@@ -43,7 +43,7 @@ Station IDs follow a 3-character alphanumeric format. When the ID is known, the 
 
 `https://cdec.water.ca.gov/dynamicapp/staMeta?station_id={XXX}`
 
-CDEC has an interactive station locator map located at [https://cdec.water.ca.gov/webgis/?appid=cdecstation](https://cdec.water.ca.gov/webgis/?appid=cdecstation)
+CDEC has an  station locator map located at [https://cdec.water.ca.gov/webgis/?appid=cdecstation](https://cdec.water.ca.gov/webgis/?appid=cdecstation)
 
 Stations can also be queried by river basin. For the greater Sacramento-San Joaquin basin, this includes the following river basins:
 
@@ -306,13 +306,20 @@ if(!file.exists("cdec_obs_counts.Rds")) {
   
 }
 
-manual_station_list |>
-  select(channel, section, station_id, station_name) |>
-  left_join(select(obs_counts, station_id, water_year, pct_complete)) |>
-  #mutate(pct_complete=num(pct_complete, label = "%", scale=100)) |>
-  mutate(pct_complete=round(pct_complete*100,1)) |>
-  DT::datatable(filter = list(position = 'top', clear = FALSE),
-                options = list(pageLength = 5))
+if(interactive() | coalesce(knitr::pandoc_to(),"")=="html"){
+  manual_station_list |>
+    select(channel, section, station_id, station_name) |>
+    left_join(select(obs_counts, station_id, water_year, pct_complete)) |>
+    mutate(pct_complete=round(pct_complete*100,1)) |>
+    DT::datatable(filter = list(position = 'top', clear = FALSE),
+                  options = list(pageLength = 5))
+} else {
+  manual_station_list |>
+    select(channel, section, station_id, station_name) |>
+    left_join(select(obs_counts, station_id, water_year, pct_complete)) |>
+    mutate(pct_complete=num(pct_complete, label = "%", scale=100)) |>
+    head(10) |> knitr::kable()
+}
 ```
 
 ```{r na-count-plot, message=FALSE}
@@ -375,10 +382,16 @@ station_table <-
 
 station_table |> write_csv("out/station_table.csv")
 
-station_table |> st_drop_geometry() |> 
-  mutate(pct_complete=round(pct_complete*100,1)) |>
-  DT::datatable(filter = list(position = 'top', clear = FALSE),
-                options = list(pageLength = 5))
+if(interactive() | coalesce(knitr::pandoc_to(),"")=="html"){
+  station_table |> st_drop_geometry() |> 
+    mutate(pct_complete=round(pct_complete*100,1)) |>
+    DT::datatable(filter = list(position = 'top', clear = FALSE),
+                  options = list(pageLength = 5))
+} else {
+  station_table |> st_drop_geometry() |> 
+    mutate(pct_complete=num(pct_complete, label = "%", scale=100)) |>
+    head(10) |> knitr::kable()
+}
 ```
 
 ### Spatial Coverage
@@ -426,15 +439,15 @@ bypass_polys <-
 
 #### Geographic distribution of sensors 
 
-Also shown on this map for context are in-stream flow sensors on tributaries and secondary channels, as well as canal diversions and reservoir outflow gages. 
+Also shown on this map for context are in-stream flow sensors on tributaries and secondary channels, as well as canal diversions and reservoir outflow gages. **(View HTML version for interactive Leaflet map)**
 
 ```{r map-sensors, message=FALSE, warning=FALSE, out.width = '910px', out.height = '640px'}
-watersheds_wgs84 <- st_transform(watershed_labels, "EPSG:4326")
-flowlines_wgs84 <- st_transform(stream_flowlines, "EPSG:4326")
-stations_wgs84 <- st_transform(cdec_stations, "EPSG:4326")
-bypasses_wgs84 <- st_transform(filter(bypass_polys,name %in% c("Sutter Bypass", "Yolo Bypass")), "EPSG:4326")
+if(interactive() | coalesce(knitr::pandoc_to(),"")=="html"){
+  watersheds_wgs84 <- st_transform(watershed_labels, "EPSG:4326")
+  flowlines_wgs84 <- st_transform(stream_flowlines, "EPSG:4326")
+  stations_wgs84 <- st_transform(cdec_stations, "EPSG:4326")
+  bypasses_wgs84 <- st_transform(filter(bypass_polys,name %in% c("Sutter Bypass", "Yolo Bypass")), "EPSG:4326")
 
-#if (interactive()) {
   leaflet::leaflet() |> 
   leaflet::addTiles(urlTemplate = 'https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}',
                  attribution = 'Basemap tiles &copy; Esri &mdash; Sources: GEBCO, NOAA, CHS, OSU, UNH, CSUMB, National Geographic, DeLorme, NAVTEQ, and Esri',
@@ -457,14 +470,14 @@ bypasses_wgs84 <- st_transform(filter(bypass_polys,name %in% c("Sutter Bypass", 
                                            sep="<br>"),""),
                                          sep="<br>") |> lapply(htmltools::HTML),
                             color = ~if_else(mainstem, "#A6011F", "#888888")) 
-#} else {
-# ggplot() + 
-#    geom_sf(data=watershed_labels, color="#888888") + 
-#    geom_sf(data=filter(bypass_polys,name %in% c("Sutter Bypass", "Yolo Bypass")), fill="#2F88A6", color=NA, alpha=0.5) +
-#    geom_sf(data=stream_flowlines, color="#2F88A6") + 
-#    geom_sf(data=cdec_stations, aes(color=mainstem)) +
-#    scale_color_manual(values = c("TRUE" = "#A6011F", "FALSE" = "#888888"))
-#}
+} else {
+ ggplot() + 
+    geom_sf(data=watershed_labels, color="#888888") + 
+    geom_sf(data=filter(bypass_polys,name %in% c("Sutter Bypass", "Yolo Bypass")), fill="#2F88A6", color=NA, alpha=0.5) +
+    geom_sf(data=stream_flowlines, color="#2F88A6") + 
+    geom_sf(data=cdec_stations, aes(color=mainstem)) +
+    scale_color_manual(values = c("TRUE" = "#A6011F", "FALSE" = "#888888"))
+}
 ```
 
 #### Years of data available by stream
