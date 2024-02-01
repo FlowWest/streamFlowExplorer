@@ -11,7 +11,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, fig.width=15, fig.height=10)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, fig.width=15, fig.height=10, dpi=300)
 library(tidyverse)
 library(lubridate)
 library(googleCloudStorageR)
@@ -190,8 +190,9 @@ cdec_station_sensors <- cdec_station_sensors |>
 
 ### Temporal Coverage
 
-The following chart summarizes the ranges of data availability. This is based on the published start and end dates and does not account for NA values within these ranges. Not listed in this figure because no stations are present: *Bear Creek, Paynes Creek, Calaveras River*.
+#### Sensor date ranges
 
+The following chart summarizes the ranges of data availability. This is based on the published start and end dates and does not account for NA values within these ranges. Not listed in this figure because no stations are present: *Bear Creek, Paynes Creek, Calaveras River*.
 
 ```{r plot-wy-avail-v2, message=FALSE, warning=FALSE}
 check_for_overlap <- function(wy, chan, sec) {
@@ -206,6 +207,15 @@ data_avail_by_water_year <-
   expand_grid(water_year = seq(1949,2024,1), 
               manual_station_list |> select(channel, section) |> unique()) |>
   mutate(has_data = pmap_lgl(list(water_year, channel, section), check_for_overlap))
+
+first_year_available <- 
+  data_avail_by_water_year |>
+  filter(has_data) |>
+  group_by(channel, water_year) |>
+  summarize(has_data = any(has_data)) |>
+  group_by(channel) |>
+  summarize(first_year = min(water_year),
+            n_years = n())
 
 data_avail_by_water_year |>
   filter(!is.na(channel)) |>
@@ -224,25 +234,11 @@ data_avail_by_water_year |>
 
 ```
 
+#### Percent non-missing
 
-```{r message=FALSE, warning=FALSE}
-station_table <- 
-  cdec_station_sensors |>
-  filter(mainstem) |>
-  group_by(channel, section, station_id, station_name) |>
-  summarize(start_date = min(start),
-            end_date = min(end),
-            sensors = list(unique(sensor_number)),
-            ) |>
-  mutate(freq_avail = paste(map(sensors, function(x) if_else(20 %in% x, "hourly", "daily")))) |>
-  select(channel, section, station_id, station_name, start_date, end_date, freq_avail)
+The following table and chart summarize the percentage of non-missing observations, within each water year, by station and by channel/section.
 
-station_table |> write_csv("out/station_table.csv")
-
-station_table |> st_drop_geometry() |> DT::datatable()
-```
-
-```{r na-count}
+```{r na-count, message=FALSE}
 retrieve_cdec_csv <- function(sta=character(), sen=character(), dur=character(), 
                      start_date=ymd("1900-10-01"), end_date=ymd("2023-09-30"),
                      dir="temp") {
@@ -309,6 +305,80 @@ if(!file.exists("cdec_obs_counts.Rds")) {
   obs_counts <- readRDS("cdec_obs_counts.Rds")
   
 }
+
+manual_station_list |>
+  select(channel, section, station_id, station_name) |>
+  left_join(select(obs_counts, station_id, water_year, pct_complete)) |>
+  #mutate(pct_complete=num(pct_complete, label = "%", scale=100)) |>
+  mutate(pct_complete=round(pct_complete*100,1)) |>
+  DT::datatable(filter = list(position = 'top', clear = FALSE),
+                options = list(pageLength = 5))
+```
+
+```{r na-count-plot, message=FALSE}
+obs_counts_summary <- 
+  obs_counts |> 
+  group_by(station_id, water_year) |>
+  mutate(best_duration = case_when(any(duration=="event")~"event",
+                                   any(duration=="hourly")~"hourly",
+                                   any(duration=="daily")~"daily",
+                                   any(duration=="monthly")~"monthly")) |>
+  filter(duration == best_duration) |>
+  ungroup() |>
+  filter(water_year <= 2023)
+
+overall_pct_complete_by_station <-
+  obs_counts_summary |>
+  group_by(channel, section, station_id) |>
+  summarize(pct_complete = coalesce(mean(pct_complete),0))
+
+overall_pct_complete_by_section <-
+  overall_pct_complete_by_station |>
+  group_by(channel, section) |>
+  summarize(pct_complete = coalesce(max(pct_complete),0))
+
+obs_counts_summary |>
+  group_by(channel, section, water_year) |>
+  summarize(pct_complete = max(pct_complete)) |>
+  ggplot() + 
+  facet_grid(rows = vars(channel), scales="free_y", space="free_y") +
+  geom_tile(aes(x = factor(water_year), y = factor(section), fill = pct_complete*100)) +
+  xlab("Water Year") + 
+  ylab("") + 
+  theme_minimal() + 
+  theme(legend.position = "left", 
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), 
+        strip.text = element_blank(),
+        panel.margin=unit(0,"lines"),
+        panel.grid = element_blank(),
+        ) + 
+  scale_y_discrete(limits=rev, position="right") +
+  scale_fill_gradient(low="lightgray", high = "black") + 
+  guides(fill=guide_colorbar(barwidth=1, barheight=30, label.position = "left", title = "% Complete"))
+```
+
+#### Summary
+
+```{r message=FALSE, warning=FALSE}
+station_table <- 
+  cdec_station_sensors |>
+  filter(mainstem) |>
+  group_by(channel, section, station_id, station_name) |>
+  summarize(start_date = min(start),
+            end_date = min(end),
+            sensors = list(unique(sensor_number)),
+            ) |>
+  mutate(freq_avail = paste(map(sensors, function(x) if_else(20 %in% x, "hourly", "daily")))) |>
+  select(channel, section, station_id, station_name, start_date, end_date, freq_avail) |>
+  left_join(overall_pct_complete_by_station) |>
+  mutate(pct_complete = coalesce(pct_complete,0))
+
+station_table |> write_csv("out/station_table.csv")
+
+station_table |> st_drop_geometry() |> 
+  mutate(pct_complete=round(pct_complete*100,1)) |>
+  DT::datatable(filter = list(position = 'top', clear = FALSE),
+                options = list(pageLength = 5))
 ```
 
 ### Spatial Coverage
@@ -358,7 +428,7 @@ bypass_polys <-
 
 Also shown on this map for context are in-stream flow sensors on tributaries and secondary channels, as well as canal diversions and reservoir outflow gages. 
 
-```{r map-sensors}
+```{r map-sensors, message=FALSE, warning=FALSE, out.width = '910px', out.height = '640px'}
 watersheds_wgs84 <- st_transform(watershed_labels, "EPSG:4326")
 flowlines_wgs84 <- st_transform(stream_flowlines, "EPSG:4326")
 stations_wgs84 <- st_transform(cdec_stations, "EPSG:4326")
@@ -375,8 +445,17 @@ bypasses_wgs84 <- st_transform(filter(bypass_polys,name %in% c("Sutter Bypass", 
   leaflet::addPolygons(data=watersheds_wgs84, label=~paste(river_basin, "watershed"), color="#888888", weight=1, fillOpacity = 0.0) |>
   leaflet::addPolygons(data=bypasses_wgs84, label=~name, weight=0, fillColor="#2F88A6", fillOpacity=0.5, color=NA) |>
   leaflet::addPolylines(data=flowlines_wgs84, label=~label, color="#2F88A6") |>
-  leaflet::addCircleMarkers(data=stations_wgs84, 
-                            label=~paste(str_to_upper(station_id), name, operator, paste(sensors), sep="<br>") |> lapply(htmltools::HTML),
+  leaflet::addCircleMarkers(data=stations_wgs84 |> 
+                              left_join(st_drop_geometry(station_table)), 
+                            label=~paste(str_to_upper(station_id), 
+                                         name, 
+                                         operator, 
+                                         paste(sensors), 
+                                         if_else(!is.na(pct_complete),paste(
+                                           paste(start_date,"-",end_date),
+                                           paste0(round(pct_complete*100),"% complete"),
+                                           sep="<br>"),""),
+                                         sep="<br>") |> lapply(htmltools::HTML),
                             color = ~if_else(mainstem, "#A6011F", "#888888")) 
 #} else {
 # ggplot() + 
@@ -393,16 +472,9 @@ bypasses_wgs84 <- st_transform(filter(bypass_polys,name %in% c("Sutter Bypass", 
 The following map illustrates the data availability length by stream. This is based on the published start and end dates and does not account for NA values within these ranges. 
 
 ```{r map-n-years, message=FALSE, warning=FALSE}
-first_year_available <- data_avail_by_water_year |>
-  filter(has_data) |>
-  group_by(channel, water_year) |>
-  summarize(has_data = any(has_data)) |>
-  group_by(channel) |>
-  summarize(first_year = min(water_year),
-            n_years = n())
-  
 river_names <- watershed_labels$river_basin |> unique() |> c("Yolo Bypass", "Sutter Bypass")
 match_name <- function(x) paste0(river_names[which(str_detect(x, river_names))][1],"")
+
 flowlines_first_year_available <- 
   stream_flowlines |>
   mutate(
@@ -433,7 +505,8 @@ ggplot() +
 Summary statistics indicating the proportion of major streams that are gaged at various time points.
 
 ```{r first-year-available, message=FALSE, warning=FALSE}
-first_year_available_by_section <- data_avail_by_water_year |>
+first_year_available_by_section <- 
+  data_avail_by_water_year |>
   filter(has_data) |>
   group_by(channel, section, water_year) |>
   summarize(has_data = any(has_data)) |>
