@@ -1,11 +1,12 @@
 ---
 title: "USGS Overview"
-date: "[Date]"
+date: "`r Sys.Date()`"
 output:
   html_document:
      code_folding: hide
      theme: flatly
 ---
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, fig.width=15, fig.height=10)
@@ -15,12 +16,16 @@ library(googleCloudStorageR)
 library(ggplot2)
 library(scales)
 library(janitor)
+library(dataRetrieval)
+library(leaflet)
+library(readr)
+library(ggmap)
 ```
 
-## [Data Type] Summary 
+## USGS Flow Data Summary 
 The USGS is responsible for monitoring and providing information on the quantity, quality, distribution, movement, and other characteristics of surface water and groundwater resources across the United States. The NWIS Mapper provides an interface for users to explore and retrieve water data through interactive maps.
 
-* **Source:** National Water Information System (NWIS) Mapper is a tool provided by the United States Geological Survey (USGS)
+* **Source:** National Water Information System (NWIS) Mapper is a tool provided by the United States Geological Survey (USGS) [USGS NWIS website] (https://waterdata.usgs.gov/nwis)
 * **Accessibility:** Public, open and accessible online
 * **Coverage:**  Approximately 1.9 million sites in all 50 States, the District of Columbia, Puerto Rico, the Virgin Islands, Guam, American Samoa and the Commonwealth of the Northern Mariana Islands.
 Approximately 1,000 gages are operating and reporting data publicly in California. Of
@@ -34,8 +39,7 @@ statewide databases or lack sufficient data quality to be reported.
 
 The frequency of data collection at a particular stream gage can range from hourly to daily, and in some cases, data may be collected more frequently during specific events, such as storms or floods. Real-time data from many stream gages are available on the USGS NWIS website.
 The USGS continually updates and maintains its network of monitoring sites, and data is made available to the public through the NWIS platform.
-* **Contact: ** Data / Model Contact (think about if w
-orth expanding to a larger list of people / orgs) - think about having table section below with projects/contacts 
+* **Contact:** General contact for Water Data for NWIS can be done through a "questions/comments" portal (https://waterdata.usgs.gov/questions-comments/?&ownerCode=USA&referrerUrl=https%3A%2F%2Fwaterdata.usgs.gov%2Fnwis) 
 * **Utilized By:** data is used for various projects, including SR JPE. 
 
 
@@ -53,10 +57,14 @@ Plot and Chart that show coverage over watersheds, map here to show temporal cov
 Hilighting major limitations, full time periods missing across many watersheds 
 ```{r}
 ggplot(usgs_overview, aes(x = min_date, xend = max_date, y = tributary, yend = tributary)) +
-  geom_segment(size = 3, color = "gray") +
+  geom_segment(size = 4, color = "gray") +
   labs(title = "Date Coverage for Tributaries",
        x = "Date",
        y = "Tributary Name")
+
+```
+```{r}
+
 
 ```
 
@@ -68,10 +76,8 @@ What quality assurance checks are implemented by monitoring agency
 What quality control checks are implemented by monitoring agency 
 
 ## Data use and limitations 
-This data can be used and is mostly reliable, the limitations are data gaps across the system and not consistent dates/years of collection. Of the approximate 4,500 local sub-watersheds
-(Hydrological Unit Code 12 [HUC12]) in California, more than 3,200 (over 70 percent) of
-watersheds do not have any history of stream gaging. Less than half of the historically
-gaged watersheds currently have active, publicly accessible gages today
+This data can be used and is mostly reliable, the limitations are data gaps across the system and not consistent dates/years of collection. Of the approximate 4,500 local sub-watersheds in California, more than 3,200 (over 70 percent) of
+watersheds do not have any history of stream gaging. Less than half of the historically aged watersheds currently have active, publicly accessible gages today
 
 ## Questions for Data Experts 
 - Please list any questions about the data source. 
