@@ -1,0 +1,277 @@
+---
+title: "Natural Flows Overview"
+author: "[Skyler Lewis](mailto:slewis@flowwest.com)"
+date: "`r Sys.Date()`"
+output:
+  github_document:
+    toc: true
+    toc_depth: 3
+  html_document:
+    code_folding: hide
+    theme: flatly
+    toc: true
+    toc_depth: 3
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, fig.width=15, fig.height=10, dpi=300)
+library(tidyverse)
+library(lubridate)
+library(googleCloudStorageR)
+library(ggplot2)
+library(scales)
+library(sf)
+```
+
+```{r funcs, include=FALSE}
+drive_file_by_id <- function(id=character(), dir="temp", vsizip=FALSE) {
+  dir.create(dir, recursive = TRUE)
+  d <- googledrive::as_dribble(googledrive::as_id(id))
+  p <- file.path(dir, d$name)
+  if(!file.exists(p)){
+    message(paste0('downloading ', p, '...'))
+    googledrive::drive_download(file = d, path = p)
+  } else {
+    message(paste0(p, ' already exists and will be used...'))
+  }
+
+  if(vsizip){
+    return(file.path("/vsizip",p))
+  } else {
+    return(p)
+  }
+}
+
+```
+
+```{r import-data,include=FALSE}
+# NHDPlusV2 flowlines for Central Valley
+flowlines_sf <- 
+  drive_file_by_id("1UiG8AeMr6mFOw7Jx--LyNRzez7GsDhzK", vsizip=T) |>
+  st_read() |>
+  janitor::clean_names() |>
+  filter(substr(reachcode,1,4) %in% c("1802", "1803", "1804"))
+
+# full download of Natural Flows, filtered to Central Valley flowlines
+naturalflows_tb <- 
+  drive_file_by_id("1P9vH9VXbPV9jYuFq35yF3elBRatYKQmU", vsizip=F) |>
+  archive::archive_read() |>
+  read_csv() |>
+  filter(comid %in% flowlines_sf$comid)
+
+# update flowlines to only include the flowlines that are present in NF
+flowlines_sf <- flowlines_sf |> 
+  filter(comid %in% naturalflows_tb$comid)
+```
+
+## Natural Flows Summary 
+[1 sentence description of data type (modeled or gage)...and source and purpose.]
+
+* **Source:** The Nature Conservancy & Code for Nature (with contributions from )
+* **Accessibility:** (public, open and accessible online, if it is a model, can you run it independently?)
+* **Coverage:**
+* **Temporal Coverage:** The temporal range of model results is 1950 - 2023. 
+* **Spatial Coverage:** Model results are available for all NHDPlusV2 flowlines (`comid`s) in the Central Valley and the rest of California. The reliability of results varies based on the spatial and temporal distribution of USGS streamgages which were used to train the model.  
+* **Maintenance:** Is it maintained? And how often? By who (if different than source)
+* **Contact:** Data / Model Contact (think about if worth expanding to a larger list of people / orgs) - think about having table section below with projects/contacts 
+* **Utilized By:** What process is it used in: (list processes that use this data) 
+
+Detailed in the [technical report](https://ceff.ucdavis.edu/tech-report)
+
+## Natural Flows Model Summary 
+[CONDITIONALLY NEEDED - If it is modeled data - follow with a model summary]
+Couple sentence overview of model synthesizing what you know about modeled data source. Then subsections to describe the what. 
+
+There are two types of model output.
+
+* **Monthly Dataset (California Unimpaired Flows Database)**[^jul23]: The core output of the Natural Flows project. A random forest model was used to predict unimpaired flows at a monthly timestep for all stream segments in California. 
+
+* **Functional Flow Metrics** [^cal21] [^gra22]: Calculation of the functional flows metrics, as defined by the [California Environmental Flows Framework](https://ceff.ucdavis.edu/).
+
+[^jul23]: Julie K.H. Zimmerman, Daren M. Carlisle, Jason T. May, Kirk R. Klausmeyer, Theodore E. Grantham, Larry R. Brown, Jeanette K. Howard. *California Unimpaired Flows Database v2.1.2*, 2023. The Nature Conservancy. San Francisco CA. [https://rivers.codefornature.org/](https://rivers.codefornature.org/)
+
+[^cal21]: California Environmental Flows Working Group (CEFWG). California Natural Flows Database: *Functional flow metrics v1.2.1*, May 2021. [https://rivers.codefornature.org/](https://rivers.codefornature.org/)
+
+[^gra22]: Grantham, T. E., Carlisle, D. M., Howard, J., Lane, B., Lusardi, R., Obester, A., Sandoval-Solis, S., Stanford, B., Stein, E. D., Taniguchi-Quan, K. T., Yarnell, S. M., & Zimmerman, J. K. (2022). Modeling functional flows in California’s rivers. *Frontiers in Environmental Science* 10. [https://doi.org/10.3389/fenvs.2022.787473](https://doi.org/10.3389/fenvs.2022.787473) 
+
+### Monthly Dataset (California Unimpaired Flows Database)
+
+[more description here] 
+
+#### Alternatives
+
+The Department of Water Resources (DWR) released its own model of unimpaired flows for the Central Valley. This product is described in the technical report, *[Estimates of Natural and Unimpaired Flows for the Central Valley of California: WY 1922-2014](https://data.ca.gov/dataset/estimates-of-natural-and-unimpaired-flows-for-the-central-valley-of-california-wy-1922-2014)*. Unimpaired flows data can be retrieved via the CDEC system via sensor code `8` (FNF, FULL NATURAL FLOW, CFS). Refer to CDEC documentation for details.
+
+### Functional Flow Metrics
+
+The model divides the water year into the dry season (low base flows), wet season (higher base flows beginning with a fall pulse flow and punctuated by various peak flows), and spring recession period (the transition back from high to low flows). 
+
+Five categories of functional flow metrics are reported, based on the five flow components described by Yarnell et al, 2015[^yar15]. (Descriptive text from the Natural Flows application.)
+
+* **dry-season base flow.** Dry-season base flows support native species during the dry-season period when water quality and quantity limit habitat suitability. 
+  
+* **fall pulse flow.** The first major storm event following the dry season. These flows represent the transition from dry to wet season and serve important functions, such as moving nutrients downstream, improving water stream flow water quality, and signaling species to migrate or spawn.
+  
+* **wet-season base flow.** Wet-season base flows support native species that migrate through and over-winter in streams.
+  
+* **peak flow.** Peak flow events transport a significant portion of sediment load, inundate floodplains, and maintain and restructure river corridors.
+  
+* **spring recession flow.** Spring recession flows represent the transition from high to low flows, provide reproductive and migratory cues, and redistribute sediment.
+
+![Functional Flows (Yarnell et al. 2020)](https://ceff.ucdavis.edu/sites/g/files/dgvnsk5566/files/inline-images/Fig1-functional_flow_components_hydrograph_1.jpg)
+
+[^yar15]: Sarah M. Yarnell, Eric D. Stein, J. Angus Webb, Theodore Grantham, Rob A. Lusardi, Julie Zimmerman, Ryan A. Peek, Belize A. Lane, Jeanette Howard, Samuel Sandoval-Solis. A functional flows approach to selecting ecologically relevant flow metrics for environmental flow applications. *River Research and Applications* 36(2): 318-324. February 2020. [https://doi.org/10.1002/rra.3575](https://doi.org/10.1002/rra.3575)
+
+### Architecture 
+(What type of model is it?) 
+
+### Accessibility 
+(How accessible is the documentation, and how easy is it to interpret) 
+
+### Update procedure 
+
+Predicted monthly flows have been updated several times, as described in the [Methods](https://rivers.codefornature.org/#/science) section. For example, on June 2022 an updated set of PRISM monthly climate data was incorporated, the stream network accumulation method was updated, and other computational methods were revised.
+
+### QA/QC procedures 
+
+### Data Inputs 
+
+- Data needed to run 
+- Timestep of each input 
+
+### Model Outputs
+
+- File source
+- Timestep 
+
+## Data Access
+
+Data can be accessed in two ways.
+
+* API documented at [https://rivers.codefornature.org/#/data](https://rivers.codefornature.org/#/data)
+
+  * Monthly data: Query CSV via GET request at `https://flow-api.codefornature.org/v2/stream/?comids=...&...` for a list of COMIDs or all COMIDs. Filter parameters for years, months, statistics, and variables are defined in the API documentation. POST requests are also possible via RESTful API.
+  
+  * Functional Flow Metrics: Query CSV via GET request `https://flow-api.codefornature.org/v2/ffm/?comids=...&...` for a list of COMIDs or all COMIDs. Filter parameters for metrics, water year types, modleing values, and gage data are defined in the API documentation. POST requests are also possible via RESTful API.
+
+* Direct download
+
+  * Monthly data: Not available for direct download
+  * Functional flow metrics: full ZIP download explored below
+  
+### Monthly Dataset
+
+Queries output a longform CSV of the following form.
+
+* `comid` (string): NHDPlusV2 common identifier
+* `statistic` (string): statistics, e.g. max, mean, median, min
+* `variable` (string): percentile of model runs
+* `year` (integer): model year
+* `month` (integer): model month
+* `value` (number): modelled value
+
+### Functional Flow Metrics (FFM) Dataset
+
+The data table is long form, with one row per flowline (`comid`), per water year type (`wyt`), per functional flow metric (`ffm`). The raw table takes the following form, with descriptive text sourced from the Natural Flows website.
+
+* `comid` (string): NHDPlusV2 common identifier
+* `ffm` (string): functional flows metrics code (see ...)
+* `wyt` (string): water year type
+* `p10`, `p25`, `p50`, `p75`, `p90`: modeling values for 10, 25, 50, 75 and 90 percentile of runs, use p50 for the most likely value
+* `unit`: measurement unit for p10, p25, p50, p75, and p90
+* `source`: source of p10, p25, p50, p75, and p90
+
+For reaches with streamgages, an additional set of rows and functional flow metrics are included, reporting the metrics derived from the observed gage data rather than the model result. For these rows (`source=="observed"`), the following fields are also populated. 
+
+* `gage_id`: USGS gage id where observed
+* `observed_years`: number of years of observations
+* `observed_year_start`: first water year of observations
+* `observed_year_end`: last water year of observations
+* `alteration`: alteration compared to modelled value
+
+The following attributes are included in the table, with values reported as separate variables for the percentiles `p10`, `p25`, `p50`, `p75`, `p90`. Some attributes are recorded for the overall water year type `all` while others are reported for each of `dry`, `moderate`, `wet`.
+
+Metrics are broken down into the following flow components, each reporting some sort of magnitude, timing, and duration information.
+
+```{r attributes, message=FALSE, warning=FALSE, include=FALSE}
+naturalflows_tb |> 
+  group_by(ffm, unit) |> 
+  summarize(source = paste(list(unique(source))),
+            wyt = paste(list(unique(wyt)))) |> 
+  knitr::kable()
+```
+
+* **`ds` = dry-season base flow.** Reported separately for `dry`, `moderate`, `wet` water year types.
+  * `ds_mag_50` = **dry-season baseflow** = Calculated as 50th percentile of daily flow within dry season (cfs)
+  * `ds_mag_90` = **dry-season high baseflow** = Calculated as 90th percentile of daily flow within dry season (cfs)
+  * `ds_tim` = **dry-season start** = Start date of dry season (water year day)
+  * `ds_dur` = **dry-season duration** = Number of days from start of dry season to start of wet season (days)
+  
+* **`fa` = fall pulse flow.**  Reported separately for `dry`, `moderate`, `wet` water year types.
+  * `fa_mag` = Peak magnitude of fall pulse event (maximum daily peak flow during event) (cfs)
+  * `fa_tim` = Date of fall pulse event peak (water year day)
+  * `fa_dur` = Duration of fall pulse event (days)
+  
+* **`wet` = wet-season base flow.** Reported separately for `dry`, `moderate`, `wet` water year types.  
+  * `wet_bfl_mag_10` = Wet-season base flow, calculated as 10th percentile of daily flows within the wet season (cfs)
+  * `wet_bfl_mag_50` = Wet-season median flow, calculated as 50th percentile of daily flows within the wet season (cfs)
+  * `wet_tim` = Start date of wet season (water year day)
+  * `wet_bfl_dur` = Number of days from start of wet season to start of spring recession period (days)
+  
+* **`peak` = peak flow.** Reported separately for `2`-year, `5`-year, and `10`-year recurrence intervals (`#`).
+  * `peak_#` = Peak flow magnitude for the specified recurrence interval (cfs)
+  * `peak_dur_#` = Cumulative number of days in which this peak flow magnitude is exceeded within a season (days)
+  * `peak_freq_#` = Number of times that this peak flow magnitude is exceeded within a season (number of occurrences)
+  
+* **`sp` = spring recession flow.** Reported separately for `dry`, `moderate`, `wet` water year types.
+  * `sp_tim` = Start date of spring season, defined as 4 days after last wet-season peak (water year day)
+  * `sp_mag` = Daily flow on start date of spring recession period. (cfs)
+  * `sp_dur` = Number of days from start of spring recession period to start of dry season (days)
+  * `sp_roc` = Recession rate, defined as median daily rate of change (%) over decreasing periods during the spring recession period
+
+## Spatial & Temporal Coverage
+
+Plot and Chart that show coverage over watersheds, map here to show temporal coverage for a site # years or something 
+Highlighting major limitations, full time periods missing across many watersheds 
+
+Spatial coverage of flowlines with model data (showing 10-year peak flow p50 value as an example)
+
+```{r plot-peak10}
+st_zm(flowlines_sf) |>
+  inner_join(filter(naturalflows_tb, ffm=="peak_10" & source=="model")) |>
+  arrange(p50) |>
+  ggplot() + geom_sf(aes(color=p50)) + scale_color_viridis_c(trans="log", direction=-1)
+```
+
+Spatial coverage of observed (training) data:
+
+```{r plot-observed}
+st_zm(flowlines_sf) |>
+  inner_join(filter(naturalflows_tb, ffm=="peak_10" & source=="observed")) |>
+  ggplot() + geom_sf(data=st_zm(flowlines_sf), color="gray") + geom_sf(color="darkred")
+```
+
+## Quality Checks 
+
+[CONDITIONALLY NEEDED - if gage / if not already described in model section]
+What quality assurance checks are implemented by monitoring agency 
+What quality control checks are implemented by monitoring agency 
+
+## Data use and limitations 
+(build out once we play around with the data a bit more) 
+Pros and cons table for each use case 
+
+flow frequency - geomorphology, flood modeling - alternative to making weighted B17C estimates
+
+watershed scale habitat modeling
+
+floodplain restoration design as input to H&H models
+
+understanding impacts of dams on natural flows, determing dam release requirements
+
+filling in data gaps for ungaged streams
+
+## Questions for Data Experts 
+- Please list any questions about the data source. 
+
