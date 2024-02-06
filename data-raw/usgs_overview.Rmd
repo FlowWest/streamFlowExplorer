@@ -28,18 +28,14 @@ The USGS is responsible for monitoring and providing information on the quantity
 * **Source:** National Water Information System (NWIS) Mapper is a tool provided by the United States Geological Survey (USGS) [USGS NWIS website] (https://waterdata.usgs.gov/nwis)
 * **Accessibility:** Public, open and accessible online
 * **Coverage:**  Approximately 1.9 million sites in all 50 States, the District of Columbia, Puerto Rico, the Virgin Islands, Guam, American Samoa and the Commonwealth of the Northern Mariana Islands.
-Approximately 1,000 gages are operating and reporting data publicly in California. Of
-these, about 60 percent are operated by the United States Geological Survey (USGS),
-with the remaining gages operated by State or other agencies. A substantial number of
-gages are operated by third-party entities that are not publicly reporting data on
-statewide databases or lack sufficient data quality to be reported.
+Approximately 1,000 gages are operating and reporting data publicly in California. Of these, about 60 percent are operated by the United States Geological Survey (USGS), with the remaining gages operated by State or other agencies. A substantial number of gages are operated by third-party entities that are not publicly reporting data on statewide databases or lack sufficient data quality to be reported. Source: [California Stream Gaging Prioritization Plan 2022] (https://www.waterboards.ca.gov/waterrights/water_issues/programs/stream_gaging_plan/docs/sb19-report.pdf)
 * **Temporal Coverage:** temporal coverage is from 1862 to present, however it varies across the different gages. Some of them have big data gaps during those years, or no data at all that goes that far back. Overall not good coverage across the system or across dates
 * **Spatial Coverage:** There is at least one gage with flow data for each of the streams of interest 
 * **Maintenance:** The frequency of data collection can vary depending on the specific site and the importance of the data for water resource management, flood monitoring, and other purposes.
 
 The frequency of data collection at a particular stream gage can range from hourly to daily, and in some cases, data may be collected more frequently during specific events, such as storms or floods. Real-time data from many stream gages are available on the USGS NWIS website.
 The USGS continually updates and maintains its network of monitoring sites, and data is made available to the public through the NWIS platform.
-* **Contact:** General contact for Water Data for NWIS can be done through a "questions/comments" portal (https://waterdata.usgs.gov/questions-comments/?&ownerCode=USA&referrerUrl=https%3A%2F%2Fwaterdata.usgs.gov%2Fnwis) 
+* **Contact:** General contact for Water Data for NWIS can be done through a ["questions/comments" portal] (https://waterdata.usgs.gov/questions-comments/?&ownerCode=USA&referrerUrl=https%3A%2F%2Fwaterdata.usgs.gov%2Fnwis) 
 * **Utilized By:** data is used for various projects, including SR JPE. 
 
 
@@ -55,12 +51,17 @@ usgs_overview <- read_csv(here::here("data-raw", "USGS_station_lookup.csv")) |>
 
 Plot and Chart that show coverage over watersheds, map here to show temporal coverage for a site # years or something 
 Hilighting major limitations, full time periods missing across many watersheds 
+#TODO replace with title, not template language
 ```{r}
-ggplot(usgs_overview, aes(x = min_date, xend = max_date, y = tributary, yend = tributary)) +
-  geom_segment(size = 4, color = "gray") +
+ggplot(usgs_overview, aes(x = min_date, xend = max_date, y = tributary, yend = tributary, color = gage)) +
+  geom_segment(size = 4) +
   labs(title = "Date Coverage for Tributaries",
        x = "Date",
-       y = "Tributary Name")
+       y = "Tributary Name") +
+  scale_x_date(date_breaks = "10 years", date_labels = "%Y") +
+  scale_color_viridis_d() +
+  theme_minimal()
+#TODO select a wider color pallette
 
 ```
 ```{r}
@@ -74,10 +75,11 @@ ggplot(usgs_overview, aes(x = min_date, xend = max_date, y = tributary, yend = t
 [CONDITIONALLY NEEDED - if gage / if not already described in model section]
 What quality assurance checks are implemented by monitoring agency 
 What quality control checks are implemented by monitoring agency 
+#TODO check for QC checks, otherwise add as question
 
 ## Data use and limitations 
 This data can be used and is mostly reliable, the limitations are data gaps across the system and not consistent dates/years of collection. Of the approximate 4,500 local sub-watersheds in California, more than 3,200 (over 70 percent) of
-watersheds do not have any history of stream gaging. Less than half of the historically aged watersheds currently have active, publicly accessible gages today
+watersheds do not have any history of stream gaging. Less than half of the historically aged watersheds currently have active, publicly accessible gages today. Source: [California Stream Gaging Prioritization Plan 2022] (https://www.waterboards.ca.gov/waterrights/water_issues/programs/stream_gaging_plan/docs/sb19-report.pdf)
 
 ## Questions for Data Experts 
 - Please list any questions about the data source. 

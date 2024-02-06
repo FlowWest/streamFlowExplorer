@@ -1,0 +1,29 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, fig.width=15, fig.height=10)
+library(tidyverse)
+library(lubridate)
+library(googleCloudStorageR)
+library(ggplot2)
+library(scales)
+library(janitor)
+library(dataRetrieval)
+library(leaflet)
+library(readr)
+library(ggmap)
+library(dataRetrieval)
+library(stringr)
+```
+
+
+
+```{r}
+usgs_list <- read_csv(here::here("data-raw", "USGS_station_lookup.csv")) |>
+  janitor::clean_names() |>
+  mutate(gage = str_sub(gage,1,8))
+
+usgs_result <- dataRetrieval::readNWISsite(siteNumbers = usgs_list$gage)
+
+usgs_list |> 
+  left_join(usgs_result, by = join_by(gage == site_no)) |>
+  st_as_sf(coords = c("dec_long_va", "dec_lat_va"))
+
