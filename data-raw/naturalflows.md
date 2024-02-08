@@ -1,7 +1,7 @@
 Natural Flows Overview
 ================
 [Skyler Lewis](mailto:slewis@flowwest.com)
-2024-02-05
+2024-02-08
 
 - [Natural Flows Summary](#natural-flows-summary)
 - [Natural Flows Model Summary](#natural-flows-model-summary)
@@ -28,25 +28,29 @@ Natural Flows Overview
 \[1 sentence description of data type (modeled or gage)…and source and
 purpose.\]
 
-- **Source:** \[agency collecting or producing data\]
-- **Accessibility:** (public, open and accessible online, if it is a
-  model, can you run it independently?)
-- **Coverage:**
+- **Source:** The Nature Conservancy & Code for Nature, based on UC
+  Davis [California Environmental Flows
+  Framework](https://ceff.ucdavis.edu) research and USGS modeling
+  frameworks.
+- **Accessibility:** Outputs are public, open and accessible online. The
+  machine learning model for estimating monthly unimpaired flows is not
+  publicly accessible. However, the model used to calculate functional
+  flow metrics based on these flows is published as
+  [func-flow](https://github.com/leogoesger/func-flow) under the UC
+  Davis [Environmental Flows
+  Project](https://github.com/hrvg/ucd-eflow).
 - **Temporal Coverage:** The temporal range of model results is 1950 -
   2023.
 - **Spatial Coverage:** Model results are available for all NHDPlusV2
   flowlines (`comid`s) in the Central Valley and the rest of California.
   The reliability of results varies based on the spatial and temporal
   distribution of USGS streamgages which were used to train the model.  
-- **Maintenance:** Is it maintained? And how often? By who (if different
-  than source)
+- **Maintenance:** Maintained by the Natural Flows research team with
+  regular updates.
 - **Contact:** Data / Model Contact (think about if worth expanding to a
   larger list of people / orgs) - think about having table section below
   with projects/contacts
-- **Utilized By:** What process is it used in: (list processes that use
-  this data)
-
-California Environmental Flows Framework <https://ceff.ucdavis.edu/>
+- **Utilized By:** What process is it used in:
 
 Detailed in the [technical report](https://ceff.ucdavis.edu/tech-report)
 
@@ -58,13 +62,16 @@ about modeled data source. Then subsections to describe the what.
 
 There are two types of model output.
 
-- **Monthly Dataset (California Unimpaired Flows Database)**[^1]: The
-  core output of the Natural Flows project. A random forest model was
-  used to predict unimpaired flows at a monthly timestep for all stream
-  segments in California.
+- **Monthly Dataset (California Unimpaired Flows Database)**[^1] [^2]
+  [^3]: The core output of the Natural Flows project. A random forest
+  model was used to predict unimpaired flows at a monthly timestep for
+  all stream segments in California.
 
-- **Functional Flow Metrics** [^2] [^3]: Calculation of the functional
-  flows metrics, as defined by the Californai
+<!-- -->
+
+- **Functional Flow Metrics** [^4] [^5]: Calculation of the functional
+  flows metrics, as defined by the [California Environmental Flows
+  Framework](https://ceff.ucdavis.edu/).
 
 ### Monthly Dataset (California Unimpaired Flows Database)
 
@@ -89,8 +96,10 @@ punctuated by various peak flows), and spring recession period (the
 transition back from high to low flows).
 
 Five categories of functional flow metrics are reported, based on the
-five flow components described by Yarnell et al, 2015[^4]. (Descriptive
-text from the Natural Flows application.)
+five flow components described by Yarnell et al, 2015[^6] and
+implemented in the [eFlows Functional Flow
+Calculator](https://eflows.ucdavis.edu/hydrology)[^7]. (Descriptive text
+from the Natural Flows application.)
 
 - **dry-season base flow.** Dry-season base flows support native species
   during the dry-season period when water quality and quantity limit
@@ -164,7 +173,7 @@ Data can be accessed in two ways.
   - Functional Flow Metrics: Query CSV via GET request
     `https://flow-api.codefornature.org/v2/ffm/?comids=...&...` for a
     list of COMIDs or all COMIDs. Filter parameters for metrics, water
-    year types, modleing values, and gage data are defined in the API
+    year types, modeling values, and gage data are defined in the API
     documentation. POST requests are also possible via RESTful API.
 
 - Direct download
@@ -304,31 +313,28 @@ agency What quality control checks are implemented by monitoring agency
 (build out once we play around with the data a bit more) Pros and cons
 table for each use case
 
-flow frequency - geomorphology, flood modeling - alternative to making
-weighted B17C estimates
-
-watershed scale habitat modeling
-
-floodplain restoration design as input to H&H models
-
-understanding impacts of dams on natural flows, determing dam release
-requirements
-
-filling in data gaps for ungaged streams
+| Use Case                                                                                               | Benefits                                                                                                                                                            | Limitations                                                                                                                                                                                             |
+|--------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Planning environmentally optimal dam release requirements / schedules** based on natural hydrographs | Quickly accessible for any stream reach regardless of historical unimpaired flow data                                                                               | …                                                                                                                                                                                                       |
+| **Filling in gage data gaps**: input to H&H models on ungaged streams                                  | Well-suited for filling gage data gaps on unimpaired streams                                                                                                        | Not usable for this purpose for impaired/dammed streams                                                                                                                                                 |
+| **Floodplain restoration design**: Flow input to H&H models                                            |                                                                                                                                                                     |                                                                                                                                                                                                         |
+| **Watershed-scale habitat modeling**                                                                   | …                                                                                                                                                                   | …                                                                                                                                                                                                       |
+| **Geomorphic studies and flood modeling**: Alternative source of peak flows (Q2,Q5,Q10)                | Quickly accessible for any stream reach regardless of gage present; provides margins of error; likely a more reliable estimate than traditional regional regression | Represents unimpaired flow (although so does regional regression) so not applicable on impaired/dammed streams; does not include estimates above Q10; for gaged streams not as reliable as Bulletin 17C |
+| …                                                                                                      | …                                                                                                                                                                   | …                                                                                                                                                                                                       |
 
 ## Questions for Data Experts
 
 - Please list any questions about the data source.
 
-[^1]: Julie K.H. Zimmerman, Daren M. Carlisle, Jason T. May, Kirk R.
-    Klausmeyer, Theodore E. Grantham, Larry R. Brown, Jeanette K.
-    Howard. *California Unimpaired Flows Database v2.1.2*, 2023. The
-    Nature Conservancy. San Francisco CA.
-    <https://rivers.codefornature.org/>
+[^1]: Zimmerman, J. K. H., Carlisle, D. M., May, J.T., Klausmeyer, K.
+    R., Grantham, T. E., Brown, L. R. & Howard, J. K. (2023).
+    *California Unimpaired Flows Database v2.1.2*, The Nature
+    Conservancy. San Francisco CA. <https://rivers.codefornature.org/>
 
-[^2]: California Environmental Flows Working Group (CEFWG). California
-    Natural Flows Database: *Functional flow metrics v1.2.1*, May 2021.
-    <https://rivers.codefornature.org/>
+[^2]: Zimmerman, J. K. H., Carlisle, D. M., May, J.T., Klausmeyer, K.
+    R., Grantham, T. E., Brown, L. R. & Howard, J. K. (2017). Patterns
+    and magnitude of flow alteration in California, USA. *Freshwater
+    Biology* 63: 859-873. <https://doi.org/10.1111/fwb.13058>
 
 [^3]: Grantham, T. E., Carlisle, D. M., Howard, J., Lane, B., Lusardi,
     R., Obester, A., Sandoval-Solis, S., Stanford, B., Stein, E. D.,
@@ -337,9 +343,26 @@ filling in data gaps for ungaged streams
     Environmental Science* 10.
     <https://doi.org/10.3389/fenvs.2022.787473>
 
-[^4]: Sarah M. Yarnell, Eric D. Stein, J. Angus Webb, Theodore Grantham,
+[^4]: California Environmental Flows Working Group (CEFWG). California
+    Natural Flows Database: *Functional flow metrics v1.2.1*, May 2021.
+    <https://rivers.codefornature.org/>
+
+[^5]: Grantham, T. E., Carlisle, D. M., Howard, J., Lane, B., Lusardi,
+    R., Obester, A., Sandoval-Solis, S., Stanford, B., Stein, E. D.,
+    Taniguchi-Quan, K. T., Yarnell, S. M., & Zimmerman, J. K. (2022).
+    Modeling functional flows in California’s rivers. *Frontiers in
+    Environmental Science* 10.
+    <https://doi.org/10.3389/fenvs.2022.787473>
+
+[^6]: Sarah M. Yarnell, Eric D. Stein, J. Angus Webb, Theodore Grantham,
     Rob A. Lusardi, Julie Zimmerman, Ryan A. Peek, Belize A. Lane,
     Jeanette Howard, Samuel Sandoval-Solis. A functional flows approach
     to selecting ecologically relevant flow metrics for environmental
     flow applications. *River Research and Applications* 36(2): 318-324.
     February 2020. <https://doi.org/10.1002/rra.3575>
+
+[^7]: Belize Lane, Noelle Patterson, Leo Qiu, Samuel Sandoval, Sarah
+    Yarnell, Robert Lusardi, Julie Zimmerman, Eric Stein, Larry Brown,
+    Theodore Grantham, Jeanette Howard. Functional Flows Calculator
+    v2.32, University of California, Davis. Davis CA. Feb, 2024,
+    <https://eflows.ucdavis.edu>
