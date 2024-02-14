@@ -72,10 +72,10 @@ ggplot(usgs_overview, aes(x = min_date, xend = max_date, y = tributary, yend = t
 
 ## Quality Checks 
 
-[CONDITIONALLY NEEDED - if gage / if not already described in model section]
-What quality assurance checks are implemented by monitoring agency 
-What quality control checks are implemented by monitoring agency 
-#TODO check for QC checks, otherwise add as question
+Much of the QA/QC process is automatic in that many arithmetic checks, cross checks, and logic checks are programmed into the electronic processing system software. When inconsistencies are found in field data, computed records, or other parts of the
+records, the electronic processing system alerts the user so that appropriate changes can be made. In addition to the
+automatic QA/QC checking, the electronic processing system provides a number of places where the user or supervisor can review and compare the computations and final results. All of these tasks, both automatic and manual, are important to the quality-assurance and quality-control process. In addition to the actual checking and review process, it equally is important that the QA/QC process and findings be documented. For streamflow and other surface-water gaging stations, the documentation traditionally has been known as an annual station analysis. Automation and electronic processing provides an easy and efficient means by which data and information can be supplied to the writer of the station analysis.
+Source: [USGS Standards for the Analysis and Processing of Surface-Water Data and Information Using Electronic Methods. Section 19. Quality Assurance and Quality Control] (https://water.usgs.gov/osw/pubs/WRIR01-4044.pdf)
 
 ## Data use and limitations 
 This data can be used and is mostly reliable, the limitations are data gaps across the system and not consistent dates/years of collection. Of the approximate 4,500 local sub-watersheds in California, more than 3,200 (over 70 percent) of
