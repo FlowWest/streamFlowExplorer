@@ -8,7 +8,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, fig.width=15, fig.height=10)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, fig.width=15, fig.height=30)
 library(tidyverse)
 library(lubridate)
 library(googleCloudStorageR)
@@ -45,7 +45,12 @@ CalSim simulates the operations of the State Water Project (SWP) and the Central
 Additionally, CalSim simulates the interactions between these components and their impacts on water availability, reliability, and overall system performance.
 
 ### Architecture 
-The following sections describe key model components.
+The following sections describe key model components. The diagram below is a simplified version of CalSim data inputs and how they contribute to the mass balance of the watersheds. 
+
+```{r, out.width = "1000px", out.height= "1000px"}
+setwd("data-raw")
+knitr::include_graphics(path = "calsim_conceptual_diagram.pdf")
+```
 
 #### Water Resource Integrated Modeling System (WRIM)
 The Water Resource Integrated Modeling System (WRIM) provides the modeling framework and software for CalSim. WRIMS is a versatile water resources modeling system designed to assess operational alternatives in large and intricate river basins. It incorporates a simulation language for flexible specification of operational criteria, a linear programming solver for making efficient water allocation decisions, and graphics capabilities ([WRIM](https://water.ca.gov/Library/Modeling-and-Analysis/Modeling-Platforms/Water-Resource-Integrated-Modeling-System)).
