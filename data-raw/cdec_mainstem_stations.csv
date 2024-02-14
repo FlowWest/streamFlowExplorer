@@ -14,11 +14,12 @@ McCloud River,McCloud River,MCA,McCloud River at Ah-Di-Na,
 McCloud River,McCloud River,MSS,McCloud River above Shasta Lake,
 Upper Sacramento River,,,,
 Upper Sacramento River,Upper Sacramento River,DLT,Sacramento River at Delta,
-Upper Sacramento River,???,SDT,Sacramento River at Delta,duplicated???
+Upper Sacramento River,???,SDT,Sacramento River at Delta,flow is duplicate of DLT; provides additional forecast data
 Upper-mid Sacramento River,,,,
+Upper-mid Sacramento River,Sacramento River,SHA,Shasta Dam,reservoir outflow
 Upper-mid Sacramento River,Sacramento River,KWK,Sacramento River at Keswick,
 Upper-mid Sacramento River,Sacramento River,BND,Sacramento River at Bend Bridge,
-Upper-mid Sacramento River,???,RDF,Red Bluff (alert),need to confirm that this is recording mainstem flow
+Upper-mid Sacramento River,???,RDF,Red Bluff (alert),very small recording window 1998-2000 - exclude
 Upper-mid Sacramento River,Sacramento River,VIN,Sacramento River at Vina Bridge - Main Channel,
 Upper-mid Sacramento River,Sacramento River,HMC,Sacramento River at Hamilton City - Main Channel,
 Upper-mid Sacramento River,Sacramento River,ORD,Sacramento River at Ord Ferry - Main Channel,
@@ -27,18 +28,18 @@ Upper-mid Sacramento River,Sacramento River,MLW,Sacramento River at Moulton Weir
 Upper-mid Sacramento River,Sacramento River,CLW,Sacramento River at Colusa Weir,
 Upper-mid Sacramento River,Sacramento River,COL,Sacramento River at Colusa,
 Upper-mid Sacramento River,Sacramento River,SBS,Sacramento River at Butte Slough,
-Upper-mid Sacramento River,???,MPS,Meridian Pumps,need to confirm that this is recording mainstem flow
+Upper-mid Sacramento River,???,MPS,Meridian Pumps,stage data exists but flow data is missing - exclude
 Lower-mid Sacramento River,,,,
 Lower-mid Sacramento River,Sacramento River,TIS,Sacramento River at Tisdale Weir,
 Lower-mid Sacramento River,Sacramento River,WLK,Sacramento River below Wilkins Slough,
-Lower-mid Sacramento River,???,BJP,Byron Jackson Pumps,need to confirm that this is recording mainstem flow
+Lower-mid Sacramento River,???,BJP,Byron Jackson Pumps,flow data is missing - exclude
 Lower-mid Sacramento River,Sacramento River,FRE,Sacramento River at Fremont Weir,
 Lower-mid Sacramento River,Sacramento River,VON,Sacramento River at Verona,
 Lower Sacramento River,,,,
 Lower Sacramento River,Sacramento River,IST,Sacramento River at I Street Bridge,
 Lower Sacramento River,Sacramento River,FPT,Sacramento River at Freeport,
-Lower Sacramento River,???,FPX,Sacramento River at Freeport Aux,need to confirm that this is recording mainstem flow
-Lower Sacramento River,???,SPE,Sac Regional WWTP,need to confirm that this is recording mainstem flow
+Lower Sacramento River,???,FPX,Sacramento River at Freeport Aux,flow data is not reporting - exclude
+Lower Sacramento River,???,SPE,Sac Regional WWTP,manual entry of monthly data only
 North Delta,,,,
 North Delta,Sacramento River,SDC,Sacramento River above Delta Cross Channel,
 North Delta,Sacramento River,GES,Sacramento River below Georgiana Slough,
@@ -48,6 +49,7 @@ North Delta,Sacramento River,SDI,Sacramento River at Decker Island,
 North Delta,Sacramento River,M13,Sacramento River below Toland Landing,
 North Delta,Sacramento River,MAL,Sacramento River at Mallard Island,
 Clear Creek,,,,
+Clear Creek,Clear Creek,WHI,Whiskeytown Reservoir,reservoir outflow
 Clear Creek,Clear Creek,IGO,Clear Creek near Igo,
 Cottonwood Creek,,,,
 Cottonwood Creek,Cottonwood Creek,NCO,North Fork Cottonwood Creek above Lake at Bridge near Ono,
@@ -59,9 +61,10 @@ Elder Creek,Elder Creek,ECP,Elder Creek near Paskenta,
 Thomes Creek,,,,
 Thomes Creek,Thomes Creek,THO,Thomes Creek at Paskenta,
 Stony Creek,,,,
-Stony Creek,???,RBW,Rainbow Diversion Dam,
+Stony Creek,???,RBW,Rainbow Diversion Dam,cfs in very coarse intervals
 Stony Creek,Stony Creek,SUW,Stony Creek near Suwanna Ranch,
 Stony Creek,Stony Creek,SCG,Stony Creek near Grizzly Flat,
+Stony Creek,Stony Creek,BLB,Black Butte Dam,reservoir outflow
 Cow Creek,,,,
 Cow Creek,Cow Creek,COW,Cow Creek near Millville,
 Bear Creek,,,,
@@ -97,9 +100,11 @@ Feather River,Feather River,F56,North Fork Feather River below Grizzly Creek,
 Feather River,Feather River,NFP,North Fork Feather River at Pulga,
 Feather River,Feather River,MFP,Middle Fork Feather River near Portola,
 Feather River,Feather River,MER,Middle Fork Feather River at Merrimac,
-Feather River,Feather River,FTO,Feather River at Oroville,
-Feather River,???,TFB,Thermalito Diversion Dam Fish Barrier,need to confirm that this is recording mainstem flow
-Feather River,???,ORF,Oroville Fish Hatchery,need to confirm that this is recording mainstem flow
+Feather River,Feather River,ORO,Oroville Dam - Spillway,reservoir outflow; combine with KLL for total flow
+Feather River,Feather River,KLL,Oroville Dam - Kelly Ridge Power Plant,reservoir outflow; combine with ORO for total flow
+Feather River,???,FTO,Feather River at Oroville,not mainstem; monthly canal diversion data reported as daily
+Feather River,???,TFB,Thermalito Diversion Dam Fish Barrier,not mainstem
+Feather River,???,ORF,Oroville Fish Hatchery,not mainstem
 Feather River,Feather River,GRL,Feather River near Gridley,
 Feather River,Feather River,FSB,Feather River at Boyd's Landing above Star Bend,
 Yuba River,,,,
@@ -122,6 +127,7 @@ American River,American River,NFD,North Fork American River at North Fork Dam,
 American River,American River,OXB,Middle Fork American River near Oxbow Powerhouse,
 American River,American River,AMK,South Fork American River near Kyburz,
 American River,American River,CBR,South Fork American River at Chili Bar,
+American River,American River,FOL,Folsom Lake,reservoir outflow
 American River,American River,AMF,American River at Folsom,
 American River,American River,AFO,American River at Fair Oaks,
 Cosumnes River,,,,
@@ -133,10 +139,12 @@ Mokelumne River,Mokelumne River,M11,North Fork Mokelumne River below Salt Spring
 Mokelumne River,Mokelumne River,M38,North Fork Mokelumne River above Tiger Creek,
 Mokelumne River,Mokelumne River,MBT,North Fork Mokelumne River below Tiger Creek Afterbay,
 Mokelumne River,Mokelumne River,M46,North Fork Mokelumne River below Electra Diversion,
+Mokelumne River,Mokelumne River,CMN,Camanche Reservoir,reservoir outflow
 Mokelumne River,Mokelumne River,SMR,South Mokelumne River at W Walnut Grove Rd,
 Mokelumne River,Mokelumne River,NMR,North Mokelumne River at W Walnut Grove Rd,
 Upper San Joaquin River,,,,
 Upper San Joaquin River,San Joaquin River,SJA,San Joaquin River near Auberry,
+Upper San Joaquin River,San Joaquin River,MIL,Friant Dam (Millerton Reservoir),reservoir outflow
 Upper San Joaquin River,San Joaquin River,SJF,San Joaquin River below Friant,
 Upper San Joaquin River,San Joaquin River,H41,San Joaquin River at Highway 41,
 Upper San Joaquin River,San Joaquin River,DNB,San Joaquin River at Donny Bridge,
@@ -175,6 +183,7 @@ Merced River,Merced River,POH,Merced River at Pohono Bridge near Yosemite,
 Merced River,Merced River,SMW,South Fork Merced River at Wawona,
 Merced River,???,MBG,Merced River near Briceburg #2,duplicate of MBB?
 Merced River,Merced River,MBB,Merced River near Briceburg,
+Merced River,Merced River,EXC,New Exchequer Dam (Lake McClure),reservoir outflow; daily only
 Merced River,Merced River,MMF,Merced River below Merced Falls,
 Merced River,Merced River,MBH,Merced River below Crocker-Huffman Dam,
 Merced River,Merced River,MSN,Merced River near Snelling,
@@ -190,6 +199,7 @@ Tuolumne River,Tuolumne River,TRH,Tuolumne River near Hetch Hetchy,
 Tuolumne River,Tuolumne River,TAI,Tuolumne River above Early Intake near Mather,
 Tuolumne River,Tuolumne River,TBI,Tuolumne River below Early Intake near Mather,
 Tuolumne River,Tuolumne River,TMP,Tuolumne River at Merals Pool,
+Tuolumne River,Tuolumne River,DNP,Don Pedro Reservoir,reservoir outflow; daily only
 Tuolumne River,Tuolumne River,LGN,Tuolumne River below La Grange Dam near La Grange,
 Tuolumne River,Tuolumne River,TRW,Tuolumne River at Waterford,
 Tuolumne River,Tuolumne River,MOD,Tuolumne River at Modesto,
@@ -200,10 +210,12 @@ Stanislaus River,Stanislaus River,S52,Middle Fork Stanislaus River at Kennedy Me
 Stanislaus River,Stanislaus River,S61,South Fork Stanislaus River at Strawberry,
 Stanislaus River,Stanislaus River,S83,South Fork Stanislaus River near Strawberry Diversion Dam,
 Stanislaus River,Stanislaus River,STU,Tuolumne Canal near Long Barn,
+Stanislaus River,Stanislaus River,NML,New Melones Reservoir,reservoir outflow
 Stanislaus River,Stanislaus River,OBB,Stanislaus River at Orange Blossom Bridge,
 Stanislaus River,Stanislaus River,RIP,Stanislaus River at Ripon,
 Stanislaus River,Stanislaus River,KOT,Stanislaus River at Koetitz Ranch,
 Calaveras River,,,,
+Calaveras River,Calaveras River,NHG,New Hogan Lake,reservoir outflow
 Calaveras River,???,MRS,Mormon Slough at Bellota,is this before or after Calaveras and Mormon branch off?
 Kings River,,,,
 Kings River,Kings River,MBK,North Fork Kings River at Meadowbrook,
@@ -211,15 +223,18 @@ Kings River,Kings River,NKD,North Fork Kings River below Dinkey Creek,
 Kings River,Kings River,KRR,South Fork Kings River above Roaring River,
 Kings River,Kings River,KBC,South Fork Kings River above Boyden Canyon,
 Kings River,Kings River,KRT,Kings River near Trimmer,
+Kings River,Kings River,PNF,Pine Flat Dam,
 Kings River,Kings River,AMW,Kings River below Army Weir,
 Kings River,Kings River,CSW,Kings River below Crescent Weir,
 Kern River,,,,
 Kern River,Kern River,SKO,South Fork Kern River near Onyx,
+Kern River,Kern River,ISB,Isabella Dam,reservoir outflow
 Kern River,Kern River,KKV,Kern River at Kernville,
 Kern River,Kern River,KRD,Kern River below Kern Canyon Powerhouse Diversion Dam,
 Kern River,Kern River,1ST,Kern River at First Point,
 Kern River,Kern River,A2P,Kern River Canal at Alt Second Point,
 Putah Creek,,,,
+Putah Creek,Putah Creek,BER,Lake Berryessa,reservoir outflow; daily only
 Putah Creek,Putah Creek,PUT,Putah Creek near Winters,
 Putah Creek,Putah Creek,PTF,Putah Creek,
 Putah Creek,Putah Creek,PTC,Putah Creek,
