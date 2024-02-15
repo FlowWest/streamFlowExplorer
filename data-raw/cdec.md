@@ -1,7 +1,7 @@
 CDEC Overview
 ================
 [Skyler Lewis](mailto:slewis@flowwest.com)
-2024-02-01
+2024-02-14
 
 ## CDEC Summary
 
@@ -371,16 +371,16 @@ if(interactive() | coalesce(knitr::pandoc_to(),"")=="html"){
 
 | channel        | section        | station_id | station_name                                     | start_date | end_date   | freq_avail | pct_complete |
 |:---------------|:---------------|:-----------|:-------------------------------------------------|:-----------|:-----------|:-----------|-------------:|
-| American River | American River | afo        | American River at Fair Oaks                      | 1998-11-02 | 2024-01-16 | hourly     |         98.3 |
+| American River | American River | afo        | American River at Fair Oaks                      | 1998-11-02 | 2024-02-14 | hourly     |         98.3 |
 | American River | American River | amf        | American River at Folsom                         | 1995-02-01 | 2001-05-08 | daily      |         87.2 |
-| American River | American River | amk        | South Fork American River near Kyburz            | 2012-10-23 | 2024-01-16 | hourly     |         99.4 |
-| American River | American River | cbr        | South Fork American River at Chili Bar           | 1997-09-10 | 2024-01-16 | hourly     |         96.4 |
+| American River | American River | amk        | South Fork American River near Kyburz            | 2012-10-23 | 2024-02-14 | hourly     |         99.4 |
+| American River | American River | cbr        | South Fork American River at Chili Bar           | 1997-09-10 | 2024-02-14 | hourly     |         96.4 |
+| American River | American River | fol        | Folsom Lake                                      | 1987-01-05 | 2024-02-14 | daily      |         96.1 |
 | American River | American River | nfd        | North Fork American River at North Fork Dam      | 1970-01-01 | 2005-11-30 | hourly     |         95.9 |
-| American River | American River | oxb        | Middle Fork American River near Oxbow Powerhouse | 1997-10-21 | 2024-01-16 | hourly     |         97.5 |
-| Antelope Creek | Antelope Creek | atc        | Antelope Creek near Red Bluff                    | 2022-06-28 | 2024-01-16 | hourly     |         62.9 |
-| Battle Creek   | Battle Creek   | bas        | South Fork Battle Creek near Manton              | 2000-07-19 | 2024-01-16 | hourly     |         70.6 |
-| Battle Creek   | Battle Creek   | bat        | Battle Creek                                     | 1986-10-01 | 2024-01-16 | hourly     |            0 |
-| Battle Creek   | Battle Creek   | bnf        | North Fork Battle Creek near Manton              | 2000-09-20 | 2024-01-16 | hourly     |         77.5 |
+| American River | American River | oxb        | Middle Fork American River near Oxbow Powerhouse | 1997-10-21 | 2024-02-14 | hourly     |         97.5 |
+| Antelope Creek | Antelope Creek | atc        | Antelope Creek near Red Bluff                    | 2022-06-28 | 2024-02-14 | hourly     |         62.9 |
+| Battle Creek   | Battle Creek   | bas        | South Fork Battle Creek near Manton              | 2000-07-19 | 2024-02-14 | hourly     |         70.6 |
+| Battle Creek   | Battle Creek   | bat        | Battle Creek                                     | 1986-10-01 | 2024-02-14 | hourly     |            0 |
 
 ### Spatial Coverage
 
@@ -496,9 +496,9 @@ tibble(yr = c(1949, 1984, 1997, 2015, 2022)) |>
 |-----:|----------------:|
 | 1949 |             2.5 |
 | 1984 |            35.0 |
-| 1997 |            75.0 |
-| 2015 |            90.0 |
-| 2022 |            92.5 |
+| 1997 |            85.0 |
+| 2015 |            92.5 |
+| 2022 |            95.0 |
 
 ## Quality Checks
 
