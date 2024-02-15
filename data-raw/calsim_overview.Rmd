@@ -47,9 +47,9 @@ Additionally, CalSim simulates the interactions between these components and the
 ### Architecture 
 The following sections describe key model components. The diagram below is a simplified version of CalSim data inputs and how they contribute to the mass balance of the watersheds. 
 
-```{r, out.width = "1000px", out.height= "1000px"}
+```{r}
 setwd("data-raw")
-knitr::include_graphics(path = "calsim_conceptual_diagram.pdf")
+knitr::include_graphics(path = "calsim_conceptual_diagram.png")
 ```
 
 #### Water Resource Integrated Modeling System (WRIM)
@@ -84,7 +84,6 @@ Watersheds in CalSim are categorized as either Rim or Valley Floor watersheds.
 * Rim: foothill and mountain watersheds characterized by steep slopes, shallow soils, limited aquifer, not developed
 * Valley Floor: located between Upper watersheds and Delta; extensively developed, highly managed, rich agricultural land, urban areas
 
-
 CalSim 3 uses defined Water Budget Areas (WBA), that have been developed to
 help define the enhanced spatial resolution of CalSim 3. WBAs are used to:
 
@@ -116,31 +115,23 @@ plans.
 * Reclamation CVP water supply contract renewal and supporting environmental
 documents (Reclamation, 2022).
 
-CalSim is developed in the form of a node-arc network where nodes represent specific locations and arcs represent flow between nodes: 
+CalSim is developed in the form of a node-arc network where nodes represent specific locations and arcs represent flow between nodes, [here](https://data.cnra.ca.gov/dataset/2395530a-5421-487e-921e-d6e594f23ac6/resource/3ec8338e-31d9-4dd3-93df-8d60ee6ec3d2/download/cs3_networkschematic_integrated_10_11_2022.pdf) is a full schematic diagram of the system. 
 
 The following Node types are included: 
 
 * storage nodes - represented by blue triangle, start with "S_"
 * conveyence nodes
-
     * Outline colors:
-    
       * Blue - natural stream channel
       * Gray - man-made canal, drain or bypass
-      
     * Fill colors:
-    
       * Green - Return flow split node Approximates diffuse networks of drains
       * Gray - streamflow gaging station
-      
 * facility nodes
-
     * wastewater treatment plants 
     * water treatment plants 
     * pump stations 
-    
 * demand units 
-
     * Dashed line signifies demand unit is limited to groundwater supplies
     * Single, solid line signifies demand unit is limited to surface water supplies
     * Double, solid line signifies demand unit has access to
