@@ -13,6 +13,8 @@ library(ggmap)
 library(dataRetrieval)
 library(stringr)
 library(sf)
+library(dplyr)
+library(tidyr)
 
 ```
 
@@ -38,3 +40,69 @@ usgs_list |>
 
 
 ```
+
+```{r}
+
+# Function to retrieve data from USGS for a gage
+get_flow_data <- function(gage) {
+  # Retrieve data from USGS
+  site_data <- readNWISdata(siteNumber = gage, parameterCd = "00060")
+  return(site_data)
+}
+
+# Iterate over each row in the data frame
+for (i in 1:nrow(usgs_list)) {
+  gage <- usgs_list$gage[i]  
+  gage <- usgs_list$gage[i]
+  # Retrieve flow data for the gage
+  flow_data <- get_flow_data(gage)
+  # Extract years from flow data
+  flow_years <- unique(as.integer(format(flow_data$datetime, "%Y")))
+  # Print gage and years with flow data
+  cat("Gage:", gage, "\n")
+  cat("Years with flow data:", flow_years, "\n\n")
+}
+
+```
+
+```{r}
+# Initialize an empty data frame to store flow data
+all_flow_data <- data.frame()
+
+for (station in usgs_list$gage) {
+  # Specify the site number
+  site_number <- gage
+  
+  # Retrieve flow data for the site
+  tryCatch({
+    flow_data <- readNWISdata(siteNumber = site_number, parameterCd = "00060")
+    
+    # Combine flow data with site number
+    flow_data$site_number <- site_number
+    
+    # Append flow data to the overall data frame
+    all_flow_data <- rbind(all_flow_data, flow_data)
+  }, error = function(e) {
+    message(paste("Skipping site", site_number, ":", e$message))
+  })
+}
+
+
+# Convert date/time columns to proper date/time objects
+all_flow_data$dateTime <- as.POSIXct(all_flow_data$dateTime, format = "%Y-%m-%d %H:%M:%S")
+
+# Plot temporal coverage
+ggplot(all_flow_data, aes(x = dateTime, y = site_number, group = site_number)) +
+  geom_point(size = 2, alpha = 0.5) +
+  geom_line(alpha = 0.5) +
+  labs(title = "Temporal Coverage of USGS Gauges",
+       x = "Date",
+       y = "Site Number") +
+  theme_minimal()
+
+#TODO find a better plot to visualize temporal coverage
+
+```
+
+
+
