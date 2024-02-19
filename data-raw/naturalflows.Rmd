@@ -299,3 +299,70 @@ Of the `r n_comid_total` NHDPlusV2 segments in the Central Valley, `r n_comid_nf
 
 - Please list any questions about the data source. 
 
+
+
+```{r fig.width=8, fig.height=8}
+# pick a stream to use as a test: Mill Creek
+selected_comid <- flowlines_sf |> filter(gnis_name == "Mill Creek") |> pull(comid) |> unique()
+
+# Pull some functional flows and peak flows values for a selected gaged reference reach  
+reference_gage_data <- 
+  naturalflows_tb |> 
+  filter(comid %in% selected_comid & source=="observed") |>
+  filter(ffm %in% c("ds_mag_50","wet_bfl_mag_50","peak_2","peak_5","peak_10")) |>
+  select(comid, ffm, p50) |>
+  pivot_wider(names_from=ffm, values_from=p50) |>
+  select(comid, ds_mag_50, wet_bfl_mag_50, peak_2, peak_5, peak_10) |>
+  filter(comid == 14907219)
+
+# Pull the same data for all ungaged reaches
+ungaged_reach_data <- 
+  naturalflows_tb |> 
+  filter(comid %in% selected_comid & source=="model") |>
+  filter(ffm %in% c("ds_mag_50","wet_bfl_mag_50","peak_2","peak_5","peak_10")) |>
+  select(comid, wyt, ffm, p50) |>
+  group_by(comid, ffm) |> summarize(p50=mean(p50)) |> ungroup() |>
+  pivot_wider(names_from=ffm, values_from=p50) |>
+  select(comid, ds_mag_50, wet_bfl_mag_50, peak_2, peak_5, peak_10)
+
+# Function to fit a flow rating curve for a particular ungaged reach that can be used to estimate flows based on the gaged reference reach  
+fit_rc <- function(rgd, ugd) {
+  dta <- tibble(rgd=rgd, ugs=ugd) |> arrange(rgd) |> 
+    mutate(nad=rgd==0|ugd==0,
+           rgd=if_else(nad,0.01,rgd),
+           ugd=if_else(nad,0.01,ugd)) |> drop_na()
+  res <- lm(log(ugd) ~ log(rgd), data=dta)
+  return(list(coeff = exp(res$coefficients[[1]]), 
+              power = res$coefficients[[2]]))
+}
+
+# Test this with a particular reach
+rgd <- reference_gage_data |> pivot_longer(cols=-comid) |> pull(value)
+ugd <- ungaged_reach_data |> head(1) |> pivot_longer(cols=-comid) |> pull(value)
+fit <- fit_rc(rgd,ugd)
+out <- tibble(rgd=rgd, ugd=ugd) |> arrange(rgd) |>
+  mutate(ugd_pred = fit$coeff * rgd ^ fit$power)
+out |> ggplot(aes(x=rgd)) + geom_point(aes(y=ugd)) + geom_line(aes(y=ugd_pred)) + 
+  coord_fixed() + scale_y_log10() + scale_x_log10() + annotation_logticks() +
+  ylab("Ungaged reach flow") + xlab("Gaged reach flow")
+
+# Run this on all reaches
+rgd <- reference_gage_data |> pivot_longer(cols=-comid) |> pull(value)
+ungaged_reach_data_fit <- 
+  ungaged_reach_data |>
+  mutate(model_params = pmap(list(ds_mag_50, wet_bfl_mag_50, peak_2, peak_5, peak_10),
+                             function(v1,v2,v3,v4,v5) fit_rc(td, c(v1,v2,v3,v4,v5)))) |>
+  unnest_wider(model_params) |> 
+  glimpse()
+
+# Now we have a coeff and power for each reach, relative to a specific reference gage. 
+# In a streamflow time series for a particular ungaged reach, take the flow "Q" from the corresponding reference gage
+# and predict the flow at the ungaged reach using Q* = coeff * Q ^ power
+
+```
+
+
+
+
+
+
