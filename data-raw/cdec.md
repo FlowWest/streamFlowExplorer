@@ -1,12 +1,15 @@
 CDEC Overview
 ================
 [Skyler Lewis](mailto:slewis@flowwest.com)
-2024-02-14
+2024-02-20
 
 ## CDEC Summary
 
-\[1 sentence description of data type (modeled or gage)…and source and
-purpose.\]
+The **California Data Exchange Center (CDEC)** is a consolidated
+interface for hydrologic and climate data collected by multiple agencies
+across the state of California, reporting historic and real-time
+streamflow, stage, precipitation, snowpack, reservoir level,
+temperature, water quality, and more.
 
 - **Source:** California Department of Water Resources (DWR),
   aggregating hydrologic datasets from many sources including counties,
@@ -31,8 +34,9 @@ purpose.\]
   form](https://water.ca.gov/Contact); specific gage data contacts
   depend on which organization/agency is responsible for maintaining the
   gage.
-- **Utilized By:** What process is it used in: (list processes that use
-  this data)
+- **Utilized By:** CDEC data is the definitive source of public
+  hydrologic data for water resources work in California, and is used as
+  inputs to countless models, studies, dashboards, and reports.
 
 ## Data Access
 
@@ -68,16 +72,10 @@ Following are the sensor codes that report some variation of flow in
 cfs. There are many other codes not listed here including stage,
 temperature, turbidity, etc.
 
-*Codes for standard in-stream flow, mapped and summarized in this report
-for mainstems:*
-
-- **`20`** = **FLOW** = FLOW, RIVER DISCHARGE, CFS\*
-- **`41`** = **MFLOW** = FLOW, MEAN DAILY, CFS\*
-
-*Codes for other flow (cfs) sensors in the CDEC database:*
-
-- **`110`** = **DIVERSN** = FLOW, CANAL DIVERSION, CFS\*
-- **`23`** = **OUTFLOW** = RESERVOIR OUTFLOW, CFS\*
+- **`20`** = **FLOW** = FLOW, RIVER DISCHARGE, CFS
+- **`41`** = **MFLOW** = FLOW, MEAN DAILY, CFS
+- **`110`** = **DIVERSN** = FLOW, CANAL DIVERSION, CFS
+- **`23`** = **OUTFLOW** = RESERVOIR OUTFLOW, CFS
 - **`76`** = **INFLOW** = RESERVOIR INFLOW, CFS
 - **`7`** = **REL SCH** = SCHEDULED RELEASE, CFS (manually reported)
 - **`210`** = **AUXFLOW** = FLOW AUX, CFS
@@ -85,8 +83,11 @@ for mainstems:*
   used)
 - **`8`** = **FNF** = FULL NATURAL FLOW, CFS (modeled)
 
-\*sensors indicated are also shown on the map for context but are not
-included in the summary stats for this report
+This report’s analysis of spatial and temporal coverage includes sensors
+for in-stream flow (`20`, `41`) that monitor the full mainstem channel
+flow for selected major rivers and creeks. Side channels and diversions
+are not included. Reservoir outflows of the major Central Valley rim
+dams are also included as flow data for their associated rivers.
 
 #### Durations (timesteps)
 
@@ -149,8 +150,9 @@ stations.
 
 The following chart summarizes the ranges of data availability. This is
 based on the published start and end dates and does not account for NA
-values within these ranges. Not listed in this figure because no
-stations are present: *Bear Creek, Paynes Creek, Calaveras River*.
+values within these ranges. Bear Creek and Paynes Creek are not listed
+in this figure because no stations are present. Calaveras River is
+included but data is only available from reservoir outflow.
 
 ``` r
 check_for_overlap <- function(wy, chan, sec) {
@@ -382,6 +384,8 @@ if(interactive() | coalesce(knitr::pandoc_to(),"")=="html"){
 | Battle Creek   | Battle Creek   | bas        | South Fork Battle Creek near Manton              | 2000-07-19 | 2024-02-14 | hourly     |         70.6 |
 | Battle Creek   | Battle Creek   | bat        | Battle Creek                                     | 1986-10-01 | 2024-02-14 | hourly     |            0 |
 
+(194 total stations)
+
 ### Spatial Coverage
 
 #### Geographic distribution of sensors
@@ -502,13 +506,12 @@ tibble(yr = c(1949, 1984, 1997, 2015, 2022)) |>
 
 ## Quality Checks
 
-**What quality assurance checks are implemented by monitoring agency?**
+**What quality assurance/quality control checks are implemented by
+monitoring agency?**
 
-(expand here)
-
-**What quality control checks are implemented by monitoring agency?**
-
-(expand here)
+CDEC is a secondary data provider. QA/QC is conducted individually by
+the agencies that collect data. No QA/QC is conducted by CDEC with the
+exception of applying the following standard error codes:
 
 ### Error codes
 

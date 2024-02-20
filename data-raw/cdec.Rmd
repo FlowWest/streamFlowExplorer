@@ -3,11 +3,11 @@ title: "CDEC Overview"
 author: "[Skyler Lewis](mailto:slewis@flowwest.com)"
 date: "`r Sys.Date()`"
 output:
+  github_document:
+    default
   html_document:
     code_folding: hide
     theme: flatly
-  github_document:
-    default
 ---
 
 ```{r setup, include=FALSE}
@@ -389,6 +389,8 @@ if(interactive() | coalesce(knitr::pandoc_to(),"")=="html"){
 }
 ```
 
+(`r length(unique(station_table$station_id))` total stations)
+
 ### Spatial Coverage
 
 ```{r import-watersheds, eval=TRUE, echo=TRUE, include=FALSE, message=FALSE, warning=FALSE}
@@ -533,13 +535,9 @@ tibble(yr = c(1949, 1984, 1997, 2015, 2022)) |>
 
 ## Quality Checks 
 
-**What quality assurance checks are implemented by monitoring agency?**
+**What quality assurance/quality control checks are implemented by monitoring agency?**
 
-(expand here)
-
-**What quality control checks are implemented by monitoring agency?**
-
-(expand here)
+CDEC is a secondary data provider. QA/QC is conducted individually by the agencies that collect data. No QA/QC is conducted by CDEC with the exception of applying the following standard error codes:
 
 ### Error codes
 
