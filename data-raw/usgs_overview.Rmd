@@ -20,6 +20,7 @@ library(dataRetrieval)
 library(leaflet)
 library(readr)
 library(ggmap)
+library(viridis)
 ```
 
 ## USGS Flow Data Summary 
@@ -49,26 +50,20 @@ usgs_overview <- read_csv(here::here("data-raw", "USGS_station_lookup.csv")) |>
   glimpse()
 ```
 
-Plot and Chart that show coverage over watersheds, map here to show temporal coverage for a site # years or something 
-Hilighting major limitations, full time periods missing across many watersheds 
-#TODO replace with title, not template language
+Plot that shows date range coverage over watersheds by the different gages. There might be potential data gaps
 ```{r}
+shuffled_palette <- sample(viridis(256))
+
 ggplot(usgs_overview, aes(x = min_date, xend = max_date, y = tributary, yend = tributary, color = gage)) +
   geom_segment(size = 4) +
   labs(title = "Date Coverage for Tributaries",
        x = "Date",
        y = "Tributary Name") +
   scale_x_date(date_breaks = "10 years", date_labels = "%Y") +
-  scale_color_viridis_d() +
+  scale_color_manual(values = shuffled_palette) +  # Use the shuffled palette
   theme_minimal()
-#TODO select a wider color pallette
 
 ```
-```{r}
-
-
-```
-
 
 ## Quality Checks 
 

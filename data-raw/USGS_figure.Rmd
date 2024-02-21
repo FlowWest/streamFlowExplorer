@@ -38,67 +38,74 @@ usgs_list |>
   st_as_sf(coords = c("dec_long_va", "dec_lat_va")) |>
   leaflet::leaflet() |> leaflet::addTiles() |> leaflet::addMarkers()
 
-
 ```
 
-```{r}
-
-# Function to retrieve data from USGS for a gage
-get_flow_data <- function(gage) {
-  # Retrieve data from USGS
-  site_data <- readNWISdata(siteNumber = gage, parameterCd = "00060")
-  return(site_data)
-}
-
-# Iterate over each row in the data frame
-for (i in 1:nrow(usgs_list)) {
-  gage <- usgs_list$gage[i]  
-  gage <- usgs_list$gage[i]
-  # Retrieve flow data for the gage
-  flow_data <- get_flow_data(gage)
-  # Extract years from flow data
-  flow_years <- unique(as.integer(format(flow_data$datetime, "%Y")))
-  # Print gage and years with flow data
-  cat("Gage:", gage, "\n")
-  cat("Years with flow data:", flow_years, "\n\n")
-}
-
-```
 
 ```{r}
-# Initialize an empty data frame to store flow data
-all_flow_data <- data.frame()
+# Function to fetch flow data for a given site number
+fetch_flow_data <- function(site_number) {
+  # Specify the parameters for data retrieval
+  site <- readNWISsite(site_number)
+  parameterCd <- "00060"  # Parameter code for discharge
+  service <- "dv"  # Daily values
 
-for (station in usgs_list$gage) {
-  # Specify the site number
-  site_number <- gage
+  # Fetch data
+  flow_data <- readNWISdv(siteNumbers = site_number, parameterCd = parameterCd)
+  return(flow_data)
+}
+
+# Initialize an empty list to store results
+flow_years_list <- list()
+
+# Iterate over each site number
+
+for (site_number in usgs_result$site_no) {
+  # Fetch flow data
+  flow_data <- fetch_flow_data(site_number)
   
-  # Retrieve flow data for the site
-  tryCatch({
-    flow_data <- readNWISdata(siteNumber = site_number, parameterCd = "00060")
-    
-    # Combine flow data with site number
-    flow_data$site_number <- site_number
-    
-    # Append flow data to the overall data frame
-    all_flow_data <- rbind(all_flow_data, flow_data)
-  }, error = function(e) {
-    message(paste("Skipping site", site_number, ":", e$message))
-  })
+  # Extract unique years with flow data
+  unique_years <- unique(year(flow_data$dateTime))
+  
+  # Store the result in the list
+  flow_years_list[[as.character(site_number)]] <- unique_years
 }
 
+flow_years_df <- data.frame(site_no = character(0), flow_years = integer(0), stringsAsFactors = FALSE)
 
-# Convert date/time columns to proper date/time objects
-all_flow_data$dateTime <- as.POSIXct(all_flow_data$dateTime, format = "%Y-%m-%d %H:%M:%S")
+for (site_number in usgs_result$site_no) {
+  # Fetch flow data
+  flow_data <- fetch_flow_data(site_number)
+  
+  # Extract unique years with flow data
+  unique_years <- unique(year(flow_data$dateTime))
+  
+  # If flow data is available, add to flow_years_df
+  if (length(unique_years) > 0) {
+    flow_years_df <- rbind(flow_years_df, data.frame(site_no = site_number, flow_years = unique_years))
+  }
+}
 
-# Plot temporal coverage
-ggplot(all_flow_data, aes(x = dateTime, y = site_number, group = site_number)) +
-  geom_point(size = 2, alpha = 0.5) +
-  geom_line(alpha = 0.5) +
-  labs(title = "Temporal Coverage of USGS Gauges",
-       x = "Date",
-       y = "Site Number") +
-  theme_minimal()
+# Create a data frame with all years and all site numbers
+all_years <- data.frame(site_no = rep(flow_years_df$site_no, each = 100),
+                        year = rep(1920:2019, length(unique(flow_years_df$site_no))),
+                        stringsAsFactors = FALSE)
+
+# Merge with flow_years_df to mark years with available flow data as TRUE
+all_years <- merge(all_years, flow_years_df, by = "site_no", all.x = TRUE)
+all_years$flow_years[is.na(all_years$flow_years)] <- 0
+all_years$flow_years[all_years$flow_years != 0] <- 1
+
+# Reshape data for plotting
+plot_data <- spread(all_years, year, flow_years, fill = NA)
+
+# Plot
+ggplot(plot_data, aes(x = year, y = site_no)) +
+  geom_tile(aes(fill = as.factor(flow_years)), color = "white") +
+  scale_fill_manual(values = c("white", "blue")) +
+  labs(x = "Year", y = "Site Number", fill = "Flow Data Available") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
 
 #TODO find a better plot to visualize temporal coverage
 
