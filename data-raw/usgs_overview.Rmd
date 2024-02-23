@@ -22,59 +22,74 @@ library(readr)
 library(ggmap)
 library(viridis)
 library(rmarkdown)
+library(sf)
 ```
 
 ## USGS Flow Data Summary 
-The USGS is responsible for monitoring and providing information on the quantity, quality, distribution, movement, and other characteristics of surface water and groundwater resources across the United States. The NWIS Mapper provides an interface for users to explore and retrieve water data through interactive maps.
+The United States Geological Survey (USGS) is responsible for monitoring and providing information on the quantity, quality, distribution, movement, and other characteristics of surface water and groundwater resources across the United States. Among the data they collect and track is flow data. The NWIS Mapper provides an interface for users to explore and retrieve water data through interactive maps.
 
-* **Source:** National Water Information System (NWIS) Mapper is a tool provided by the United States Geological Survey (USGS) [USGS NWIS website](https://waterdata.usgs.gov/nwis)
-* **Accessibility:** Public, open and accessible online
+* **Source:** National Water Information System (NWIS) mapper is a tool provided by the USGS. [USGS NWIS website](https://waterdata.usgs.gov/nwis)
+* **Accessibility:** Public, open and accessible online.
 * **Coverage:**  Approximately 1.9 million sites in all 50 States, the District of Columbia, Puerto Rico, the Virgin Islands, Guam, American Samoa and the Commonwealth of the Northern Mariana Islands.
-Approximately 1,000 gages are operating and reporting data publicly in California. Of these, about 60 percent are operated by the United States Geological Survey (USGS), with the remaining gages operated by State or other agencies. A substantial number of gages are operated by third-party entities that are not publicly reporting data on statewide databases or lack sufficient data quality to be reported. Source: [California Stream Gaging Prioritization Plan 2022](https://www.waterboards.ca.gov/waterrights/water_issues/programs/stream_gaging_plan/docs/sb19-report.pdf)
-* **Temporal Coverage:** temporal coverage is from 1862 to present, however it varies across the different gages. Some of them have big data gaps during those years, or no data at all that goes that far back. Overall not good coverage across the system or across dates
-* **Spatial Coverage:** There is at least one gage with flow data for each of the streams of interest 
-* **Maintenance:** The frequency of data collection can vary depending on the specific site and the importance of the data for water resource management, flood monitoring, and other purposes.
+Approximately 1,000 gages operate and report data publicly in California. Of these, about 60 percent are operated by the USGS, and the remaining gages are operated by State or other agencies. Lastly, a substantial number of gages are operated by third-party entities that are either not publicly availiable, or lack sufficient data quality to be reported.
+Source: [California Stream Gaging Prioritization Plan 2022](https://www.waterboards.ca.gov/waterrights/water_issues/programs/stream_gaging_plan/docs/sb19-report.pdf)
+* **Temporal Coverage:** Temporal coverage of 1862 to present, however it varies across the different gages. Some gages have big data gaps or no historical data at all. Overall, it does not provide good temporal and system coverage.
+* **Spatial Coverage:** There is at least one gage with flow data for each of the streams of interest listed as follows:
+#TODO figure out a way to add all the stream names (since they are over 35)
+* **Maintenance:** Frequency of data collection varies depending on the site and the importance of the data for water resource management, flood monitoring, and other purposes.
+The frequency of data collection at a particular stream gage ranges from hourly to daily, and in some cases, data is collected more frequently (during specific events, such as storms or floods). Real-time data from many stream gages is available on the USGS NWIS website.
+The USGS continually updates and maintains its network of monitoring sites, data is available to the public through the NWIS platform.
 
-The frequency of data collection at a particular stream gage can range from hourly to daily, and in some cases, data may be collected more frequently during specific events, such as storms or floods. Real-time data from many stream gages are available on the USGS NWIS website.
-The USGS continually updates and maintains its network of monitoring sites, and data is made available to the public through the NWIS platform.
 * **Contact:** General contact for Water Data for NWIS can be done through a ["questions/comments" portal](https://waterdata.usgs.gov/questions-comments/?&ownerCode=USA&referrerUrl=https%3A%2F%2Fwaterdata.usgs.gov%2Fnwis) 
-* **Utilized By:** data is used for various projects, including SR JPE. 
+
+* **Utilized By:** Data is used for various FlowWest projects, including SR JPE. 
 
 
 ## Spatial & Temporal Coverage
 ```{r message=FALSE, warning=FALSE}
 usgs_overview <- read_csv(here::here("data-raw", "USGS_station_lookup.csv")) |> 
-  clean_names()|>
+  janitor::clean_names() |>
+  mutate(gage = str_sub(gage,1,8))|>
   select(-percent_na_only_something_we_want_to_do_if_we_can_functionalize_this_process) |> 
   mutate(min_date = as.Date(min_date, format = "%m/%d/%Y"),
-         max_date = as.Date(max_date, format = "%m/%d/%Y")) |> 
-  glimpse()
+         max_date = as.Date(max_date, format = "%m/%d/%Y")) 
+
+#creating a map to show temporal coverage
+
+get_lat_lon <- function(station_code){
+  site_info <- dataRetrieval::readNWISsite(siteNumbers = station_code)
+  coordinates <- ifelse(is.null(site_info), list(NA_integer_, NA_integer_), list(site_info$dec_long_va, site_info$dec_lat_va))
+  return(coordinates)
+}
+
+usgs_flow_gages <- dataRetrieval::readNWISsite(siteNumbers = usgs_overview$gage)
+
+usgs_overview |> 
+  left_join(usgs_flow_gages, by = join_by(gage == site_no)) |>
+  st_as_sf(coords = c("dec_long_va", "dec_lat_va")) |>
+  leaflet::leaflet() |> leaflet::addTiles() |> leaflet::addMarkers()
 ```
 
-Plot that shows date range coverage over watersheds by the different gages. There might be potential data gaps
+##Plot that shows date range coverage over watersheds by the different gages. There might be potential data gaps
 ```{r}
-shuffled_palette <- sample(viridis(256))
-
 ggplot(usgs_overview, aes(x = min_date, xend = max_date, y = tributary, yend = tributary, color = gage)) +
-  geom_segment(size = 4) +
+  geom_segment(size = 4, alpha = 0.6, show.legend = FALSE) +  
   labs(title = "Date Coverage for Tributaries",
        x = "Date",
        y = "Tributary Name") +
   scale_x_date(date_breaks = "10 years", date_labels = "%Y") +
-  scale_color_manual(values = shuffled_palette) +  # Use the shuffled palette
+  scale_color_viridis_d(alpha = 0.6) +
   theme_minimal()
-
 ```
 
 ## Quality Checks 
 
-Much of the QA/QC process is automatic in that many arithmetic checks, cross checks, and logic checks are programmed into the electronic processing system software. When inconsistencies are found in field data, computed records, or other parts of the
-records, the electronic processing system alerts the user so that appropriate changes can be made. In addition to the
-automatic QA/QC checking, the electronic processing system provides a number of places where the user or supervisor can review and compare the computations and final results. All of these tasks, both automatic and manual, are important to the quality-assurance and quality-control process. In addition to the actual checking and review process, it equally is important that the QA/QC process and findings be documented. For streamflow and other surface-water gaging stations, the documentation traditionally has been known as an annual station analysis. Automation and electronic processing provides an easy and efficient means by which data and information can be supplied to the writer of the station analysis.
+Much of the QA/QC processes are programmed into the electronic processing system software. When inconsistencies are found in field data, computed records, or other parts of the records, the electronic processing system alerts the assigned USGS users to supervised so that appropriate changes can be made. In addition to the automatic QA/QC checking, the electronic processing system provides a number of places where the user or supervisor can review and compare the computations and final results. All of these tasks, both automatic and manual, are important to the quality-assurance and quality-control process. 
+Documentation of the QA/QC process and findings are documented in an annual station analysis. For streamflow and other surface-water gaging stations, the documentation traditionally has been known as an annual station analysis. Automation and electronic processing provides an easy and efficient means by which data and information can be supplied to the writer of the station analysis.
 Source: [USGS Standards for the Analysis and Processing of Surface-Water Data and Information Using Electronic Methods. Section 19. Quality Assurance and Quality Control](https://water.usgs.gov/osw/pubs/WRIR01-4044.pdf)
 
 ## Data use and limitations 
-This data can be used and is mostly reliable, the limitations are data gaps across the system and not consistent dates/years of collection. Of the approximate 4,500 local sub-watersheds in California, more than 3,200 (over 70 percent) of
+Data can be used and is mostly reliable, the limitations are data gaps across the system and not consistent dates/years of collection. Of the approximate 4,500 local sub-watersheds in California, more than 3,200 (over 70 percent) of
 watersheds do not have any history of stream gaging. Less than half of the historically aged watersheds currently have active, publicly accessible gages today. Source: [California Stream Gaging Prioritization Plan 2022](https://www.waterboards.ca.gov/waterrights/water_issues/programs/stream_gaging_plan/docs/sb19-report.pdf)
 
 ## Questions for Data Experts 
