@@ -1,0 +1,17 @@
+title: streamFlowExplorer
+url: https://flowwest.github.io/streamFlowExplorer/
+template:
+  bootstrap: 5
+
+navbar:
+  structure:
+    left:  [home, articles]
+    right: [github]
+  type: default
+  left:
+  - text: 'Flow Source Overview'
+    menu:
+      - text: 'CalSim Overview'
+        href: articles/calsim_template.html
+
+

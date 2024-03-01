@@ -1,0 +1,14 @@
+Package: streamFlowExplorer
+Title: StreamFlowExplorer is a data package developed by FlowWest and Metropolitan Water District to explore existing California empirical and modeled flow datasets.
+Version: 0.0.0.9000
+Authors@R: 
+    person("Erin", "Cain", , "ecain@flowwest.com", role = c("aut", "cre"))
+Description: StreamFlowExplorer is a data package developed by FlowWest and Metropolitan Water District to explore existing California empirical and modeled flow datasets. This package provides summaries describing the following California flow datasets and highlighting limitations for various use cases.
+License: CC0
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
