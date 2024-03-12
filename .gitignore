@@ -2,5 +2,6 @@
 .Rhistory
 .RData
 .Ruserdata
+data-raw/temp
 docs
 inst/doc
