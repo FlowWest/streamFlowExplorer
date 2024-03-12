@@ -1,0 +1,536 @@
+---
+title: "CalSim Model Overview Document"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{calsim_template}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, fig.width=15, fig.height=30)
+library(tidyverse)
+library(lubridate)
+library(googleCloudStorageR)
+library(ggplot2)
+library(scales)
+```
+
+## CalSim Summary
+
+CalSim is a water resources planning model, developed by the California
+Department of Water Resources (DWR) and the Mid-Pacific Region of the
+U.S. Bureau of Reclamation (Reclamation), to simulate operations of the
+State Water Project (SWP) and the Central Valley Project (CVP). CalSim 3
+is the newest version of the model so this document will focus on the
+CalSim 3 version but will highlight differences between CalSim 3 and the
+prior modeling version CalSim-II (released in 2022).
+
+-   **Source:** Jointly developed by DWR and Reclamation. Information in
+    this document pulled from [CalSim 3 main
+    report](https://og-production-open-data-cnra-892364687672.s3.amazonaws.com/resources/2d4160d7-cbe1-4e63-8cdd-98f322e74cf2/calsim-3-report-final.pdf?Content-Type=application%2Fpdf&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAJJIENTAPKHZMIPXQ%2F20240103%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20240103T175526Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=37958f394ed72b67a74b7951391dca289e568cf433930a8a5cc249ef593afa82)
+    and [ ](https://ascelibrary.org/doi/10.1061/40430%281999%2995)
+-   **Accessibility:**
+    -   Model available on
+        [GitHub](https://github.com/usbr/CM3/tree/master/CalSim_3_0721_benchmark_model).
+        However high level of effort to run model independently. (And
+        license for commercial solver XA needed to run WRIMS 2) \`
+    -   Extensive model documentation can be found
+        [here.](https://og-production-open-data-cnra-892364687672.s3.amazonaws.com/resources/2d4160d7-cbe1-4e63-8cdd-98f322e74cf2/calsim-3-report-final.pdf?Content-Type=application%2Fpdf&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAJJIENTAPKHZMIPXQ%2F20240103%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20240103T175526Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=37958f394ed72b67a74b7951391dca289e568cf433930a8a5cc249ef593afa82)
+    -   DSS CalSim output files are not easily avaliable online.
+-   **Coverage:**
+    -   **Temporal Coverage:** 1922 - 2015
+    -   **Spatial Coverage:** Covers all DWR and Reclamation Operated
+        watersheds ([see full
+        schematic](https://data.cnra.ca.gov/dataset/2395530a-5421-487e-921e-d6e594f23ac6/resource/3ec8338e-31d9-4dd3-93df-8d60ee6ec3d2/download/cs3_networkschematic_integrated_10_11_2022.pdf)).
+        23 out of 28 watersheds representing historical Chinook extent
+        are represented in CalSim
+-   **Maintenance:** Maintained by Reclamation and DWR. New modeled
+    scenarios are released as needed by Reclamation and DWR efforts.\
+-   **Contact:**
+    [CVMsupport\@water.ca.gov](mailto:CVMsupport@water.ca.gov){.email}
+-   **Utilized By:** Primarily developed for conducting planning studies
+    relating to operations of the SWP and CVP. Modeling results are
+    additionally utilized in many efforts including the Central Valley
+    Improvement Act Science Integration Team modeling processes
+    (CalSim-II), DWR's Voluntary Agreements process (CalSim 3), and
+    Reorienting to Recovery CA Central Valley Salmon Recovery Project.
+
+## CalSim Model Summary
+
+California Simulation (CalSim) is a water resources planning model of
+the Central Valley Project (CVP) and State Water Project (SWP)
+operations.
+
+CalSim simulates the operations of the State Water Project (SWP) and the
+Central Valley Project (CVP), along with much of the water resources
+infrastructure in the Central Valley of California and the
+Sacramento-San Joaquin Delta region. It models various aspects of water
+management, including:
+
+-   water storage,
+-   conveyance,
+-   deliveries,
+-   hydropower generation,
+-   and flows
+
+Additionally, CalSim simulates the interactions between these components
+and their impacts on water availability, reliability, and overall system
+performance.
+
+### Architecture
+
+The following sections describe key model components. The diagram below
+is a simplified version of CalSim data inputs and how they contribute to
+the mass balance of the watersheds.Water Resource Integrated Modeling
+System (WRIM)
+
+![](images/CalSimConceptualDiagramSimplified.png){width="682"}
+
+The Water Resource Integrated Modeling System (WRIM) provides the
+modeling framework and software for CalSim. WRIMS is a versatile water
+resources modeling system designed to assess operational alternatives in
+large and intricate river basins. It incorporates a simulation language
+for flexible specification of operational criteria, a linear programming
+solver for making efficient water allocation decisions, and graphics
+capabilities
+([WRIM](https://water.ca.gov/Library/Modeling-and-Analysis/Modeling-Platforms/Water-Resource-Integrated-Modeling-System)).
+
+-   Simulation language for operations criteria
+-   Linear programming solver for water allocation decisions
+-   Graphic capabilities
+
+#### Supporting Models
+
+```{r, echo = FALSE}
+# Fill in additional info based on page 169. 
+models <- readxl::read_excel(system.file("extdata", "calsim", "calsim_inputs.xlsx", 
+                        package = "streamFlowExplorer", mustWork = TRUE), sheet = 2)
+knitr::kable(models)
+```
+
+#### CalSimHydro
+
+CalSimHydro is the CalSim 3.0 Hydrology Preprocessor. CalSimHydro
+consists of the following components described in [CalSimHydro Tool - A
+Web-based interactive tool for the CalSim 3.0 Hydrology
+Prepropessor](https://www.researchgate.net/publication/258461694_CalSimHydro_Tool_-_A_Web-based_interactive_tool_for_the_CalSim_30_Hydrology_Prepropessor):
+
+1.  A Rainfall-Runoff Model to compute monthly infiltration
+2.  a Soil moisture and demand calculator (IDC) that estimates surface
+    runoff, deep percolation, and water demands for natural vegetation
+    cover and various crops other than rice
+3.  a Rice Water Use Model to compute the water demands, deep
+    percolation, irrigation return flow, and runoff from precipitation
+    for the rice fields
+4.  a Refuge Water Use Model that simulates the ponding operations for
+    managed wetlands, and
+5.  a Data Aggregation and Transfer Module to aggregate the outputs from
+    the above modules and transfer them to the CalSim SV input file.
+
+#### System Components
+
+Watersheds in CalSim are categorized as either Rim or Valley Floor
+watersheds.
+
+-   Rim: foothill and mountain watersheds characterized by steep slopes,
+    shallow soils, limited aquifer, not developed
+-   Valley Floor: located between Upper watersheds and Delta;
+    extensively developed, highly managed, rich agricultural land, urban
+    areas
+
+CalSim 3 uses defined Water Budget Areas (WBA), that have been developed
+to help define the enhanced spatial resolution of CalSim 3. WBAs are
+used to:
+
+-   Provide a structure to simplify the organization, explanation, and
+    presentation of CalSim 3 data, code, and results.
+-   Define the boundary of non-district agricultural water users within
+    a region who are aggregated to a single demand unit in CalSim 3.
+-   Define the boundary of scattered water users whose water supplies
+    for domestic (or industrial) use are self-produced, who rely on
+    groundwater, and who are represented in CalSim 3 by a single demand
+    unit.
+-   Define the spatial resolution of hydrologic input data for
+    calculating agricultural demands (i.e., precipitation and
+    evapotranspiration (ET)).
+
+Additionally, the refined spatial scale is organized around demand units
+are formulated so that water users within a demand unit have similar
+water rights, water contracts, source(s) of water, soils, land use, and
+general water delivery and irrigation efficiencies. Demand units are the
+smallest computational unit and are generated based on the following
+data sources:
+
+-   Water district and water agency boundaries and service areas
+    obtained from the Cal-Atlas Geospatial Clearinghouse (formerly the
+    California Spatial Information Library), which comprises separate
+    GIS layers for Federal, State, and private water districts. These
+    data are also available from DWR (2022a).
+-   County LAFCO reports on water purveyors in their respective counties
+    (LAFCO, 2022).0F
+-   County land-use surveys undertaken by DWR's Division of Regional
+    Assistance (formerly Division of Planning and Local Assistance)
+    (DWR, 2022b).
+-   County and regional integrated water resources plans and integrated
+    water management plans.
+-   CalSim II documentation (Reclamation, 2007).
+-   Reclamation CVP water supply contract renewal and supporting
+    environmental documents (Reclamation, 2022).
+
+CalSim is developed in the form of a node-arc network where nodes
+represent specific locations and arcs represent flow between nodes,
+[here](https://data.cnra.ca.gov/dataset/2395530a-5421-487e-921e-d6e594f23ac6/resource/3ec8338e-31d9-4dd3-93df-8d60ee6ec3d2/download/cs3_networkschematic_integrated_10_11_2022.pdf)
+is a full schematic diagram of the system.
+
+The following Node types are included:
+
+-   storage nodes - represented by blue triangle, start with "S\_"
+-   conveyence nodes
+    -   Outline colors:
+        -   Blue - natural stream channel
+        -   Gray - man-made canal, drain or bypass
+    -   Fill colors:
+        -   Green - Return flow split node Approximates diffuse networks
+            of drains
+        -   Gray - streamflow gaging station
+-   facility nodes
+    -   wastewater treatment plants
+    -   water treatment plants
+    -   pump stations
+-   demand units
+    -   Dashed line signifies demand unit is limited to groundwater
+        supplies
+    -   Single, solid line signifies demand unit is limited to surface
+        water supplies
+    -   Double, solid line signifies demand unit has access to
+    -   both surface water and groundwater supplies
+    -   Blue-green fill denotes managed wetland demand unit
+    -   Green fill denotes agricultural demand unit
+    -   Grey fill denotes urban demand unit
+
+Arcs represent averge monthly flows to, from or between nodes. Flow
+direction indicated by arrow. A few different types of arcs are
+includes:
+
+-   C (blue): channel - river or stream flows
+-   C (gray): channel - canal or drain flows
+-   SP (black dashed) : Spill - spill or flood bypass flows
+-   D (red) : Diversion - typically to demand unit
+-   R (green) : Return Flow - typically from demand unit
+-   I (blue) : Inflow - rim watershed inflows
+-   SR (blue) : Surface Runoff - rainfall-runoff within the valley floor
+
+### Assumptions
+
+Hydroloic Modeling assumptions:
+
+-   The first assumption categorizes foothill and mountainous 'rim'
+    watersheds surrounding the Central Valley as relatively undeveloped,
+    with minimal changes in land use over time affecting natural
+    outflows. These watersheds typically exhibit complex topography,
+    steep slopes, shallow soils, and limited groundwater aquifer
+    systems. Runoff in these areas is predominantly influenced by the
+    snowfall and snowmelt cycle, with precipitation quickly returning to
+    streams as baseflow. Groundwater is not extensively utilized as a
+    water supply source in these upland watersheds.
+-   The second assumption pertains to the 'valley floor' watersheds,
+    which have undergone extensive agricultural development and include
+    significant urban areas. Human impacts on the environment strongly
+    influence the timing and volume of runoff in these areas. Deep
+    percolation from precipitation and irrigation contributes to aquifer
+    recharge, which is closely connected to the stream system.
+    Groundwater serves as a crucial water source for both agricultural
+    and urban purposes, leading to significant changes in groundwater
+    storage over time.
+
+### Accessibility
+
+There are multiple components of accessibility being evaluated:
+
+-   documentation
+-   model code/software openly available for download
+-   model parameters and results available for download
+-   user is able to run the model without extensive expertise
+
+**Documentation:** The CalSim 3 main report documentation is 776 pages
+though well-organized. The documentation provides the following sections
+and 3 appendix
+
+**License:** WRIMS 2 is copyrighted by the State of California
+Department of Water Resources. It is licensed under the Eclipse Public
+License, Version 1.0. See Eclipse Public License for more details.
+However, WRIMS 2 includes a commercial solver named XA which requires a
+license.
+
+**Download Links:**
+
+-   *Code and Software:* WRIMS 2.0 guides and software are available for
+    download at the [DWR WRIMS
+    site](https://water.ca.gov/Library/Modeling-and-Analysis/Modeling-Platforms/Water-Resource-Integrated-Modeling-System).
+-   *Inputs and Outputs:* The full CalSim model package is available for
+    download
+    [here](https://catalog.data.gov/dataset/calsim-3-0-release-7f092),
+    however there is no clear documentation on how to review or run the
+    downloaded model. This includes model parameters/inputs but it is
+    not clear how to navigate the file structure to find specific
+    inputs.
+
+**Running the Model**
+
+In progress: Evaluating how accessible running the model is.
+
+### Update procedure
+
+There is no standard update schedule for CalSim; rather, model updates
+follow updates in regulations. The following summarizes the updates that
+have been made:
+
+-   2000: DWR created Water Resources Integrated Modeling System (WRIMS)
+-   2002: Reclamation and DWR subsequently made two public releases of
+    CalSim II, known as benchmark studies, on May 17, 2002, and
+    September 30, 2002 ([CalSim III Main
+    Report](https://og-production-open-data-cnra-892364687672.s3.amazonaws.com/resources/2d4160d7-cbe1-4e63-8cdd-98f322e74cf2/calsim-3-report-final.pdf?Content-Type=application%2Fpdf&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAJJIENTAPKHZMIPXQ%2F20240205%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20240205T205626Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=f9191d5ba661e24d023337c798faf495f4ed350e1518c0a5f54d9397991c0859)).
+-   2002 - 2021: Iterative updates to CalSim 2 regulatory rulesets.
+-   2022: CalSim 3 produced
+
+#### Primary differences between CalSimII and CalSim 3
+
+Updates of CalSim 3 aim to enhance the accuracy, comprehensiveness, and
+usability of CalSim 3 for water resources management in California,
+addressing various aspects of hydrology, water demand,
+groundwater-surface water interactions, and model transparency. CalSim 3
+objectives described in [main
+report](https://og-production-open-data-cnra-892364687672.s3.amazonaws.com/resources/2d4160d7-cbe1-4e63-8cdd-98f322e74cf2/calsim-3-report-final.pdf?Content-Type=application%2Fpdf&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAJJIENTAPKHZMIPXQ%2F20240205%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20240205T205626Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=f9191d5ba661e24d023337c798faf495f4ed350e1518c0a5f54d9397991c0859).
+
+Spatial Resolution and Representation:
+
+-   Adoption of a finer spatial resolution depicting major stream
+    networks, surface water diversions, and water agencies in the
+    Central Valley.
+-   Association of water users with their local surface water supply
+    sources and/or groundwater use.
+-   Improved representation of mountain and foothill watersheds
+    surrounding the Central Valley floor, including explicit
+    representation of storage regulation and diversions within these
+    watersheds, and improved estimates of unimpaired flows based on
+    historical gauge data.
+-   Simulation of all major water supply reservoirs.
+
+Updated Hydrology Modeling:
+
+-   Implementation of a unified land-use-based hydrology model for the
+    Central Valley floor, including explicit representation of surface
+    runoff contributing to streamflows.
+-   Refinement of water demands using data collected from the California
+    Water Plan, local and regional planning studies, and calibration of
+    water use efficiency factors using historical diversion data.
+
+Groundwater-Surface Water Interaction:
+
+-   Development of a spatially discrete groundwater module with a
+    resolution similar to the California Central Valley Simulation Model
+    (C2VSim) for simulating groundwater heads and stream-aquifer
+    interaction.
+
+Standardization and Documentation:
+
+-   Adoption of standardized nomenclature and model structure to provide
+    greater clarity and transparency in the model.
+-   Increased documentation through the main report and associated
+    appendices.
+
+Simulation Period and Software Enhancements:
+
+-   Extension of the simulation period through the water year 2015.
+-   Improvement of model result presentation and comparison between
+    scenarios through enhancements in the WRIMS software.
+
+#### Scenarios Produced
+
+| Scenario Name                               | CalSim Version | Year Released | Description                                                                                                                                          |
+|--------------|--------------|--------------|-----------------------------|
+| 2008 2009 BiOp                              | CalSim II      |               |                                                                                                                                                      |
+| 2008 2009 BiOp                              | CalSim II      |               |                                                                                                                                                      |
+| 2019 BiOp 2020 ITP                          | CalSim II      |               |                                                                                                                                                      |
+| Delivery Capability Report and Studies 2015 | CalSim II      | 2015          | Link to report and results? avaliable [here.](https://water.ca.gov/Library/Modeling-and-Analysis/Central-Valley-models-and-tools/CalSim-II/DCR2019). |
+| Delivery Capability Report and Studies 2017 | CalSim II      | 2017          | Link to report and results? avaliable [here.](https://water.ca.gov/Library/Modeling-and-Analysis/Central-Valley-models-and-tools/CalSim-II/DCR2017)  |
+| Delivery Capability Report and Studies 2019 | CalSim II      | 2019          | Link to report and results? avaliable [here.](https://water.ca.gov/Library/Modeling-and-Analysis/Central-Valley-models-and-tools/CalSim-II/DCR2015)  |
+
+### Data Inputs
+
+Data Inputs to CalSim 3 were summarized based on Chapters 4, 5, and 6 of
+the main report. Inputs described in the main report are summarized in
+the table below:
+
+```{r, echo = FALSE}
+# Fill in additional info based on page 169. 
+data_inputs <- readxl::read_excel(system.file("extdata", "calsim", "calsim_inputs.xlsx", 
+                        package = "streamFlowExplorer", mustWork = TRUE), sheet = 1)
+knitr::kable(head(data_inputs))
+```
+
+#### Rim Watershed Modeling Inputs
+
+##### Hydraulic Inputs
+
+Rim watersheds - modeled using unimpaired runoff, utilize gage data
+directly where available to create a preprocessed time series of
+unimpaired runoff. This time series utilizes the following data sources:
+
+-   USGS (no specifics on what USGS data is used, or how to access)
+-   DWR (no specifics on what DWR data is used, or how to access)
+-   USACE (no specifics on what USACE data is used, or how to access)
+-   Reclamation (no specifics on what Reclamation data is used, or how
+    to access)
+-   Data stored in text files as part of DWR's "COMP" model (no
+    specifics on what COMP model data is used, or how to access)
+
+These data sources are not described in depth and no links to the
+sources are provided in the CalSim 3 main report.
+
+When there are gaps in gage data or there is no available gage data for
+a rim watershed, a synthetic timeseries was developed using a linear
+interpolation approach (when there is some gage data, but only for a
+limited timeseries) or a S-Curve Method (Percent Deviation Method) to
+scale flow based on a similar watershed (when there is no gage data
+available from any time period). See [section
+5-14](https://og-production-open-data-cnra-892364687672.s3.amazonaws.com/resources/2d4160d7-cbe1-4e63-8cdd-98f322e74cf2/calsim-3-report-final.pdf?Content-Type=application%2Fpdf&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAJJIENTAPKHZMIPXQ%2F20240212%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20240212T164938Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=edf9d1ee74a6a2ea30420509b5a22ba04bdfb9c11951dc204f583d37739231a0)
+for additional information on methods for producing synthetic
+timeseries.
+
+To see the method used for each rim watershed and the specific gage
+utilized, refer to table Table 5-1: Data Sources and Calculation
+Methods, Sacramento River Hydrologic Region or Table 5-5: Data Sources
+and Calculation Methods, San Joaquin River Hydraulic Region in the [main
+report](https://og-production-open-data-cnra-892364687672.s3.amazonaws.com/resources/2d4160d7-cbe1-4e63-8cdd-98f322e74cf2/calsim-3-report-final.pdf?Content-Type=application%2Fpdf&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAJJIENTAPKHZMIPXQ%2F20240212%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20240212T164938Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=edf9d1ee74a6a2ea30420509b5a22ba04bdfb9c11951dc204f583d37739231a0.)
+
+#### Valley Floor Watershed Modeling Inputs
+
+##### Hydraulic Inputs
+
+CalSim simulates both Surface Water and Groundwater dynamics for Valley
+Floor Watersheds. Inputs are preprocessed in a series of models that are
+ran prior to CalSim 3 including:
+
+-   IDC = Integrated Demand Calculator
+-   RRM = Rainfall-Runoff Model
+-   RWUM = Rice Water Use Model
+-   WWUM = Wetland Water Use Model
+
+The following timeseries data are used directly in the above models:
+
+-   Surface runoff (SR) from precipitation
+-   Applied water demand for rice (AWr)
+-   Applied water demand for other agricultural crops (AWo)
+-   Applied water demand for permanent, semi-permanent, and seasonal
+    wetlands (AWw)
+-   Urban demand (UD), combining indoor and outdoor components
+-   Tailwater (TW) from irrigated agricultural land
+-   Wastewater (WW) return flows from wastewater treatment plants
+-   Deep percolation (DP) from all land-use classes
+
+No links to the sources are provided in the CalSim 3 main report.
+
+##### Land Use
+
+-   Land Use
+-   Land Use Surveys
+-   Remote Sensing Data
+-   Historical and Current (Agricultural Land, Urban Land, Managed
+    Wetlands, Native Vegetation)
+
+Evaporation and Evapotranspiration (?) Valley Surface Runoff
+
+#### Delta Regions
+
+Precipitation
+
+-   NCDC Gaged Point Precipitation
+-   PRISM Distributed Precipitation Grid
+
+Evaporation and Evapotranspiration (?)
+
+#### Water Demand - Monthly
+
+Demand is represented through catchment objects divided into:
+agricultural, urban, wetland refuge
+
+**Agricultural Water Demand Data Sources**
+
+-   Water district and water agency boundaries and service areas
+    obtained from the Cal-Atlas Geospatial Clearinghouse (formerly the
+    California Spatial Information Library), which comprises separate
+    GIS layers for Federal, State, and private water districts. These
+    data are also available from DWR (2022a).
+-   County LAFCO reports on water purveyors in their respective counties
+    (LAFCO, 2022)
+-   County land-use surveys undertaken by DWR's Division of Regional
+    Assistance (formerly Division of Planning and Local Assistance)
+    (DWR, 2022b).
+-   County and regional integrated water resources plans and integrated
+    water management plans.
+-   CalSim II documentation (Reclamation, 2007).
+-   Reclamation CVP water supply contract renewal and supporting
+    environmental documents (Reclamation, 2022).
+
+**Urban Water Demand Data Sources**
+
+-   Urban Water Management Plans (UWMP)
+-   Integrated Regional Water Management Plans (IRWMP)
+-   Drinking Water Source Assessments
+-   U.S. Environmental Protection Agency (EPA)
+-   California Water Plan, Update 2018
+
+**Wetland Water Demand Data Sources**
+
+-   Report on Refuge Water Supply Investigations, Central Valley
+    Hydrologic Basin, California (Reclamation, 1989a)
+-   San Joaquin Basin Action Plan/Kesterson Mitigation Plan
+    (Reclamation, 1989b)
+-   Central Valley Joint Venture Implementation Plan (USFWS, 2006)
+-   Refuge water management plans (Reclamation, 2022a)
+-   Refuge water supply environmental documentation (Reclamation, 2022b)
+-   Reclamation water supply contract documents with Grassland WD, CDFW,
+    USFWS, and MOUs with USFWS (Reclamation, 2022c)
+
+**Contracts and Water Rights**
+
+-   Central Valley Project
+-   State Water Project
+-   Non-Project Water Users, Sacramento River Region
+-   Non-Project Water Users, San Joaquin River Region
+
+### Model Outputs
+
+CalSim produces .DSS file model outputs at a monthly timestep.
+
+### Model Validation procedures
+
+-   Ask expert
+
+## Spatial & Temporal Coverage
+
+Watershed boundaries were developed using CalWater 2.2.1 and the USGS
+12-digit Hydrologic Unit Code (HUC) watersheds.
+
+Click
+[here](https://data.cnra.ca.gov/dataset/2395530a-5421-487e-921e-d6e594f23ac6/resource/3ec8338e-31d9-4dd3-93df-8d60ee6ec3d2/download/cs3_networkschematic_integrated_10_11_2022.pdf)
+to download the full model network schematic.
+
+## Data use and limitations
+
+Valley Wide Analysis - pros, good coverage of the system, can model how
+different operations would cause different flow at a relatively fine
+scale. cons, monthly time scale is limited for use in biological
+modeling, monthly timestep does not capture the fine scale resolution
+that biological organisms experience.
+
+### Questions
+
+-   Is there a conceptual model anywhere to describe the CalSim modeling
+    framework What are the model validation procedures?
+-   What are the Applied Water demands used for? Talk through diagram.
