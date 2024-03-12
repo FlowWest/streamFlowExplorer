@@ -13,5 +13,9 @@ navbar:
     menu:
       - text: 'CalSim Overview'
         href: articles/calsim_template.html
+  - text: 'Modeling Methods'
+    menu:
+      - text: 'Flow Modeling Approaches'
+        href: articles/flow_modeling_approaches.html
 
 

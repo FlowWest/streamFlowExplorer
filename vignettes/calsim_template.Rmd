@@ -85,11 +85,10 @@ performance.
 
 The following sections describe key model components. The diagram below
 is a simplified version of CalSim data inputs and how they contribute to
-the mass balance of the watersheds.
+the mass balance of the watersheds.Water Resource Integrated Modeling
+System (WRIM)
 
-![](images/calsim_conceptual_diagram.png)
-
-#### Water Resource Integrated Modeling System (WRIM)
+![](images/CalSimConceptualDiagramSimplified.png){width="682"}
 
 The Water Resource Integrated Modeling System (WRIM) provides the
 modeling framework and software for CalSim. WRIMS is a versatile water
@@ -106,7 +105,7 @@ capabilities
 
 #### Supporting Models
 
-```{r}
+```{r, echo = FALSE}
 # Fill in additional info based on page 169. 
 models <- readxl::read_excel(system.file("extdata", "calsim", "calsim_inputs.xlsx", 
                         package = "streamFlowExplorer", mustWork = TRUE), sheet = 2)
@@ -352,14 +351,14 @@ Simulation Period and Software Enhancements:
 
 #### Scenarios Produced
 
-| Scenario Name                               | CalSim Version | Year Released | Description                                                                                                                                                                                          |
-|------------------|------------------|------------------|------------------|
-| 2008 2009 BiOp                              | CalSim II      |               |                                                                                                                                                                                                      |
-| 2008 2009 BiOp                              | CalSim II      |               |                                                                                                                                                                                                      |
-| 2019 BiOp 2020 ITP                          | CalSim II      |               |                                                                                                                                                                                                      |
-| Delivery Capability Report and Studies 2015 | CalSim II      | 2015          | Link to report and results? avaliable [here.](https://water.ca.gov/Library/Modeling-and-Analysis/Central-Valley-models-and-tools/CalSim-II/DCR2019). TODO is this the same as the 2019 BiOp 2020 ITP |
-| Delivery Capability Report and Studies 2017 | CalSim II      | 2017          | Link to report and results? avaliable [here.](https://water.ca.gov/Library/Modeling-and-Analysis/Central-Valley-models-and-tools/CalSim-II/DCR2017)                                                  |
-| Delivery Capability Report and Studies 2019 | CalSim II      | 2019          | Link to report and results? avaliable [here.](https://water.ca.gov/Library/Modeling-and-Analysis/Central-Valley-models-and-tools/CalSim-II/DCR2015)                                                  |
+| Scenario Name                               | CalSim Version | Year Released | Description                                                                                                                                          |
+|--------------|--------------|--------------|-----------------------------|
+| 2008 2009 BiOp                              | CalSim II      |               |                                                                                                                                                      |
+| 2008 2009 BiOp                              | CalSim II      |               |                                                                                                                                                      |
+| 2019 BiOp 2020 ITP                          | CalSim II      |               |                                                                                                                                                      |
+| Delivery Capability Report and Studies 2015 | CalSim II      | 2015          | Link to report and results? avaliable [here.](https://water.ca.gov/Library/Modeling-and-Analysis/Central-Valley-models-and-tools/CalSim-II/DCR2019). |
+| Delivery Capability Report and Studies 2017 | CalSim II      | 2017          | Link to report and results? avaliable [here.](https://water.ca.gov/Library/Modeling-and-Analysis/Central-Valley-models-and-tools/CalSim-II/DCR2017)  |
+| Delivery Capability Report and Studies 2019 | CalSim II      | 2019          | Link to report and results? avaliable [here.](https://water.ca.gov/Library/Modeling-and-Analysis/Central-Valley-models-and-tools/CalSim-II/DCR2015)  |
 
 ### Data Inputs
 
@@ -367,11 +366,11 @@ Data Inputs to CalSim 3 were summarized based on Chapters 4, 5, and 6 of
 the main report. Inputs described in the main report are summarized in
 the table below:
 
-```{r}
+```{r, echo = FALSE}
 # Fill in additional info based on page 169. 
 data_inputs <- readxl::read_excel(system.file("extdata", "calsim", "calsim_inputs.xlsx", 
                         package = "streamFlowExplorer", mustWork = TRUE), sheet = 1)
-knitr::kable(data_inputs)
+knitr::kable(head(data_inputs))
 ```
 
 #### Rim Watershed Modeling Inputs
@@ -505,15 +504,13 @@ agricultural, urban, wetland refuge
 -   Non-Project Water Users, Sacramento River Region
 -   Non-Project Water Users, San Joaquin River Region
 
-#### Groundwater Data
-
-Add timestep of each input (or range for each category)
-
 ### Model Outputs
 
-File source Timestep
+CalSim produces .DSS file model outputs at a monthly timestep.
 
 ### Model Validation procedures
+
+-   Ask expert
 
 ## Spatial & Temporal Coverage
 
@@ -529,10 +526,11 @@ to download the full model network schematic.
 Valley Wide Analysis - pros, good coverage of the system, can model how
 different operations would cause different flow at a relatively fine
 scale. cons, monthly time scale is limited for use in biological
-modeling, monthly timesep does not capture the fine scale resolution
+modeling, monthly timestep does not capture the fine scale resolution
 that biological organisms experience.
 
 ### Questions
 
 -   Is there a conceptual model anywhere to describe the CalSim modeling
-    framework
+    framework What are the model validation procedures?
+-   What are the Applied Water demands used for? Talk through diagram.
