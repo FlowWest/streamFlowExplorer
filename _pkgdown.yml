@@ -1,7 +1,8 @@
 title: streamFlowExplorer
 url: https://flowwest.github.io/streamFlowExplorer/
 template:
-  bootstrap: 5
+  params:
+    bootswatch: flatly
 
 navbar:
   structure:
@@ -13,6 +14,10 @@ navbar:
     menu:
       - text: 'CalSim Overview'
         href: articles/calsim_template.html
+      - text: 'CDEC Overview'
+        href: articles/cdec_template.html
+      - text: 'USGS Overview'
+        href: articles/usgs_template.html
   - text: 'Modeling Methods'
     menu:
       - text: 'Flow Modeling Approaches'

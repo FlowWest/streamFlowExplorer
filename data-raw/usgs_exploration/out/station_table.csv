@@ -1,0 +1,195 @@
+channel,section,station_id,station_name,start_date,end_date,freq_avail,geometry,pct_complete
+American River,American River,afo,American River at Fair Oaks,1998-11-02,2024-02-14,hourly,"c(-106751.724033104, 69511.5297297789)",0.9831586290141477
+American River,American River,amf,American River at Folsom,1995-02-01,2001-05-08,daily,"c(-102796.698832271, 74746.0403382294)",0.8716884283468609
+American River,American River,amk,South Fork American River near Kyburz,2012-10-23,2024-02-14,hourly,"c(-28210.6652323162, 83156.5567134544)",0.9944064494030809
+American River,American River,cbr,South Fork American River at Chili Bar,1997-09-10,2024-02-14,hourly,"c(-70822.0811746706, 84302.2072297288)",0.9640347379371632
+American River,American River,fol,Folsom Lake,1987-01-05,2024-02-14,daily,"c(-102796.698832271, 74746.0403382294)",0.9614753845469094
+American River,American River,nfd,North Fork American River at North Fork Dam,1970-01-01,2005-11-30,hourly,"c(-88662.874860765, 102705.695369237)",0.9589705277077203
+American River,American River,oxb,Middle Fork American River near Oxbow Powerhouse,1997-10-21,2024-02-14,hourly,"c(-65753.3613552282, 110269.834979051)",0.9749119423475194
+Antelope Creek,Antelope Creek,atc,Antelope Creek near Red Bluff,2022-06-28,2024-02-14,hourly,"c(-180336.187362019, 244998.160940634)",0.6287243150684931
+Battle Creek,Battle Creek,bas,South Fork Battle Creek near Manton,2000-07-19,2024-02-14,hourly,"c(-168103.691634697, 267287.40982511)",0.7056618217811148
+Battle Creek,Battle Creek,bat,Battle Creek,1986-10-01,2024-02-14,hourly,"c(-182184.600926099, 266750.282410122)",0
+Battle Creek,Battle Creek,bnf,North Fork Battle Creek near Manton,2000-09-20,2024-02-14,hourly,"c(-168592.727252114, 269355.669928035)",0.7747417030639931
+Battle Creek,Battle Creek,btb,South Fork Battle Creek below Diversion to Coleman Canal,2016-06-01,2024-02-14,hourly,"c(-167127.170856546, 266901.177150086)",0.9165668198093669
+Battle Creek,Battle Creek,bti,South Fork Battle Creek below Diversion to Inskip Canal,2023-10-27,2024-02-14,hourly,"c(-159795.721124056, 265949.042451626)",0
+Battle Creek,Battle Creek,btw,North Fork Battle Creek below Diversion to Wildcat Canal,2016-06-01,2024-02-14,hourly,"c(-166420.319912829, 268873.680526996)",0.9165668198093669
+Battle Creek,Battle Creek,btx,North Fork Battle Creek below Diversion to Cross Country Canal,2023-10-27,2024-02-14,hourly,"c(-157812.893729014, 272234.616993946)",0
+Bear River,Bear River,bpg,Bear River at Pleasant Grove Rd,2006-01-27,2024-02-14,hourly,"c(-128770.38283073, 108582.394661641)",0.9752794577036427
+Bear River,Bear River,bre,Bear River at Rollins Reservoir,2005-10-28,2017-01-18,hourly,"c(-82308.8693061742, 124535.00851173)",0.7765557356775706
+Bear River,Bear River,brw,Bear River near Wheatland,1997-01-21,2001-09-19,hourly,"c(-121763.906526161, 110235.148334106)",0.9872006745810611
+Bear River,Bear River,cfw,Bear River at Camp Far West Dam,1997-08-21,2012-06-08,hourly,"c(-113781.938945979, 115670.490974416)",0.9254357201875026
+Big Chico Creek,Big Chico Creek,bic,Big Chico Creek near Chico,1997-03-20,2024-02-14,hourly,"c(-152283.719707983, 196159.09438525)",0.8514719090519269
+Butte Creek,Butte Creek,bcd,Butte Creek near Durham,1997-03-23,2024-02-14,hourly,"c(-152375.969857851, 186114.559413189)",0.9253559034275686
+Butte Creek,Butte Creek,bck,Butte Creek near Chico,1997-03-12,2024-02-14,hourly,"c(-146398.117350756, 191336.619946946)",0.9745855229839966
+Butte Creek,Butte Creek,bwc,Butte Creek near Western Canal,1997-03-20,2012-03-12,hourly,"c(-157698.853808869, 172625.25223077)",0.869566460540023
+Cache Creek,Cache Creek,ccl,Cache Creek near Lower Lake,2019-05-29,2024-02-14,hourly,"c(-222235.040341453, 103918.9087959)",0.8684018888639369
+Cache Creek,Cache Creek,ccy,Cahce Creek at Yolo,1997-03-05,1998-11-09,hourly,"c(-156934.4620032, 80450.657414794)",0.9777425013561857
+Cache Creek,Cache Creek,rum,Cache Creek at Rumsey Bridge,1984-01-01,2024-02-14,hourly,"c(-193914.755642712, 99402.0820076512)",0.8599717818839759
+Calaveras River,Calaveras River,nhg,New Hogan Lake,1988-12-07,2024-02-14,daily,"c(-71065.1850920334, 15382.2948861672)",0.9851305611697482
+Clear Creek,Clear Creek,igo,Clear Creek near Igo,1996-09-06,2024-02-14,hourly,"c(-213904.608685013, 280305.837962217)",0.9590119544430543
+Clear Creek,Clear Creek,whi,Whiskeytown Reservoir,1994-01-01,2024-02-14,daily,"c(-214738.996238008, 289746.900786604)",0.9620282622618127
+Cosumnes River,Cosumnes River,cmf,Middle Fork Cosumnes River near Somerset,2006-01-30,2024-02-14,hourly,"c(-61088.8869535579, 67829.2437818018)",0.9775334867532777
+Cosumnes River,Cosumnes River,cnf,North Fork Cosumnes River near El Dorado,2006-01-27,2024-02-14,hourly,"c(-73475.8693184005, 63986.631689446)",0.9760036062524086
+Cosumnes River,Cosumnes River,mhb,Cosumnes River at Michigan Bar,1984-01-01,2024-02-14,hourly,"c(-91048.7721260015, 54285.4577399464)",0.9800816650603837
+Cottonwood Creek,Cottonwood Creek,cot,Cottonwood Creek,1984-01-01,1999-12-09,hourly,"c(-190073.701465277, 265687.630694781)",0.7242207548545972
+Cottonwood Creek,Cottonwood Creek,ncb,North Fork Cottonwood Creek at Sunny Hill Mine,2020-12-11,2024-02-14,hourly,"c(-229375.104084086, 276478.092125345)",0.9350456621004566
+Cottonwood Creek,Cottonwood Creek,nco,North Fork Cottonwood Creek above Lake at Bridge near Ono,2010-06-02,2010-06-02,hourly,"c(-226598.128981919, 283167.674223863)",0
+Cow Creek,Cow Creek,cow,Cow Creek near Millville,1984-01-01,2024-02-14,hourly,"c(-189260.82767184, 278762.036758387)",0.9849851906174364
+Deer Creek,Deer Creek,dch,Deer Creek at Highway 32,1998-10-03,2024-02-14,hourly,"c(-123397.99837389, 250803.685710954)",0.7144316610168283
+Deer Creek,Deer Creek,dcv,Deer Creek near Vina,1997-03-12,2024-02-14,hourly,"c(-166252.002464511, 223727.117178979)",0.9740041767976275
+Deer Creek,Deer Creek,dvd,Deer Creek below Stanford Vina Dam,1997-03-20,2024-02-14,hourly,"c(-173713.410966452, 218280.345333661)",0.9421623650914298
+Elder Creek,Elder Creek,ecp,Elder Creek near Paskenta,2000-07-14,2024-02-14,hourly,"c(-214308.540705856, 225937.782113928)",0.9553931403402617
+Feather River,Feather River,f56,North Fork Feather River below Grizzly Creek,2013-08-01,2024-02-14,hourly,"c(-118996.048154679, 204945.638237497)",0.9241802144508185
+Feather River,Feather River,f57,North Fork Feather River below Rock Creek Diversion Dam,2013-08-01,2024-02-14,hourly,"c(-108923.845294778, 218938.643709876)",0.9241802144508185
+Feather River,Feather River,f70,North Fork Feather River below Belden Dam,2018-05-21,2024-02-14,hourly,"c(-99218.5428347102, 228997.46054762)",0.8939688495479535
+Feather River,Feather River,fsb,Feather River at Boyd's Landing above Star Bend,2008-11-17,2024-02-14,hourly,"c(-139251.167083548, 115578.950457374)",0.9727380521662466
+Feather River,Feather River,grl,Feather River near Gridley,1984-01-01,2024-02-14,hourly,"c(-141824.465887362, 151311.813814161)",0.9653070398077451
+Feather River,Feather River,kll,Oroville Dam - Kelly Ridge Power Plant,1993-10-01,2024-02-14,daily,"c(-127385.646079803, 169569.42840127)",1
+Feather River,Feather River,mer,Middle Fork Feather River at Merrimac,1984-01-05,2024-02-14,hourly,"c(-108828.762256915, 188857.977751859)",0.9295564651327445
+Feather River,Feather River,mfp,Middle Fork Feather River near Portola,2006-10-31,2024-02-14,hourly,"c(-38066.1365955513, 200434.377502603)",0.9927694151992709
+Feather River,Feather River,nfp,North Fork Feather River at Pulga,2004-12-01,2024-02-14,hourly,"c(-124193.338632595, 198523.360089438)",0.9910599070473549
+Feather River,Feather River,oro,Oroville Dam - Spillway,1987-01-05,2024-02-14,daily,"c(-128232.299593515, 170360.642668877)",0.9737813661404499
+Feather River,Feather River,wfr,West Branch Feather River near Magalia,2007-12-05,2024-02-14,hourly,"c(-134442.203931297, 200907.254990734)",0.836483991948312
+Kern River,Kern River,1st,Kern River at First Point,2021-07-09,2024-02-14,hourly,"c(97717.4029414075, -285030.256857406)",0.1854927701674277
+Kern River,Kern River,a2p,Kern River Canal at Alt Second Point,2021-06-28,2024-02-14,daily,"c(76759.9891202585, -296689.037953753)",0.7510559360730593
+Kern River,Kern River,isb,Isabella Dam,1988-12-07,2024-02-14,daily,"c(138122.638277921, -262331.952034663)",0.9874854209218683
+Kern River,Kern River,kkv,Kern River at Kernville,2010-01-20,2024-02-14,hourly,"c(142489.775641009, -250216.880585944)",0.8602965373386999
+Kern River,Kern River,krd,Kern River below Kern Canyon Powerhouse Diversion Dam,2010-12-02,2024-02-14,hourly,"c(110584.408645497, -283371.158941866)",0.9854423983831125
+Kern River,Kern River,sko,South Fork Kern River near Onyx,2002-03-21,2024-02-14,hourly,"c(164997.451217813, -251695.769584418)",0.9681933372008883
+Kings River,Kings River,amw,Kings River below Army Weir,1997-01-15,2024-02-14,hourly,"c(19082.7138885461, -181202.658762364)",0.9887748029487681
+Kings River,Kings River,csw,Kings River below Crescent Weir,1997-01-15,2012-12-31,hourly,"c(11109.046381908, -181105.700286624)",0.9380943521955529
+Kings River,Kings River,kbc,South Fork Kings River above Boyden Canyon,2015-04-30,2024-02-14,hourly,"c(108865.179495834, -133522.896036831)",0.9048152618708986
+Kings River,Kings River,krr,South Fork Kings River above Roaring River,2015-04-30,2024-02-14,hourly,"c(123287.178259896, -135762.634756384)",0.9326052470522023
+Kings River,Kings River,krt,Kings River near Trimmer,2010-10-07,2024-02-14,hourly,"c(76482.7004893538, -126563.19098181)",0.8972383930165201
+Kings River,Kings River,mbk,North Fork Kings River at Meadowbrook,1997-06-23,2024-02-14,hourly,"c(101024.128873051, -103372.535851792)",0
+Kings River,Kings River,nkd,North Fork Kings River below Dinkey Creek,1998-08-10,2005-11-15,hourly,"c(77616.6575605642, -125963.717778667)",0.9543016142243489
+Kings River,Kings River,pnf,Pine Flat Dam,1987-06-21,2024-02-14,daily,"c(60119.2338624515, -131330.66538935)",0.9447352444517277
+McCloud River,McCloud River,mc7,McCloud River below McCloud Dam,2011-04-12,2024-02-14,hourly,"c(-173456.592773552, 346968.329124463)",0.9379802054122737
+McCloud River,McCloud River,mca,McCloud River at Ah-Di-Na,2009-05-13,2024-02-14,hourly,"c(-176219.391573013, 345713.667369458)",0
+McCloud River,McCloud River,mcd,McCloud River near McCloud,1999-05-28,2005-11-17,hourly,"c(-172869.410749658, 354020.812070059)",0.9674912044314694
+McCloud River,McCloud River,mss,McCloud River above Shasta Lake,1991-08-01,2024-02-14,hourly,"c(-186892.510060307, 329026.609642397)",0.9460640256143288
+Merced River,Merced River,amr,Merced River at Amsterdam Rd,2018-12-18,2024-02-14,hourly,"c(-47595.4318928778, -60817.7683336791)",0.9571233500511516
+Merced River,Merced River,crs,Merced River at Cressy,1997-03-20,2024-02-14,hourly,"c(-58590.292178961, -65534.8842018186)",0.9609344228794755
+Merced River,Merced River,exc,New Exchequer Dam (Lake McClure),1993-10-03,1998-07-22,daily,"c(-23809.8095653456, -47919.5158089786)",0.9406859139905681
+Merced River,Merced River,h59,Merced River at Highway 59,2018-10-01,2024-02-14,hourly,"c(-44159.3505513394, -60589.8063867581)",0.9998402450283205
+Merced River,Merced River,hib,Merced River at Happy Isles Bridge near Yosemite,1997-03-24,2024-02-14,hourly,"c(38833.093014878, -31566.7754632705)",0.9688626044170527
+Merced River,Merced River,mbb,Merced River near Briceburg,1999-03-05,2024-02-14,hourly,"c(1930.88577355408, -46407.9949249798)",0.9006265095940315
+Merced River,Merced River,mbh,Merced River below Crocker-Huffman Dam,2013-03-11,2024-02-14,hourly,"c(-33557.1102971616, -55309.4086106275)",0.9585052467182492
+Merced River,Merced River,mbn,Merced River at Shaffer Bridge near Cressy,2013-03-11,2024-02-14,hourly,"c(-53780.031055558, -62318.4276002548)",0.9475835366351592
+Merced River,Merced River,mmf,Merced River below Merced Falls,1998-06-18,2024-02-14,hourly,"c(-29213.4935621282, -54905.8279865696)",0.9421081545428895
+Merced River,Merced River,msn,Merced River near Snelling,1997-05-28,2024-02-14,hourly,"c(-39814.9950176158, -57085.4179995586)",0.9534946443374283
+Merced River,Merced River,mst,Merced River near Stevinson,1997-03-20,2024-02-14,hourly,"c(-82332.1428492788, -71338.3058254221)",0.9530380926438827
+Merced River,Merced River,poh,Merced River at Pohono Bridge near Yosemite,1997-03-24,2001-08-01,hourly,"c(29377.7423219232, -33241.9148657033)",0.9744680754593703
+Merced River,Merced River,smw,South Fork Merced River at Wawona,2007-10-05,2024-02-14,hourly,"c(28923.4964476579, -52716.8735542218)",0.9825711628162662
+Mill Creek,Mill Creek,mch,Mill Creek below Highway 99,1997-10-21,2024-02-14,hourly,"c(-179524.019462207, 226901.045063398)",0.9477396137435437
+Mill Creek,Mill Creek,mlm,Mill Creek near Los Molinos,1997-03-11,2007-11-20,hourly,"c(-172626.105860998, 228367.027034475)",0.9745303283078223
+Mokelumne River,Mokelumne River,cmn,Camanche Reservoir,1993-10-03,2020-11-16,daily,"c(-89268.5688275553, 23673.706232273)",0.9475859595279088
+Mokelumne River,Mokelumne River,m11,North Fork Mokelumne River below Salt Springs Dam,2013-12-02,2024-02-14,hourly,"c(-19166.3009561927, 53074.7044545091)",0.9828996057589141
+Mokelumne River,Mokelumne River,m38,North Fork Mokelumne River above Tiger Creek,2013-08-01,2024-02-14,hourly,"c(-42642.5005325566, 47944.2525398368)",0.9241802144508185
+Mokelumne River,Mokelumne River,m46,North Fork Mokelumne River below Electra Diversion,2013-08-01,2024-02-14,hourly,"c(-47865.356545007, 45101.1662422582)",0.9241802144508185
+Mokelumne River,Mokelumne River,mbt,North Fork Mokelumne River below Tiger Creek Afterbay,2013-08-01,2024-02-14,hourly,"c(-43929.8992925985, 47240.6641437709)",0.9241802144508185
+Mokelumne River,Mokelumne River,nmr,North Mokelumne River at W Walnut Grove Rd,2010-12-20,2017-01-11,hourly,"c(-131769.678679213, 24040.2788757221)",0.8656434354938173
+Mokelumne River,Mokelumne River,smr,South Mokelumne River at W Walnut Grove Rd,2010-12-20,2017-09-27,hourly,"c(-130366.851941832, 24273.8067962332)",0.9572526903567775
+Pit River,Pit River,p1u,Pit River above Pit 1 Powerhouse,2023-06-13,2024-02-14,hourly,"c(-126233.428174941, 330952.61312429)",0.3013698630136986
+Pit River,Pit River,p35,Pit River below Lake Britton,2011-09-28,2024-02-14,hourly,"c(-141014.448219682, 335110.794115754)",0.9998859227237568
+Pit River,Pit River,pcn,Pit River near Canby,2000-07-14,2024-02-14,hourly,"c(-77657.3288980397, 376934.104691937)",0.9606795395426304
+Pit River,Pit River,pp1,Pit River below Pit 1 Powerhouse near Fall River Mills,2000-07-14,2024-02-14,hourly,"c(-127301.59115934, 330653.650095927)",0.9452849748608928
+Pit River,Pit River,pr4,Pit River below Pit 4 Dam,2010-06-30,2024-02-14,hourly,"c(-149803.541294731, 330131.827379404)",0.9465509474618502
+Pit River,Pit River,prb,Pit River at Big Bend,2010-06-30,2024-02-14,hourly,"c(-160648.408290947, 335338.370583133)",0.9465509474618502
+Pit River,Pit River,psh,Pit River at Shasta Lake,2023-06-26,2024-02-14,daily,"c(-170069.21538938, 315882.287249015)",0.25205479452054796
+Putah Creek,Putah Creek,ber,Lake Berryessa,1993-10-04,2024-02-14,daily,"c(-183235.990228105, 57241.1402997333)",0.9948079946103751
+Putah Creek,Putah Creek,ptc,Putah Creek,2019-05-31,2023-10-01,hourly,"c(-167574.016135035, 58598.3505327529)",0.7531211168500637
+Putah Creek,Putah Creek,ptf,Putah Creek,2019-12-30,2024-02-14,hourly,"c(-174720.334847242, 54732.7563935807)",0.9310696440601841
+Putah Creek,Putah Creek,put,Putah Creek near Winters,1997-03-24,2024-02-14,hourly,"c(-181307.771358219, 57441.621429259)",0.9667828348253685
+Sacramento River,Upper-mid Sacramento River,bnd,Sacramento River at Bend Bridge,1984-01-01,2024-02-14,hourly,"c(-185883.642252977, 254645.951167949)",0.9816760899331287
+Sacramento River,Upper-mid Sacramento River,btc,Sacramento River at Butte City,1998-01-28,2024-02-14,hourly,"c(-171463.247455118, 162024.588321803)",0.9766042705532235
+Sacramento River,Upper-mid Sacramento River,clw,Sacramento River at Colusa Weir,1998-01-28,2024-02-14,hourly,"c(-172031.136576249, 137469.388705665)",0.27021452753929454
+Sacramento River,Upper-mid Sacramento River,col,Sacramento River at Colusa,1984-01-01,2024-02-14,hourly,"c(-172558.157536871, 134950.276147866)",0.9835558288575742
+Sacramento River,Upper-mid Sacramento River,hmc,Sacramento River at Hamilton City - Main Channel,1991-06-19,2024-02-14,hourly,"c(-171096.426385966, 194589.780385754)",0.954886809747297
+Sacramento River,Upper-mid Sacramento River,kwk,Sacramento River at Keswick,1994-07-01,2024-02-14,hourly,"c(-206899.20430889, 289872.223514809)",0.9428378470402808
+Sacramento River,Upper-mid Sacramento River,mlw,Sacramento River at Moulton Weir,1998-01-28,2024-02-14,hourly,"c(-174193.960021026, 148785.535119493)",0.4991433737651175
+Sacramento River,Upper-mid Sacramento River,ord,Sacramento River at Ord Ferry - Main Channel,1984-01-01,2024-02-14,hourly,"c(-170980.78458848, 180941.140151099)",0.9562555693571125
+Sacramento River,Upper-mid Sacramento River,sbs,Sacramento River at Butte Slough,1998-10-03,1998-10-03,hourly,"c(-167113.493541692, 132696.274662353)",0.7529681256438499
+Sacramento River,Upper-mid Sacramento River,sha,Shasta Dam,1987-01-05,2024-02-14,daily,"c(-204497.935981862, 302807.111820139)",0.9563445772293739
+Sacramento River,Upper-mid Sacramento River,vin,Sacramento River at Vina Bridge - Main Channel,1984-01-01,2024-02-14,hourly,"c(-178808.720016123, 212293.311385243)",0.9689595380455124
+Sacramento River,Lower-mid Sacramento River,fre,Sacramento River at Fremont Weir,1984-01-01,2024-02-14,hourly,"c(-144724.888761386, 83853.6919840248)",0.9697837619613494
+Sacramento River,Lower-mid Sacramento River,tis,Sacramento River at Tisdale Weir,1998-01-28,2024-02-14,hourly,"c(-157590.53938233, 113792.45522249)",0.6387626895149914
+Sacramento River,Lower-mid Sacramento River,von,Sacramento River at Verona,1984-01-01,2024-02-14,hourly,"c(-138690.251462714, 85405.8545948057)",0.9720147368659081
+Sacramento River,Lower-mid Sacramento River,wlk,Sacramento River below Wilkins Slough,1984-01-01,2024-02-14,hourly,"c(-157851.550959332, 111958.255310178)",0.970231540612446
+Sacramento River,Lower Sacramento River,fpt,Sacramento River at Freeport,1948-10-01,2024-02-14,hourly,"c(-130765.487414191, 49918.8349807253)",0.975826565112159
+Sacramento River,Lower Sacramento River,ist,Sacramento River at I Street Bridge,1984-01-01,2024-02-14,hourly,"c(-130938.330146925, 64658.8614028962)",0.9580188274290741
+Sacramento River,North Delta,ges,Sacramento River below Georgiana Slough,2006-05-17,2024-02-14,hourly,"c(-133166.665776874, 25808.1172375847)",0.9496730382555247
+Sacramento River,North Delta,m13,Sacramento River below Toland Landing,2021-05-28,2024-02-14,hourly,"c(-154817.415238371, 8273.33297161385)",0
+Sacramento River,North Delta,mal,Sacramento River at Mallard Island,2011-07-08,2024-02-14,hourly,"c(-168280.170788979, 4643.27866639197)",0.8642609851036753
+Sacramento River,North Delta,sdc,Sacramento River above Delta Cross Channel,2003-09-25,2024-02-14,hourly,"c(-132662.455509807, 27812.3661686326)",0.8891314539452031
+Sacramento River,North Delta,sdi,Sacramento River at Decker Island,2010-01-20,2010-01-20,hourly,"c(-152045.10662899, 9955.7058829302)",0
+Sacramento River,North Delta,soi,Sacramento River downstream of Isleton,2015-06-11,2024-02-14,hourly,"c(-144955.276433481, 18954.778579263)",0.8922063136101893
+Sacramento River,North Delta,srv,Sacramento River at Rio Vista,2003-10-08,2024-02-14,hourly,"c(-147534.742141175, 17279.1493524616)",0.9690215787733613
+San Joaquin River,Upper San Joaquin River,dnb,San Joaquin River at Donny Bridge,2004-06-16,2024-02-14,hourly,"c(3046.04680271476, -131488.555447526)",0.920702265326746
+San Joaquin River,Upper San Joaquin River,grf,San Joaquin River at Gravelly Ford,1997-03-20,2024-02-14,hourly,"c(-14257.1637968206, -135422.82630534)",0.9595718923941783
+San Joaquin River,Upper San Joaquin River,h41,San Joaquin River at Highway 41,2012-05-22,2024-02-14,hourly,"c(18408.4194108336, -126722.953075554)",0.9293867443192687
+San Joaquin River,Upper San Joaquin River,mil,Friant Dam (Millerton Reservoir),1987-06-20,1998-02-26,daily,"c(26216.4085027381, -112830.468465365)",0.8936648640556119
+San Joaquin River,Upper San Joaquin River,sja,San Joaquin River near Auberry,1998-07-01,2024-02-14,hourly,"c(41607.5110571348, -98206.9328281209)",0.932210740718348
+San Joaquin River,Upper San Joaquin River,sjf,San Joaquin River below Friant,1997-03-05,2002-01-07,hourly,"c(24505.5392159569, -114681.444656533)",0.953793761823305
+San Joaquin River,Upper San Joaquin River,skb,San Joaquin River below Highway 145 (Skaggs Bridge),2012-04-24,2024-02-14,hourly,"c(-7874.50508979529, -132663.606538463)",0.9482311394315942
+San Joaquin River,Lower San Joaquin River,ffb,San Joaquin River at Fremont Ford Bridge,2004-05-12,2024-02-14,hourly,"c(-82402.1572587026, -78125.5002346179)",0.9611701498053746
+San Joaquin River,Lower San Joaquin River,men,San Joaquin River near Mendota,1984-01-01,2024-02-14,hourly,"c(-33697.1586014009, -133977.741336029)",0.9686235032718268
+San Joaquin River,Lower San Joaquin River,mrb,San Joaquin River at Maze Rd Bridge,2006-11-17,2024-02-14,hourly,"c(-108171.209201776, -40983.3497736268)",0.9646820954221946
+San Joaquin River,Lower San Joaquin River,new,San Joaquin River below Merced River near Newman,1984-01-01,2024-02-14,hourly,"c(-86436.7286114747, -73576.6110887812)",0.9746936132320283
+San Joaquin River,Lower San Joaquin River,scl,San Joaquin River near Crows Landing,2004-07-13,2024-02-14,hourly,"c(-89583.3536257801, -64495.855172507)",0.951604337431694
+San Joaquin River,Lower San Joaquin River,sdp,San Joaquin River near Dos Palos,2009-12-03,2024-02-14,hourly,"c(-44571.8742388052, -113531.447996817)",0.9381731294490249
+San Joaquin River,Lower San Joaquin River,sjb,San Joaquin River below Bifurcation,1997-06-20,2024-02-14,hourly,"c(-25493.0358762926, -138175.076483611)",0.8915217053326193
+San Joaquin River,Lower San Joaquin River,sjh,San Joaquin River near Highway 152,2022-12-18,2024-02-14,hourly,"c(-48691.9739249108, -106681.414161214)",0.7845890410958904
+San Joaquin River,Lower San Joaquin River,sjn,San Joaquin River at San Mateo Rd near Mendota,2011-02-17,2024-02-14,hourly,"c(-27332.8289277937, -137514.781130137)",0.9653064185577379
+San Joaquin River,Lower San Joaquin River,sjp,San Joaquin River at Patterson Bridge,1997-03-20,2024-02-14,hourly,"c(-95440.8256787188, -57525.3226505523)",0.9518934500161264
+San Joaquin River,Lower San Joaquin River,sjs,San Joaquin River near Stevinson,1997-03-20,2024-02-14,hourly,"c(-75333.4449935532, -79852.7581830393)",0.9264585782322733
+San Joaquin River,Lower San Joaquin River,smn,San Joaquin River above Merced River near Newman,2010-03-01,2024-02-14,hourly,"c(-86354.7699497691, -73942.0867910911)",0.9601591489953268
+San Joaquin River,Lower San Joaquin River,swa,San Joaquin River near Washington Rd,2011-02-14,2024-02-14,hourly,"c(-52087.2845092504, -100002.70177233)",0.915928400329366
+San Joaquin River,South Delta,bdt,San Joaquin River at Brandt Bridge,2008-01-03,2024-02-14,hourly,"c(-116238.882776191, -16015.7196972086)",0.969684061306984
+San Joaquin River,South Delta,msd,San Joaquin River at Mossdale Bridge,2005-12-12,2005-12-19,hourly,"c(-114857.656555051, -24817.899690175)",0.9889030976481384
+San Joaquin River,South Delta,pri,San Joaquin River at Prisoners Point ner Termino,2006-05-30,2024-02-14,hourly,"c(-136448.727187355, 5904.58598309802)",0.9572901504880882
+San Joaquin River,South Delta,sjc,San Joaquin River near Buckley Cove,2018-07-25,2024-02-14,hourly,"c(-121552.339915104, -3124.74014727445)",0.8639888267169032
+San Joaquin River,South Delta,sjd,San Joaquin River above Dos Reis,2013-08-16,2024-02-14,hourly,"c(-115832.538313306, -20765.2202519546)",0.85153295105785
+San Joaquin River,South Delta,sjg,San Joaquin River at Garwood Bridge,2003-08-27,2024-02-14,hourly,"c(-116648.106238003, -8227.55052614957)",0.9292949613660371
+San Joaquin River,South Delta,sjj,San Joaquin River at Jersey Point,2003-10-08,2024-02-14,hourly,"c(-148011.104256382, 5279.79900941998)",0.9084575395488684
+San Joaquin River,South Delta,sjl,San Joaquin River below Old River near Lathrop,2004-10-13,2007-12-01,hourly,"c(-116404.706940857, -22000.3256634804)",0.9306370783117499
+San Joaquin River,South Delta,vns,San Joaquin River near Vernalis,1984-01-01,2024-02-14,hourly,"c(-111532.044166854, -37087.905304519)",0.9768594284128054
+Stanislaus River,Stanislaus River,kot,Stanislaus River at Koetitz Ranch,2015-07-01,2024-02-14,hourly,"c(-103032.984223535, -34557.9266445953)",0.9164638106367465
+Stanislaus River,Stanislaus River,nml,New Melones Reservoir,1987-01-05,2024-02-14,daily,"c(-46073.1611903101, -7461.28385993699)",0.9406766973575866
+Stanislaus River,Stanislaus River,nsa,North Fork Stainslaus River near Avery,1998-06-27,1998-10-08,hourly,"c(-25349.4111101233, 25343.9305488002)",0.12634132420091324
+Stanislaus River,Stanislaus River,nsd,North Fork Stainslaus River below Diversion,1998-06-27,2024-02-14,hourly,"c(-1569.40421209374, 46426.3123332746)",0.8457045762564958
+Stanislaus River,Stanislaus River,obb,Stanislaus River at Orange Blossom Bridge,1984-01-01,2024-02-14,hourly,"c(-65963.6399748473, -25681.5922462228)",0.9499205630723357
+Stanislaus River,Stanislaus River,rip,Stanislaus River at Ripon,1997-03-05,2024-02-14,hourly,"c(-97738.1473227115, -31300.6100335829)",0
+Stanislaus River,Stanislaus River,s12,Middle Fork Stanislaus River below Sandbar Diversion Dam,2013-08-01,2024-02-14,hourly,"c(-13802.7677400357, 18541.8090320323)",0.9241802144508185
+Stanislaus River,Stanislaus River,s52,Middle Fork Stanislaus River at Kennedy Meadows,2013-08-01,2024-02-14,hourly,"c(22686.2975744451, 31283.6323925164)",0.9241802144508185
+Stanislaus River,Stanislaus River,s61,South Fork Stanislaus River at Strawberry,2013-08-01,2024-02-14,hourly,"c(-655.998173842391, 20135.7981717107)",0.9241802144508185
+Stanislaus River,Stanislaus River,s83,South Fork Stanislaus River near Strawberry Diversion Dam,2013-08-01,2024-02-14,hourly,"c(-4009.6458187587, 17944.3402454904)",0.9241802144508185
+Stanislaus River,Stanislaus River,stu,Tuolumne Canal near Long Barn,1994-01-01,2024-02-14,daily,"c(-14627.3471042159, 8532.06545965653)",0.9666666666666667
+Stony Creek,Stony Creek,blb,Black Butte Dam,1988-12-06,2024-02-14,daily,"c(-199292.24668774, 201576.363142463)",0.99208750833217485
+Stony Creek,Stony Creek,scg,Stony Creek near Grizzly Flat,2014-12-09,2024-02-14,hourly,"c(-206779.396187086, 193296.045206423)",0.9788813478498335
+Stony Creek,Stony Creek,suw,Stony Creek near Suwanna Ranch,2014-11-25,2024-02-14,hourly,"c(-216082.588170114, 166085.118908852)",0.9831177760588644
+Sutter Bypass,Sutter Bypass,bsl,Butte Slough near Meridian,1997-03-12,2024-02-14,hourly,"c(-164147.943603046, 130043.545463671)",0.9747944177365978
+Sutter Bypass,Sutter Bypass,wsl,Willow Slough at SB West Borrow Pit,1997-10-21,2023-12-16,hourly,"c(-140981.205441153, 101056.409097292)",0.9596313034907803
+Thomes Creek,Thomes Creek,tho,Thomes Creek at Paskenta,1984-01-01,2024-02-14,hourly,"c(-216128.485556631, 210880.75765266)",0.8899116914782793
+Tuolumne River,Tuolumne River,dnp,Don Pedro Reservoir,1993-10-03,2002-12-31,daily,"c(-37067.8390037835, -34864.6977767008)",0.9659703300313564
+Tuolumne River,Tuolumne River,lgn,Tuolumne River below La Grange Dam near La Grange,1997-03-05,2024-02-14,hourly,"c(-38947.5507382241, -38822.4847999727)",0.9719489837387104
+Tuolumne River,Tuolumne River,mod,Tuolumne River at Modesto,1984-01-01,2024-02-14,hourly,"c(-87075.5018991101, -42844.4267299315)",0.9658345243999051
+Tuolumne River,Tuolumne River,tai,Tuolumne River above Early Intake near Mather,1997-06-13,2007-09-05,hourly,"c(4644.2467294997, -15228.2770273057)",0.9373967670105418
+Tuolumne River,Tuolumne River,tbi,Tuolumne River below Early Intake near Mather,1997-06-13,2024-02-14,hourly,"c(2618.94300329899, -14981.9249449368)",0.9393115619330936
+Tuolumne River,Tuolumne River,tgc,Tuolumne River at the Grand Canyon of the Tuolumne,2008-01-04,2024-02-14,hourly,"c(29859.5508838125, -11038.3821736085)",0.9737209485022581
+Tuolumne River,Tuolumne River,tmp,Tuolumne River at Merals Pool,2022-05-01,2024-02-14,hourly,"c(-4760.10369776524, -19989.2693566615)",0.7095319634703197
+Tuolumne River,Tuolumne River,trh,Tuolumne River near Hetch Hetchy,1997-06-13,2009-01-09,hourly,"c(17709.353349585, -8757.26659107115)",0.9589107432313168
+Tuolumne River,Tuolumne River,trt,Tuolumne River at Tuolumne City,2019-12-18,2024-02-14,hourly,"c(-99737.6892948719, -45341.8047616235)",0.9413583344249818
+Tuolumne River,Tuolumne River,trw,Tuolumne River at Waterford,2012-08-22,2024-02-14,hourly,"c(-67466.2431453455, -42278.375675045)",0.979641540886067
+Upper Sacramento River,Upper Sacramento River,dlt,Sacramento River at Delta,1991-07-01,2024-02-14,hourly,"c(-203637.303829569, 327392.478499992)",0.9430372858005914
+Yolo Bypass,Yolo Bypass,lis,Yolo Bypass at Lisbon,2004-01-22,2010-01-25,hourly,"c(-138393.618783517, 52118.6328582019)",0.9690689290303666
+Yolo Bypass,Yolo Bypass,toe,Toe Drain at Liberty Island near Courtland,2021-05-28,2024-02-14,hourly,"c(-143558.262673153, 38241.1735831886)",0.6969082952815829
+Yolo Bypass,Yolo Bypass,yby,Yolo Bypass near Woodland,1997-03-05,1998-07-13,hourly,"c(-142873.094932537, 74752.3091963325)",0.9560963952262266
+Yuba River,Yuba River,gyb,North Yuba River below Goodyears Bar,2008-07-31,2024-02-14,hourly,"c(-80582.8609839605, 168071.13600244)",0.9457124040129001
+Yuba River,Yuba River,jbr,South Yuba River at Jones Bar,1998-06-18,2024-02-14,hourly,"c(-95144.1536933509, 142345.854726428)",0.9722822988823437
+Yuba River,Yuba River,mry,Yuba River near Marysville,1987-07-10,2003-12-01,hourly,"c(-131628.436579367, 129928.224775649)",0.9313626357943391
+Yuba River,Yuba River,nyr,North Yuba River below Bullards Bar Dam,1997-10-24,2003-11-03,hourly,"c(-98372.431163076, 153386.682702749)",0.846380962183511
+Yuba River,Yuba River,nys,North Yuba River above Slate Creek near Strawberry,2007-01-24,2024-02-14,hourly,"c(-93691.9219434336, 168189.718197565)",0.9582525788592254
+Yuba River,Yuba River,orh,Middle Yuba River below Our House Dam,1998-06-18,2024-02-14,hourly,"c(-85782.8808417441, 155578.388439749)",0.9722822988823437
+Yuba River,Yuba River,ypb,Yuba River at Parks Bar Bridge,2010-10-01,2024-02-14,hourly,"c(-110549.946247421, 135715.572149472)",0.9998859167256876
+Yuba River,Yuba River,yrs,Yuba River near Smartville,1996-07-29,2024-02-14,hourly,"c(-109889.707857401, 136214.826397829)",0.9334805861439942

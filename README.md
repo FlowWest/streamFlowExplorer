@@ -1,6 +1,4 @@
-# streamFlowExplorer
-
-![](man/figures/streamFlowExplorer%20conflict.png){width="260"}
+# streamFlowExplorer<a href='https://flowwest.github.io/streamFlowExplorer'><img src='man/figures/streamFlowExplorer%20conflict.png' align="right" height="250" style="float:right; height:250px;"/></a> 
 
 ## What is streamFlowExplorer?
 

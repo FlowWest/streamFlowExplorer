@@ -1,0 +1,168 @@
+---
+title: "USGS Overview Document"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{calsim_template}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, fig.width=15, fig.height=10, dpi=300)
+library(tidyverse)
+library(lubridate)
+library(googleCloudStorageR)
+library(ggplot2)
+library(scales)
+library(janitor)
+library(dataRetrieval)
+library(leaflet)
+library(readr)
+library(ggmap)
+library(viridis)
+library(rmarkdown)
+library(sf)
+
+colors <- c("#326875", "#899da4", "#9ab293", "#c1c172")
+
+```
+
+## USGS Flow Data Summary 
+The United States Geological Survey (USGS) is responsible for monitoring and providing information on the quantity, quality, distribution, movement, and other characteristics of surface water and groundwater resources across the United States. Among the data they collect and track is flow data. The NWIS Mapper provides an interface for users to explore and retrieve water data through interactive maps.
+
+* **Source:** National Water Information System (NWIS) mapper is a tool provided by the USGS. [USGS NWIS website](https://waterdata.usgs.gov/nwis)
+* **Accessibility:** Public, open and accessible online.
+* **Coverage:**  Approximately 1.9 million sites in all 50 States, the District of Columbia, Puerto Rico, the Virgin Islands, Guam, American Samoa and the Commonwealth of the Northern Mariana Islands.
+Approximately 1,000 gages operate and report data publicly in California. Of these, about 60 percent are operated by the USGS, and the remaining gages are operated by State or other agencies. Lastly, a substantial number of gages are operated by third-party entities that are either not publicly availiable, or lack sufficient data quality to be reported.
+Source: [California Stream Gaging Prioritization Plan 2022](https://www.waterboards.ca.gov/waterrights/water_issues/programs/stream_gaging_plan/docs/sb19-report.pdf)
+* **Temporal Coverage:** Temporal coverage of 1862 to present, however it varies across the different gages. Some gages have big data gaps or no historical data at all. Overall, it does not provide good temporal and system coverage.
+* **Spatial Coverage:** There is at least one gage with flow data for each of the streams of interest mentioned on [Lindley et al.](https://swfsc-publications.fisheries.noaa.gov/publications/CR/2006/2006Lin.pdf)
+* **Maintenance:** Frequency of data collection varies depending on the site and the importance of the data for water resource management, flood monitoring, and other purposes.
+The frequency of data collection at a particular stream gage ranges from hourly to daily, and in some cases, data is collected more frequently (during specific events, such as storms or floods). Real-time data from many stream gages is available on the USGS NWIS website.
+The USGS continually updates and maintains its network of monitoring sites, data is available to the public through the NWIS platform.
+
+* **Contact:** General contact for Water Data for NWIS can be done through a ["questions/comments" portal](https://waterdata.usgs.gov/questions-comments/?&ownerCode=USA&referrerUrl=https%3A%2F%2Fwaterdata.usgs.gov%2Fnwis) 
+
+* **Utilized By:** Data is used for various FlowWest projects, including SR JPE. 
+
+
+## Spatial & Temporal Coverage
+
+```{r import-watersheds, eval=TRUE, echo=TRUE, include=FALSE, message=FALSE, warning=FALSE}
+# import a few different watershed files
+# use intersection with these polys to detect if in the basin
+watersheds_huc8 <- 
+  st_read(system.file("extdata", "cdec", "shp", "calw221_huc_8_selected.shp", 
+                        package = "streamFlowExplorer", mustWork = TRUE), as_tibble=TRUE) |>
+  janitor::clean_names() |>
+  st_transform("EPSG:3310") |>
+  select(huc_8, huc_8_name, wshed_id)
+subwatersheds_huc12 <- 
+  st_read(system.file("extdata", "cdec", "shp", "wbd_subwatershed_selected.shp", 
+                        package = "streamFlowExplorer", mustWork = TRUE), as_tibble=TRUE) |>
+  janitor::clean_names() |>
+  st_transform("EPSG:3310")
+subwatersheds_calw221 <-
+  st_read(system.file("extdata", "cdec", "shp", "calw221_selected.shp", 
+                        package = "streamFlowExplorer", mustWork = TRUE), as_tibble=TRUE) |>
+  janitor::clean_names() |>
+  st_transform("EPSG:3310")
+watershed_labels <- 
+  st_read(system.file("extdata", "cdec", "shp", "wbd_huc10_group_by_river_name.shp", 
+                        package = "streamFlowExplorer", mustWork = TRUE), as_tibble=TRUE) |>
+  janitor::clean_names() |>
+  st_transform("EPSG:3310") |>
+  rename(river_basin = river_name)
+
+# import river and creek stream lines
+# use intersection with buffered flowline shapefile to detect if on the mainstem
+stream_flowlines <- 
+  st_read(system.file("extdata", "cdec", "shp", "ca_streams_selected.shp", 
+                        package = "streamFlowExplorer", mustWork = TRUE), as_tibble=TRUE) |>
+  janitor::clean_names() |>
+  st_zm() |>
+  st_transform("EPSG:3310") |>
+  mutate(label = coalesce(name, paste0("Tributary of ",down_name)))
+bypass_polys <- 
+  st_read(system.file("extdata", "cdec", "shp", "yolo_sutter_bypass_extents.shp", 
+                        package = "streamFlowExplorer", mustWork = TRUE), as_tibble=TRUE) |>
+  janitor::clean_names() |>
+  st_transform("EPSG:3310") |>
+  mutate(name = map(area_name, function(x) str_split_1(x, " - ")[1])) |> 
+  unnest() |>
+  group_by(name) |>
+  summarize() |>
+  st_union(by_feature = TRUE)
+```
+
+```{r message=FALSE, warning=FALSE}
+usgs_overview <- read_csv(system.file("extdata", "usgs", "USGS_station_lookup.csv", 
+                        package = "streamFlowExplorer", mustWork = TRUE)) |> 
+  janitor::clean_names() |>
+  mutate(gage = str_sub(gage,1,8))|>
+  select(-percent_na_only_something_we_want_to_do_if_we_can_functionalize_this_process) |> 
+  mutate(min_date = as.Date(min_date, format = "%m/%d/%Y"),
+         max_date = as.Date(max_date, format = "%m/%d/%Y")) 
+
+#creating a map to show temporal coverage
+
+get_lat_lon <- function(station_code){
+  site_info <- dataRetrieval::readNWISsite(siteNumbers = station_code)
+  coordinates <- ifelse(is.null(site_info), list(NA_integer_, NA_integer_), list(site_info$dec_long_va, site_info$dec_lat_va))
+  return(coordinates)
+}
+
+usgs_flow_gages <- dataRetrieval::readNWISsite(siteNumbers = usgs_overview$gage)
+
+map_data <- usgs_overview |> 
+  left_join(usgs_flow_gages, by = join_by(gage == site_no)) |>
+  st_as_sf(coords = c("dec_long_va", "dec_lat_va")) 
+
+  watersheds_wgs84 <- st_transform(watershed_labels, "EPSG:4326")
+  flowlines_wgs84 <- st_transform(stream_flowlines, "EPSG:4326")
+  bypasses_wgs84 <- st_transform(filter(bypass_polys,name %in% c("Sutter Bypass", "Yolo Bypass")), "EPSG:4326")
+
+  leaflet::leaflet() |> 
+  leaflet::addTiles(urlTemplate = 'https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}',
+                 attribution = 'Basemap tiles &copy; Esri &mdash; Sources: GEBCO, NOAA, CHS, OSU, UNH, CSUMB, National Geographic, DeLorme, NAVTEQ, and Esri',
+                 options = leaflet::tileOptions(noWrap = TRUE, opacity = 1.0, maxNativeZoom = 13, maxZoom = 13)) |>
+  leaflet::addTiles(urlTemplate = 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Reference_Overlay/MapServer/tile/{z}/{y}/{x}',
+                 attribution = 'Reference tiles &copy; Esri &mdash; Source: USGS, Esri, TANA, DeLorme, and NPS',
+                 options = leaflet::tileOptions(noWrap = TRUE, opacity = 0.5, maxNativeZoom = 13, maxZoom = 13)) |>  
+  leaflet::addPolygons(data=watersheds_wgs84, label=~paste(river_basin, "watershed"), color="#888888", weight=1, fillOpacity = 0.0) |>
+  leaflet::addPolygons(data=bypasses_wgs84, label=~name, weight=0, fillColor="#326875", fillOpacity=0.5, color=NA) |>
+  leaflet::addPolylines(data=flowlines_wgs84, label=~label, color="#326875", weight = 2) |>
+  leaflet::addCircleMarkers(data=map_data, 
+                            label=~gage,
+                            stroke = FALSE, 
+                            fillOpacity = 1, radius = 5, 
+                            color = "#c1c172") 
+
+```
+
+
+## Date range coverage over watersheds by the different gages.
+```{r}
+ggplot(usgs_overview, aes(x = min_date, 
+                          xend = max_date, 
+                          y = tributary, 
+                          yend = tributary)) +
+  geom_segment(size = 4, alpha = 0.6, show.legend = FALSE, alpha = .4, color = "#326875") +  
+  labs(title = "Date Coverage for Tributaries",
+       x = "Date",
+       y = "") +
+  scale_x_date(date_breaks = "10 years", date_labels = "%Y") +
+  theme_minimal()
+```
+
+## Quality Checks 
+
+The USGS QA/QC process commences with automated electronic processing software designed to detect errors or inconsistencies. Once identified, USGS staff conduct thorough reviews and implement necessary changes. For stream flow and other surface-water gauging stations, QA/QC documentation is reported in an annual station analysis report.
+
+Source: [USGS Standards for the Analysis and Processing of Surface-Water Data and Information Using Electronic Methods. Section 19. Quality Assurance and Quality Control](https://water.usgs.gov/osw/pubs/WRIR01-4044.pdf)
+
+## Questions for Data Experts 
+
