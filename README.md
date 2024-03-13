@@ -32,9 +32,9 @@ The below tree displays a series of decision points and associated pathways to p
 
 If you find that for your flow data use, you ended in a brown square where additional modeling is needed, please refer to the article on Flow Modeling Approaches.
 
-The following table provides a brief overview of the benefits and limitations of each data type for some potential use cases. Since this review is focused on flow data for ecological analysis this table primary focuses on that, but it also includes a few use cases for non ecological analysis since some of these datasets are primarily developed for non ecological purposes.
+The following table provides a brief overview of the benefits and limitations of each data type for some potential use cases. Since this review is focused on flow data for ecological analysis this table primary focuses on that, but it also includes a few use cases for non-ecological analysis since some of these datasets are primarily developed for non ecological purposes.
 
-![](man/figures/use_table_readme.png){width="770"}
+![](man/figures/use_table_readme.png)
 
 ## Modeling Methods to Fill Data Gaps
 
