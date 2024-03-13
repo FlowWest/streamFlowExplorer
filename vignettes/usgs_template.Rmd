@@ -51,6 +51,43 @@ The USGS continually updates and maintains its network of monitoring sites, data
 
 ## Spatial & Temporal Coverage
 
+The following section assesses spatial and temporal coverage of the stations.
+
+### Temporal Coverage 
+
+The following chart summarizes the ranges of data availability. This is based on the published start and end dates and does not account for NA values within these ranges.  Darker shading indicates that there are multiple gages operating at the same time. 
+
+```{r}
+usgs_overview <- read_csv(system.file("extdata", "usgs", "USGS_station_lookup.csv", 
+                        package = "streamFlowExplorer", mustWork = TRUE)) |> 
+  janitor::clean_names() |>
+  mutate(gage = str_sub(gage,1,8))|>
+  select(-percent_na_only_something_we_want_to_do_if_we_can_functionalize_this_process) |> 
+  mutate(min_date = as.Date(min_date, format = "%m/%d/%Y"),
+         max_date = as.Date(max_date, format = "%m/%d/%Y")) 
+
+ggplot(usgs_overview, aes(x = min_date, 
+                          xend = max_date, 
+                          y = tributary, 
+                          yend = tributary)) +
+  geom_segment(size = 4, alpha = 0.6, show.legend = FALSE, alpha = .4, color = "#326875") +  
+  labs(title = "Date Coverage for Tributaries",
+       x = "Date",
+       y = "") +
+  scale_x_date(date_breaks = "10 years", date_labels = "%Y") +
+  theme_minimal()
+```
+
+#### Percent non-missing
+
+```{r na-count, message=FALSE}
+# TODO 
+```
+
+### Spatial Coverage
+
+The map below shows USGS gage locations
+
 ```{r import-watersheds, eval=TRUE, echo=TRUE, include=FALSE, message=FALSE, warning=FALSE}
 # import a few different watershed files
 # use intersection with these polys to detect if in the basin
@@ -99,15 +136,7 @@ bypass_polys <-
 ```
 
 ```{r message=FALSE, warning=FALSE}
-usgs_overview <- read_csv(system.file("extdata", "usgs", "USGS_station_lookup.csv", 
-                        package = "streamFlowExplorer", mustWork = TRUE)) |> 
-  janitor::clean_names() |>
-  mutate(gage = str_sub(gage,1,8))|>
-  select(-percent_na_only_something_we_want_to_do_if_we_can_functionalize_this_process) |> 
-  mutate(min_date = as.Date(min_date, format = "%m/%d/%Y"),
-         max_date = as.Date(max_date, format = "%m/%d/%Y")) 
-
-#creating a map to show temporal coverage
+#creating a map to show spatial coverage
 
 get_lat_lon <- function(station_code){
   site_info <- dataRetrieval::readNWISsite(siteNumbers = station_code)
@@ -125,38 +154,30 @@ map_data <- usgs_overview |>
   flowlines_wgs84 <- st_transform(stream_flowlines, "EPSG:4326")
   bypasses_wgs84 <- st_transform(filter(bypass_polys,name %in% c("Sutter Bypass", "Yolo Bypass")), "EPSG:4326")
 
-  leaflet::leaflet() |> 
-  leaflet::addTiles(urlTemplate = 'https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}',
-                 attribution = 'Basemap tiles &copy; Esri &mdash; Sources: GEBCO, NOAA, CHS, OSU, UNH, CSUMB, National Geographic, DeLorme, NAVTEQ, and Esri',
-                 options = leaflet::tileOptions(noWrap = TRUE, opacity = 1.0, maxNativeZoom = 13, maxZoom = 13)) |>
-  leaflet::addTiles(urlTemplate = 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Reference_Overlay/MapServer/tile/{z}/{y}/{x}',
-                 attribution = 'Reference tiles &copy; Esri &mdash; Source: USGS, Esri, TANA, DeLorme, and NPS',
-                 options = leaflet::tileOptions(noWrap = TRUE, opacity = 0.5, maxNativeZoom = 13, maxZoom = 13)) |>  
-  leaflet::addPolygons(data=watersheds_wgs84, label=~paste(river_basin, "watershed"), color="#888888", weight=1, fillOpacity = 0.0) |>
-  leaflet::addPolygons(data=bypasses_wgs84, label=~name, weight=0, fillColor="#326875", fillOpacity=0.5, color=NA) |>
-  leaflet::addPolylines(data=flowlines_wgs84, label=~label, color="#326875", weight = 2) |>
-  leaflet::addCircleMarkers(data=map_data, 
-                            label=~gage,
-                            stroke = FALSE, 
-                            fillOpacity = 1, radius = 5, 
-                            color = "#c1c172") 
-
+# leaflet::leaflet() |> 
+# leaflet::addTiles(urlTemplate = 'https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}',
+#                attribution = 'Basemap tiles &copy; Esri &mdash; Sources: GEBCO, NOAA, CHS, OSU, UNH, CSUMB, National Geographic, DeLorme, NAVTEQ, and Esri',
+#                options = leaflet::tileOptions(noWrap = TRUE, opacity = 1.0, maxNativeZoom = 13, maxZoom = 13)) |>
+# leaflet::addTiles(urlTemplate = 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Reference_Overlay/MapServer/tile/{z}/{y}/{x}',
+#                attribution = 'Reference tiles &copy; Esri &mdash; Source: USGS, Esri, TANA, DeLorme, and NPS',
+#                options = leaflet::tileOptions(noWrap = TRUE, opacity = 0.5, maxNativeZoom = 13, maxZoom = 13)) |>  
+# leaflet::addPolygons(data=watersheds_wgs84, label=~paste(river_basin, "watershed"), color="#888888", weight=1, fillOpacity = 0.0) |>
+# leaflet::addPolygons(data=bypasses_wgs84, label=~name, weight=0, fillColor="#326875", fillOpacity=0.5, color=NA) |>
+# leaflet::addPolylines(data=flowlines_wgs84, label=~label, color="#326875", weight = 2) |>
+# leaflet::addCircleMarkers(data=map_data, 
+#                           label=~gage,
+#                           stroke = FALSE, 
+#                           fillOpacity = 1, radius = 5, 
+#                           color = "#c1c172") 
+#                           
+ map_data |> sf::st_set_crs(4326)
+ggplot() +
+    geom_sf(data=watershed_labels, color="#888888") +
+    geom_sf(data=filter(bypass_polys,name %in% c("Sutter Bypass", "Yolo Bypass")), fill="#326875", color=NA, alpha=0.5) +
+    geom_sf(data=stream_flowlines, color="#326875") +
+    geom_sf(data=map_data |> sf::st_set_crs(4326), color="#c1c172")
 ```
 
-
-## Date range coverage over watersheds by the different gages.
-```{r}
-ggplot(usgs_overview, aes(x = min_date, 
-                          xend = max_date, 
-                          y = tributary, 
-                          yend = tributary)) +
-  geom_segment(size = 4, alpha = 0.6, show.legend = FALSE, alpha = .4, color = "#326875") +  
-  labs(title = "Date Coverage for Tributaries",
-       x = "Date",
-       y = "") +
-  scale_x_date(date_breaks = "10 years", date_labels = "%Y") +
-  theme_minimal()
-```
 
 ## Quality Checks 
 
