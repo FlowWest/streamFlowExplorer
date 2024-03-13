@@ -1,4 +1,4 @@
-# streamFlowExplorer<a href='https://flowwest.github.io/streamFlowExplorer'><img src='man/figures/streamFlowExplorer%20conflict.png' align="right" height="250" style="float:right; height:250px;"/></a> 
+# streamFlowExplorer<a href='https://flowwest.github.io/streamFlowExplorer'></a><img src="man/figures/streamFlowExplorer%20conflict.png" align="right" height="250" style="float:right; height:250px;"/>
 
 ## What is streamFlowExplorer?
 
@@ -34,7 +34,7 @@ If you find that for your flow data use, you ended in a brown square where addit
 
 The following table provides a brief overview of the benefits and limitations of each data type for some potential use cases. Since this review is focused on flow data for ecological analysis this table primary focuses on that, but it also includes a few use cases for non ecological analysis since some of these datasets are primarily developed for non ecological purposes.
 
-![](man/figures/use_table_readme.png){width="1000"}
+![](man/figures/use_table_readme.png){width="770"}
 
 ## Modeling Methods to Fill Data Gaps
 
