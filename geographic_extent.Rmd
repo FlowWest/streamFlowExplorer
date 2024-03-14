@@ -19,33 +19,33 @@ library(ggplot2)
 
 ## Introduction
 
-The ecosystem management process in the Central Valley faces significant challenges due to the slow and complex nature of integrating flow, habitat, and temperature data. This project aims to address these challenges by compiling interoperable flow datasets to enhance ecosystem management evaluations, with a particular focus on areas in the Central Valley that are currently utilized or have potential for salmonid use. This document provides an overview of the geographical coverage included in our 'system of interest.' By referencing two scientific papers, [Yoshima et al.](https://nrm.dfg.ca.gov/FileHandler.ashx?DocumentID=3563) and [Lindley et al.](https://swfsc-publications.fisheries.noaa.gov/publications/CR/2006/2006Lin.pdf), we will compare the geographical coverage differences between the streams examined in each study.
+The ecosystem management process in the Central Valley faces significant challenges due to the slow and complex nature of integrating flow, habitat, and temperature data. This project aims to address these challenges by compiling interoperable flow datasets to enhance ecosystem management evaluations, with a particular focus on areas in the Central Valley that are currently utilized, or have potential for salmonid use. This document provides an overview of the geographical coverage included in our 'system of interest.' By referencing two scientific papers, [Yoshiyama et al.](https://nrm.dfg.ca.gov/FileHandler.ashx?DocumentID=3563) and [Lindley et al.](https://swfsc-publications.fisheries.noaa.gov/publications/CR/2006/2006Lin.pdf), we will compare the geographical coverage differences between the streams examined in each study.
 
 
 ## Geographic Extent
 
 
-## [Yoshima et al.](https://nrm.dfg.ca.gov/FileHandler.ashx?DocumentID=3563)
-Historical and current data on the distribution of chinook salmon in the major streams of the Central Valley drainage are consolidated in order to comprehensively assess the historical significance of salmon in the regional landscape. Previous research is built upon, and an earlier work is expanded upon to include additional historical information and recent data on chinook salmon abundances.
+## [Yoshiyama et al.](https://nrm.dfg.ca.gov/FileHandler.ashx?DocumentID=3563)
+In order to comprehensively assess the historical significance of salmon in the regional landscape, Yoshiyama et al. consolidate historical and current data on the distribution of Chinook salmon in the major streams of the Central Valley. They build upon previous research and expand earlier work to include additional historical information and recent data on Chinook salmon abundances as follows:
 
-  - The geographic extent for each major stream was determined through a review of literature and unpublished documents.
-  - Probable historical distributions were established by considering the presence of natural barriers to upstream salmon migration and historical accounts, such as those from gold miners and early settlers.
-  - Additional insights were provided by ethnographic studies conducted during the early 20th century. These studies involved interviews with elder Native Americans from various tribal groups, offering valuable information on the material culture and traditions of California's native peoples.
+  - Determine the geographic extent for each major stream through a review of literature and unpublished documents.
+  - Establish probable historical distributions by considering the presence of natural barriers to upstream salmon migration and historical accounts, such as those from gold miners and early settlers.
+  - Gather additional insights through ethnographic studies conducted during the early 20th century. These studies involved interviews with elder Native Americans from various tribal groups, offering valuable information on the material culture and traditions of California's native peoples.
 
 ## [Lindley et al.](https://swfsc-publications.fisheries.noaa.gov/publications/CR/2006/2006Lin.pdf)
-Focused on understanding the historical population structure of Central Valley steelhead to aid in effective conservation and recovery planning. 
-A description of the historical structure of the Central Valley steelhead evolutionary significant unit (ESU) is established using a multi-phase modeling approach.
+Lindley et al. focuse on understanding the historical population structure of Central Valley steelhead to aid in effective conservation and recovery planning. 
+They establish the description of the historical structure of the Central Valley steelhead evolutionary significant unit (ESU) using a multi-phase modeling approach as follows:
 
-  - In the first phase, a habitat model based on environmental factors such as stream discharge, gradient, and temperature is developed, incorporating data from digital elevation models and climate data. This initial phase identifies 151 patches of potentially suitable habitat.
-  - Subsequently, the distances among these habitat patches are measured, and patches within 35 km of each other are clustered together, resulting in 81 distinct habitat patches.
-  - Analysis of climate and elevation differences among these 81 habitat areas reveals at least four major subdivisions within the Central Valley steelhead ESU. These subdivisions correspond to specific geographic regions, including the Sacramento River basin, Suisun Bay area tributaries, San Joaquin tributaries draining the Sierra Nevada, and lower-elevation streams draining to the Buena Vista and Tulare basins, upstream of the San Joaquin River.
+  - In the first phase, they develop a habitat model based on environmental factors such as stream discharge, gradient, and temperature, incorporating data from digital elevation models and climate data. This initial phase identifies 151 patches of potentially suitable habitat.
+  - Subsequently, they measure the distances among these habitat patches, and cluster patches within 35 km of each other, resulting in 81 distinct habitat patches.
+  - They analyze climate and elevation differences among these 81 habitat areas, revealing at least four major subdivisions within the Central Valley steelhead ESU. These subdivisions correspond to specific geographic regions, including the Sacramento River basin, Suisun Bay area tributaries, San Joaquin tributaries draining the Sierra Nevada, and lower-elevation streams draining to the Buena Vista and Tulare basins, upstream of the San Joaquin River.
 
 
 ```{r, include=FALSE}
 cv_coverage <- read_excel("data-raw/InteropFlows_Streams.xlsx")
 ```
-
-```{r, include=FALSE}
+# Plot showing a comparison of literature stream coverage 
+```{r, echo=FALSE}
 
 coverage_summary <- cv_coverage %>%
   group_by(stream_name) %>%
@@ -61,15 +61,18 @@ coverage_summary_long <- pivot_longer(coverage_summary,
 # Plot
 ggplot(coverage_summary_long, aes(x = Author, y = stream_name, fill = Coverage)) +
   geom_tile() +
-  scale_fill_manual(values = c("white", "blue"), labels = c("Not Covered", "Covered")) +
-  labs(title = "Stream Coverage of Yoshiyama and Llindley's Papers",
+  scale_fill_manual(values = c("darkred", "darkgreen"), labels = c("Not Covered", "Covered")) +
+  labs(title = "System Stream Coverage - Yoshiyama et al. vs Llindley et al.",
        x = "Author",
        y = "Stream Name",
        fill = "Coverage") +
-  theme_minimal()
+  theme_minimal() +
+  theme(axis.text.y = element_text(size = 6)) 
 ```
 
-| stream name              | Yishiyama    |  Lindley   |
+# Table compring system coverage definitions of Yoshiyama et al. vs Lindley et al.
+
+| stream name              | Yoshiyama    |  Lindley   |
 |:-------------------------|:-------------|:-----------|
 | American River           |	  **yes**   |	  **yes**  |
 | Antelope Creek 	         |	  **yes**   |	  **yes**  |
