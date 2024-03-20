@@ -90,7 +90,7 @@ I am creating a regional model with data from 4 salmonid bearing streams: Butte 
 ```{r}
 ## Data used to build models: Butte Creek
 # Butte Creek is used to build the regression models because the time series is complete and the data are high quality.
-
+#data range 1997-03-12 to 2024-03-20
 cdec_datasets("BCK")
 butte <- cdec_query(station = "BCK", dur_code = "H", sensor_num = "20", start_date = "1997-01-01")
 butte_format <- butte |> 
@@ -111,19 +111,23 @@ butte_format <- butte |>
 butte_format_wide <- butte_format |> 
   ungroup() |> 
   select(-gage_agency, -gage_number) |> 
-  pivot_wider(id_cols = c(stream, date), names_from = "statistic", values_from = "value", values_fill = NA)
+  pivot_wider(id_cols = c(stream, date), names_from = "statistic", values_from = "value", values_fill = NA) |> 
+  glimpse()
 
 ggplot(butte_format, aes(x = date, y = value)) +
   geom_line()
 
-cdec_datasets("YR7") # NO flow so find different gage - if there is one on the yuba go for that 
-# Gage Data
-YR7_daily_temps <- cdec_query(station = "YR7", dur_code = "E", sensor_num = "146", start_date = "2019-01-01")
 
-yuba_format <- YR7_daily_temps |> 
+#gage option 1 - modeling seems a bit weird
+cdec_datasets("YPB") # NO flow so find different gage - if there is one on the yuba go for that 
+# 2010-10-01	2024-03-20
+# Gage Data
+YR7_daily_flows <- cdec_query(station = "YPB", dur_code = "H", sensor_num = "20", start_date = "2009-01-01")
+
+yuba_format <- YR7_daily_flows |> 
     mutate(date = as_date(datetime),
            year = year(datetime)) |> 
-    filter(parameter_value < 40, parameter_value > 0, !is.na(date)) |> 
+    filter(parameter_value > 0, !is.na(date)) |> 
     group_by(date) |> 
     summarise(mean = mean(parameter_value, na.rm = TRUE),
              max = max(parameter_value, na.rm = TRUE),
@@ -131,49 +135,53 @@ yuba_format <- YR7_daily_temps |>
   pivot_longer(mean:min, names_to = "statistic", values_to = "value") |>
   mutate(stream = "yuba river",
          gage_agency = "CDEC",
-         gage_number = "YR7",
-         parameter = "temperature") |> 
+         gage_number = "YPB",
+         parameter = "flow") |> 
   glimpse()
 
+ggplot(yuba_format, aes(x = date, y = value)) +
+  geom_line()
 # combine butte and yuba together for regression modeling
 yuba_format_wide <- yuba_format |> 
   ungroup() |> 
   select(-gage_agency, -gage_number) |> 
-  pivot_wider(id_cols = c(stream, date), names_from = "statistic", values_from = "value", values_fill = NA)
+  pivot_wider(id_cols = c(stream, date), names_from = "statistic", values_from = "value", values_fill = NA) |> 
+  glimpse()
 
 yuba_regression_data_full <- yuba_format_wide |> 
   ungroup() |> 
   select(date, mean) |> 
-  rename(yuba_temp_mean = mean) |> 
+  rename(yuba_flow_mean = mean) |> 
   full_join(butte_format_wide |> 
               select(date, mean) |> 
-              rename(butte_temp_mean = mean))
+              rename(butte_flow_mean = mean)) |> 
+  glimpse()
 
 # FOR PREDICTIONS identify gaps to predict data
 yuba_gap_mean <- yuba_regression_data_full |> 
-  filter(is.na(yuba_temp_mean), !is.na(butte_temp_mean)) |> 
-  rename(butte_temp = butte_temp_mean)
+  filter(is.na(yuba_flow_mean), !is.na(butte_flow_mean)) |> 
+  rename(butte_flow = butte_flow_mean)
 
 # FOR MODEL use data where there are no missing data for either butte or feather for regression modeling
 yuba_regression_data_mean <- yuba_regression_data_full |> 
-  filter(!is.na(yuba_temp_mean), !is.na(butte_temp_mean)) |> 
-  rename(butte_temp = butte_temp_mean,
-         temp = yuba_temp_mean)
+  filter(!is.na(yuba_flow_mean), !is.na(butte_flow_mean)) |> 
+  rename(butte_flow = butte_flow_mean,
+         flow = yuba_flow_mean)
 
 #### Building Mean Regression
 # MEAN Regression
 split <-rsample::initial_split(yuba_regression_data_mean, prop = 0.8)
 train <- rsample::training(split)
 test <- rsample::testing(split)
-yuba_mod_mean <- lm(temp ~ date + butte_temp, data = train)
+yuba_mod_mean <- lm(flow ~ date + butte_flow, data = train)
 summary(yuba_mod_mean)
 test_predict <- predict(yuba_mod_mean, test)
 test_predict_df <- test |>
   mutate(predicted = test_predict)
 # evaluate predictions - MAPE of 10% is not bad
 mean(abs((
-  test_predict_df$predicted - test_predict_df$temp
-)) / test_predict_df$temp)
+  test_predict_df$predicted - test_predict_df$flow
+)) / test_predict_df$flow)
 
 # Predictions
 yuba_gap_predicted_mean <- predict(yuba_mod_mean, yuba_gap_mean)
@@ -183,6 +191,8 @@ yuba_mean_predicted <- yuba_gap_mean |>
   select(date, value, statistic)
 ggplot(yuba_mean_predicted, aes(x = date, y = value)) +
   geom_line()
+
+
 
 
 # Plot new complete data set. Color points by data type (gage, interpolated)
