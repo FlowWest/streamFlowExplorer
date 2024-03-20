@@ -17,6 +17,7 @@ library(streamFlowExplorer)
 library(CDECRetrieve)
 
 colors <- c("#326875", "#899da4", "#9ab293", "#c1c172")
+colors_small <- c("#326875", "#c1c172")
 ```
 
 Some sources to review
@@ -45,21 +46,31 @@ I want to study the flow and temperature correlation on ___ system. There is a U
 library(dataRetrieval)
 library(forecastML)
 
-# Make API call to USGS to retrieve flow data for the specified site and time period
-gage_data <- dataRetrieval::readNWISdv(11384000, "00060") |> 
-  select(date = Date, 
-         flow_cfs = X_00060_00003)
-# 'gage_data' is the dataset containing USGS flow data with gaps
-# Fill gaps in flow data using forecastML::fill_gaps() function
-filled_data <- forecastML::fill_gaps(data = gage_data,
-                                     date_col = 1, 
-                                     frequency = "1 day")
+# Make API call to CDEC to retrieve flow data for the specified site and time period
+amk <- cdec_query(station = "AMK", dur_code = "H", sensor_num = "20", start_date = "2017-01-01") |>
+  mutate(date = as_date(datetime)) |> 
+  group_by(date) |> 
+  summarise(flow_cfs = mean(parameter_value, na.rm = TRUE)) |> 
+  # filter(!is.na(date), !is.na(flow_cfs)) |> 
+  mutate(data_type = "gage")
 
 # Plot original and filled data for comparison
-gage_data |> 
-  ggplot(aes(x = date, y = flow_cfs)) + 
-  geom_line(color = colors[1]) + 
+amk |> 
+  ggplot(aes(x = date, y = flow_cfs, color = data_type)) + 
+  geom_line() + 
+  scale_color_manual(values = colors_small) +
   theme_minimal()
+
+# 'gage_data' is the dataset containing CDEC flow data with gaps
+# Fill gaps in flow data using interpolation function 
+# Search to find the right interpolation function 
+# Start with forcast::forecast() before so that might be better 
+# if that doesn't work use this one - `forecastML::fill_gaps()` is one option 
+# And then update documentation above to show which forecast function you are using 
+
+# Create interpolated data 
+
+# Plot new complete data set. Color points by data type (gage, interpolated)
 
 
 ```
@@ -74,11 +85,13 @@ One approach is to interpolate flow data for one stream using available stream g
 
 ### Example
 
-I am creating a regional model with data from 4 salmonid bearing streams: Butte Creek, Mill Creek, Deer Creek, and Yuba River . I am interested in flow data from 2000 - 2024 to match with my monitoring data. Unfortunately, on Yuba River, there is only gage data after _____. In order to keeep Yuba in my dataset. I need to fill in the gaps. 
+I am creating a regional model with data from 4 salmonid bearing streams: Butte Creek, Mill Creek, Deer Creek, and Yuba River . I am interested in flow data from 2000 - 2024 to match with my monitoring data. Unfortunately, on Yuba River, there is only gage data after _____. In order to keep Yuba in my dataset. I need to fill in the gaps. 
 
 ```{r}
 ## Data used to build models: Butte Creek
 # Butte Creek is used to build the regression models because the time series is complete and the data are high quality.
+# NOTE _____ THIS IS AN EXAMPLE WITH TEMPERATURE, REDO this example with FLOW 
+cdec_datasets("BCK") # Test out sensor 20 for flow data at BCK - 
 butte <- cdec_query(station = "BCK", dur_code = "H", sensor_num = "25", start_date = "2000-01-01")
 butte_format <- butte |> 
     mutate(date = as_date(datetime),
@@ -92,13 +105,14 @@ butte_format <- butte |>
     mutate(stream = "butte creek",
            gage_agency = "CDEC",
            gage_number = "BCK",
-           parameter = "temperature")
+           parameter = "temperature") # TODO change to flow 
 
 butte_format_wide <- butte_format |> 
   ungroup() |> 
   select(-gage_agency, -gage_number) |> 
   pivot_wider(id_cols = c(stream, date), names_from = "statistic", values_from = "value", values_fill = NA)
 
+cdec_datasets("YR7") # NO flow so find different gage - if there is one on the yuba go for that 
 # Gage Data
 YR7_daily_temps <- cdec_query(station = "YR7", dur_code = "E", sensor_num = "146", start_date = "2019-01-01")
 
@@ -167,7 +181,7 @@ ggplot(yuba_mean_predicted, aes(x = date, y = value)) +
   geom_line()
 
 
-# TODO kinda a weird trend line, update
+# Plot new complete data set. Color points by data type (gage, interpolated)
 
 ```
 
