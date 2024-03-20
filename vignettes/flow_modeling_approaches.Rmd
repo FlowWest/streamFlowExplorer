@@ -90,27 +90,31 @@ I am creating a regional model with data from 4 salmonid bearing streams: Butte 
 ```{r}
 ## Data used to build models: Butte Creek
 # Butte Creek is used to build the regression models because the time series is complete and the data are high quality.
-# NOTE _____ THIS IS AN EXAMPLE WITH TEMPERATURE, REDO this example with FLOW 
-cdec_datasets("BCK") # Test out sensor 20 for flow data at BCK - 
-butte <- cdec_query(station = "BCK", dur_code = "H", sensor_num = "25", start_date = "2000-01-01")
+
+cdec_datasets("BCK")
+butte <- cdec_query(station = "BCK", dur_code = "H", sensor_num = "20", start_date = "1997-01-01")
 butte_format <- butte |> 
     mutate(date = as_date(datetime),
-           temp_degC = SRJPEdata::fahrenheit_to_celsius(parameter_value)) |>
-    filter(temp_degC < 40, temp_degC > 0.5) |>
+           flow = parameter_value) |>
+  filter(parameter_value > 0) |> 
     group_by(date) |> 
-    summarise(mean = mean(temp_degC, na.rm = TRUE),
-              max = max(temp_degC, na.rm = TRUE),
-              min = min(temp_degC, na.rm = TRUE)) |> 
+    summarise(mean = mean(parameter_value, na.rm = TRUE),
+              max = max(parameter_value, na.rm = TRUE),
+              min = min(parameter_value, na.rm = TRUE)) |> 
     pivot_longer(mean:min, names_to = "statistic", values_to = "value") |>
     mutate(stream = "butte creek",
            gage_agency = "CDEC",
            gage_number = "BCK",
-           parameter = "temperature") # TODO change to flow 
+           parameter = "flow") |> 
+  glimpse() 
 
 butte_format_wide <- butte_format |> 
   ungroup() |> 
   select(-gage_agency, -gage_number) |> 
   pivot_wider(id_cols = c(stream, date), names_from = "statistic", values_from = "value", values_fill = NA)
+
+ggplot(butte_format, aes(x = date, y = value)) +
+  geom_line()
 
 cdec_datasets("YR7") # NO flow so find different gage - if there is one on the yuba go for that 
 # Gage Data
