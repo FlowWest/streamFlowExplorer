@@ -120,6 +120,7 @@ ggplot(butte_format, aes(x = date, y = value)) +
 #gage option 1 
 cdec_datasets("YPB") 
 # 2010-10-01	2024-03-20
+#timeserries will be modeled to match dates from BCK (1997-2024)
 # Gage Data
 YR7_daily_flows <- cdec_query(station = "YPB", dur_code = "H", sensor_num = "20", start_date = "2009-01-01")
 
@@ -228,90 +229,7 @@ ggplot(flow_modeled, aes(date, flow, color = date >= "2011-01-31")) +
 ```
 
 
-```{r}
-#Yuba gage option #2 -----
 
-#USGS 11413517
-# 2007-12-05	2024-03-20
-# Gage Data
-
-YUBA_USGS <- readNWISdv(11413517, "00060")
-
-# Format to make tidier
-yuba_usgs_daily_flows <- YUBA_USGS %>%
-  select(Date, flow_cfs =  X_00060_00003) %>%
-  as_tibble() %>% 
-  rename(date = Date) |> 
-  glimpse()
-
-yuba_usgs_format <- yuba_usgs_daily_flows |> 
-    filter(flow_cfs  > 0, !is.na(date)) |> 
-    group_by(date) |> 
-    summarise(mean = mean(flow_cfs , na.rm = TRUE),
-             max = max(flow_cfs , na.rm = TRUE),
-             min = min(flow_cfs , na.rm = TRUE)) |> 
-  pivot_longer(mean:min, names_to = "statistic", values_to = "value") |>
-  mutate(stream = "yuba river",
-         gage_agency = "USGS",
-         gage_number = "11413517",
-         parameter = "flow") |> 
-  glimpse()
-
-ggplot(yuba_usgs_format, aes(x = date, y = value)) +
-  geom_line()
-# combine butte and yuba together for regression modeling
-yuba_usgs_format_wide <- yuba_usgs_format |> 
-  ungroup() |> 
-  select(-gage_agency, -gage_number) |> 
-  pivot_wider(id_cols = c(stream, date), names_from = "statistic", values_from = "value", values_fill = NA) |> 
-  glimpse()
-
-yuba_usgs_regression_data_full <- yuba_usgs_format_wide |> 
-  ungroup() |> 
-  select(date, mean) |> 
-  rename(yuba_flow_mean = mean) |> 
-  full_join(butte_format_wide |> 
-              select(date, mean) |> 
-              rename(butte_flow_mean = mean)) |> 
-  glimpse()
-
-# FOR PREDICTIONS identify gaps to predict data
-yuba_usgs_gap_mean <- yuba_usgs_regression_data_full |> 
-  filter(is.na(yuba_flow_mean), !is.na(butte_flow_mean)) |> 
-  rename(butte_flow = butte_flow_mean)
-
-# FOR MODEL use data where there are no missing data for either butte or feather for regression modeling
-yuba_usgs_regression_data_mean <- yuba_usgs_regression_data_full |> 
-  filter(!is.na(yuba_flow_mean), !is.na(butte_flow_mean)) |> 
-  rename(butte_flow = butte_flow_mean,
-         flow = yuba_flow_mean)
-
-#### Building Mean Regression
-# MEAN Regression
-split <-rsample::initial_split(yuba_usgs_regression_data_mean, prop = 0.8)
-train <- rsample::training(split)
-test <- rsample::testing(split)
-yuba_mod_mean <- lm(flow ~ date + butte_flow, data = train)
-summary(yuba_mod_mean)
-test_predict <- predict(yuba_mod_mean, test)
-test_predict_df <- test |>
-  mutate(predicted = test_predict)
-# evaluate predictions - MAPE of 10% is not bad
-mean(abs((
-  test_predict_df$predicted - test_predict_df$flow
-)) / test_predict_df$flow)
-
-# Predictions
-yuba_usgs_gap_predicted_mean <- predict(yuba_mod_mean, yuba_gap_mean)
-yuba_usgs_mean_predicted <- yuba_gap_mean |> 
-  mutate(value = yuba_usgs_gap_predicted_mean,
-         statistic = "mean_predicted") |> 
-  select(date, value, statistic)
-ggplot(yuba_usgs_mean_predicted, aes(x = date, y = value)) +
-  geom_line()
-
-
-```
 
 ## Approach 3: Representative Stream and Scaling
 
