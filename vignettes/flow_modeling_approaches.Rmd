@@ -15,6 +15,7 @@ library(ggplot2)
 library(scales)
 library(streamFlowExplorer)
 library(CDECRetrieve)
+library(dplyr)
 
 colors <- c("#326875", "#899da4", "#9ab293", "#c1c172")
 colors_small <- c("#326875", "#c1c172")
@@ -45,7 +46,7 @@ I want to study the flow and temperature correlation on ___ system. There is a U
 # Load necessary libraries
 library(dataRetrieval)
 library(forecastML)
-
+library(forecast)
 # Make API call to CDEC to retrieve flow data for the specified site and time period
 amk <- cdec_query(station = "AMK", dur_code = "H", sensor_num = "20", start_date = "2017-01-01") |>
   mutate(date = as_date(datetime)) |> 
@@ -60,18 +61,16 @@ amk |>
   geom_line() + 
   scale_color_manual(values = colors_small) +
   theme_minimal()
-
 # 'gage_data' is the dataset containing CDEC flow data with gaps
 # Fill gaps in flow data using interpolation function 
 # Search to find the right interpolation function 
 # Start with forcast::forecast() before so that might be better 
 # if that doesn't work use this one - `forecastML::fill_gaps()` is one option 
 # And then update documentation above to show which forecast function you are using 
+# Remove rows with NA in the "date" column
 
-# Create interpolated data 
 
-# Plot new complete data set. Color points by data type (gage, interpolated)
-
+#create a timeseries that covers all dates of date period
 
 ```
 
@@ -85,7 +84,7 @@ One approach is to interpolate flow data for one stream using available stream g
 
 ### Example
 
-I am creating a regional model with data from 4 salmonid bearing streams: Butte Creek, Mill Creek, Deer Creek, and Yuba River . I am interested in flow data from 2000 - 2024 to match with my monitoring data. Unfortunately, on Yuba River, there is only gage data after _____. In order to keep Yuba in my dataset. I need to fill in the gaps. 
+I am creating a regional model with data from 4 salmonid bearing streams: Butte Creek, Mill Creek, Deer Creek, and Yuba River . I am interested in flow data from 2000 - 2024 to match with my monitoring data. Unfortunately, on Yuba River, there is only gage data after 2010. In order to keep Yuba in my dataset. I need to fill in the gaps. 
 
 ```{r}
 ## Data used to build models: Butte Creek
@@ -118,8 +117,8 @@ ggplot(butte_format, aes(x = date, y = value)) +
   geom_line()
 
 
-#gage option 1 - modeling seems a bit weird
-cdec_datasets("YPB") # NO flow so find different gage - if there is one on the yuba go for that 
+#gage option 1 
+cdec_datasets("YPB") 
 # 2010-10-01	2024-03-20
 # Gage Data
 YR7_daily_flows <- cdec_query(station = "YPB", dur_code = "H", sensor_num = "20", start_date = "2009-01-01")
@@ -141,11 +140,17 @@ yuba_format <- YR7_daily_flows |>
 
 ggplot(yuba_format, aes(x = date, y = value)) +
   geom_line()
+
+#Plotting butte and yuba flow
+ggplot(yuba_regression_data_full, aes(x = yuba_flow_mean, y = butte_flow_mean)) +
+  geom_point()
+
 # combine butte and yuba together for regression modeling
 yuba_format_wide <- yuba_format |> 
   ungroup() |> 
   select(-gage_agency, -gage_number) |> 
   pivot_wider(id_cols = c(stream, date), names_from = "statistic", values_from = "value", values_fill = NA) |> 
+  filter(!is.na(date)) |> 
   glimpse()
 
 yuba_regression_data_full <- yuba_format_wide |> 
@@ -188,13 +193,42 @@ yuba_gap_predicted_mean <- predict(yuba_mod_mean, yuba_gap_mean)
 yuba_mean_predicted <- yuba_gap_mean |> 
   mutate(value = yuba_gap_predicted_mean,
          statistic = "mean_predicted") |> 
-  select(date, value, statistic)
+  filter(!is.na(date)) |> 
+  select(date, value, statistic) |> 
+  glimpse()
+
 ggplot(yuba_mean_predicted, aes(x = date, y = value)) +
   geom_line()
+  
+#joining predictions to Yuba data
+#Trimming predictions to only where data gaps exist (previous to 2011)
+yuba_predicted_trimmed <- yuba_mean_predicted |> 
+  filter(date <= "2011-01-31") |> 
+  glimpse()
 
-# Plot new complete data set. Color points by data type (gage, interpolated)
+#checking that date range is now 1997-2024
+range(yuba_predicted_trimmed$date)
+
+# Left join to fill missing values in yuba_format_wide with values from yuba_mean_predicted
+merged_data <- full_join(yuba_format_wide, yuba_predicted_trimmed, by = "date") |> 
+  glimpse()
+
+#mutating predicted and existing flow values into a single column
+flow_modeled <- merged_data |> 
+  mutate(flow = ifelse(is.na(mean), value, mean)) |> 
+  select(c(stream, date, flow)) |> 
+  glimpse()
+
+#plotting flow data showing modeled and existing flow data 
+ggplot(flow_modeled, aes(date, flow, color = date >= "2011-01-31")) +
+  geom_line() +
+  scale_color_manual(values = c("blue", "red"), labels = c("Modeled Flow Data", "YPB Flow Data")) +
+  labs(color = "Flow Source") +
+  theme_minimal()
+```
 
 
+```{r}
 #Yuba gage option #2 -----
 
 #USGS 11413517
