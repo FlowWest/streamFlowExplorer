@@ -139,10 +139,25 @@ yuba_format <- YR7_daily_flows |>
          parameter = "flow") |> 
   glimpse()
 
+
+# Generate a sequence of dates from 2010-10-01 to 2024-03-20
+all_dates <- seq(as.Date("2010-10-01"), as.Date("2024-03-20"), by = "day")
+
+# Check for missing dates in YPB
+missing_dates <- setdiff(all_dates, yuba_format$date)
+missing_dates <- as.Date(missing_dates, origin = "2010-10-01")
+# Print the missing dates, if any
+if (length(missing_dates) == 0) {
+  print("No missing dates found.")
+} else {
+  print("Missing dates:")
+  print(missing_dates)
+}
+
 ggplot(yuba_format, aes(x = date, y = value)) +
   geom_line()
 
-#Plotting butte and yuba flow
+#Plotting butte and yuba flow correlation 
 ggplot(yuba_regression_data_full, aes(x = yuba_flow_mean, y = butte_flow_mean)) +
   geom_point()
 
@@ -202,27 +217,21 @@ ggplot(yuba_mean_predicted, aes(x = date, y = value)) +
   geom_line()
   
 #joining predictions to Yuba data
-#Trimming predictions to only where data gaps exist (previous to 2011)
-yuba_predicted_trimmed <- yuba_mean_predicted |> 
-  filter(date <= "2011-01-31") |> 
-  glimpse()
 
-#checking that date range is now 1997-2024
-range(yuba_predicted_trimmed$date)
-
-# Left join to fill missing values in yuba_format_wide with values from yuba_mean_predicted
-merged_data <- full_join(yuba_format_wide, yuba_predicted_trimmed, by = "date") |> 
+#filling missing values in yuba_format_wide with values from yuba_mean_predicted
+merged_data <- full_join(yuba_format_wide, yuba_mean_predicted, by = "date") |> 
   glimpse()
 
 #mutating predicted and existing flow values into a single column
 flow_modeled <- merged_data |> 
-  mutate(flow = ifelse(is.na(mean), value, mean)) |> 
-  select(c(stream, date, flow)) |> 
+  mutate(flow = ifelse(is.na(mean), value, mean),
+         source = ifelse(is.na(statistic), "YPB", statistic)) |> 
+  select(c(stream, date, flow, source)) |> 
   glimpse()
 
 #plotting flow data showing modeled and existing flow data 
-ggplot(flow_modeled, aes(date, flow, color = date >= "2011-01-31")) +
-  geom_line() +
+ggplot(flow_modeled, aes(date, flow, color = source)) +
+  geom_point(size = .8) +
   scale_color_manual(values = c("blue", "red"), labels = c("Modeled Flow Data", "YPB Flow Data")) +
   labs(color = "Flow Source") +
   theme_minimal()
