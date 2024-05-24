@@ -1,0 +1,125 @@
+---
+title: "Geographic Salmonid Extent Accross California Central Valley System According to Lindley et al. and Yoshiyama et al."
+date: "`r Sys.Date()`"
+output:
+  html_document:
+     code_folding: hide
+     theme: flatly
+---
+
+```{r, include=FALSE}
+library(readxl)
+library(lubridate)
+library(readr)
+library(dplyr)
+library(visdat)
+library(tidyr)
+library(ggplot2)
+```
+
+## Introduction
+
+Salmonid management process in the Central Valley faces significant challenges due to the slow and complex nature of integrating flow, habitat, and temperature data. This project aims to address these challenges by compiling interoperable flow datasets to enhance ecosystem management evaluations, with a particular focus on areas in the Central Valley that are currently utilized or have potential for salmonid use. 
+
+This document provides an overview of the geographical coverage included in our 'system of interest.' By referencing two scientific papers, [Yoshima et al.](https://nrm.dfg.ca.gov/FileHandler.ashx?DocumentID=3563) and [Lindley et al.](https://swfsc-publications.fisheries.noaa.gov/publications/CR/2006/2006Lin.pdf), we will compare the geographical coverage differences between the streams examined in each study.
+
+
+## Geographic Extent
+
+
+## [Yoshima et al.](https://nrm.dfg.ca.gov/FileHandler.ashx?DocumentID=3563)
+Historical and current data on the distribution of chinook salmon in the major streams of the Central Valley drainage are consolidated in order to comprehensively assess the historical significance of salmon in the regional landscape. Previous research is built upon, and an earlier work is expanded upon to include additional historical information and recent data on chinook salmon abundances.
+
+  - The geographic extent for each major stream was determined through a review of literature and unpublished documents.
+  - Probable historical distributions were established by considering the presence of natural barriers to upstream salmon migration and historical accounts, such as those from gold miners and early settlers.
+  - Additional insights were provided by ethnographic studies conducted during the early 20th century. These studies involved interviews with elder Native Americans from various tribal groups, offering valuable information on the material culture and traditions of California's native peoples.
+
+## [Lindley et al.](https://swfsc-publications.fisheries.noaa.gov/publications/CR/2006/2006Lin.pdf)
+Focused on understanding the historical population structure of Central Valley steelhead to aid in effective conservation and recovery planning. 
+A description of the historical structure of the Central Valley steelhead evolutionary significant unit (ESU) is established using a multi-phase modeling approach.
+
+  - In the first phase, a habitat model based on environmental factors such as stream discharge, gradient, and temperature is developed, incorporating data from digital elevation models and climate data. This initial phase identifies 151 patches of potentially suitable habitat.
+  - Subsequently, the distances among these habitat patches are measured, and patches within 35 km of each other are clustered together, resulting in 81 distinct habitat patches.
+  - Analysis of climate and elevation differences among these 81 habitat areas reveals at least four major subdivisions within the Central Valley steelhead ESU. These subdivisions correspond to specific geographic regions, including the Sacramento River basin, Suisun Bay area tributaries, San Joaquin tributaries draining the Sierra Nevada, and lower-elevation streams draining to the Buena Vista and Tulare basins, upstream of the San Joaquin River.
+
+
+```{r, include=FALSE}
+cv_coverage <- read_excel("data-raw/InteropFlows_Streams.xlsx")
+```
+
+```{r, include=FALSE}
+coverage_summary <- cv_coverage %>%
+  group_by(stream_name) %>%
+  summarize(Yoshiyama_coverage = sum(Yoshiyama == "yes") > 0,
+            Lindley_coverage = sum(Lindley == "yes") > 0)
+# Reshape the data for plotting
+coverage_summary_long <- pivot_longer(coverage_summary, 
+                                      cols = c(Yoshiyama_coverage, Lindley_coverage),
+                                      names_to = "Author", 
+                                      values_to = "Coverage")
+# Plot
+ggplot(coverage_summary_long, aes(x = Author, y = stream_name, fill = Coverage)) +
+  geom_tile() +
+  scale_fill_manual(values = c("white", "blue"), labels = c("Not Covered", "Covered")) +
+  labs(title = "Stream Coverage of Yoshiyama and Llindley's Papers",
+       x = "Author",
+       y = "Stream Name",
+       fill = "Coverage") +
+  theme_minimal()
+```
+
+| stream name              | Yishiyama    |  Lindley   |
+|:-------------------------|:-------------|:-----------|
+| American River           |	  **yes**   |	  **yes**  |
+| Antelope Creek 	         |	  **yes**   |	  **yes**  |
+| Battle Creek             |	  **yes**   |	  **yes**  |
+| Bear River 	             |	  **yes**   |	  **no**   |
+| Big Chico Creek          |	  **yes**   |	  **yes**  |
+| Butte Creek 	           |	  **yes**   |	  **yes**  |
+| Cache Creek              |	  **no**    |	  **yes**  |
+| Calaveras River          |	  **yes**   |	  **yes**  |
+| Caliente Creek           |	  **no**    |	  **yes**  |
+| Chowchilla River 	       |	  **no**    |	  **yes**  |
+| Clear Creek	             |	  **yes**   |	  **yes**  |
+| Coon Creek 	             |	  **no**    |	  **yes**  |
+| Cosumnes River           |	  **yes**   |	  **yes**  |
+| Cottonwood Creek         |	  **yes**   |	  **yes**  |
+| Cow Creek                |	  **yes**   |	  **no**   |
+| Deer Creek	             |	  **yes**   |	  **yes**  |
+| Del Puerto Creek         |	  **no**    |	  **yes**  |
+| Elder Creek 	           |	  **no**    |	  **yes**  |
+| Feather River            |	  **yes**   |	  **yes**  |
+| Fresno River 	           |	  **no**    |	  **yes**  |
+| Kaweah River             |	  **no**    |	  **yes**  |
+| Kern River 	             |	  **no**    |	  **yes**  |
+| Kings River              |	  **yes**   |	  **yes**  |
+| Little Cow Creek         |	  **no**    |	  **yes**  |
+| Lone Tree Creek          |	  **no**    |	  **yes**  |
+| Los Banos Creek	         |	  **no**    |	  **yes**  |
+| Los Gatos Creek          |	  **no**    |	  **yes**  |
+| Marsh Creek              |	  **no**    |	  **yes**  |
+| McCloud River 	         |	  **yes**   |	  **yes**  |
+| Merced River             |	  **yes**   |	  **yes**  |
+| Mill Creek 	             |	  **yes**   |	  **yes**  |
+| Mokelumne River          |	  **yes**   |	  **yes**  |
+| Panoche Creek 	         |	  **no**    |	  **yes**  |
+| Paynes Creek             |	  **no**    |	  **yes**  |
+| Pit River	               |	  **yes**   |	  **yes**  |
+| Poso Creek 	             |	  **no**    |	  **yes**  |
+| Putah Creek	             |	  **no**    |	  **yes**  |
+| Stanislaus River 	       |	  **yes**   |	  **yes**  |
+| Stony Creek              |	  **yes**   |	  **yes**  |
+| Northern Kelso Creek     |	  **no**    |	  **yes**  |
+| Sweany Creek             |	  **no**    |	  **yes**  |
+| Thomes Creek 	           |	  **no**    |	  **yes**  |
+| Toomes Creek             |	  **no**    |	  **yes**  |
+| Tuolumne River	         |	  **yes**   |	  **yes**  |
+| Upr Sacramento River 	   |	  **yes**   |	  **yes**  |
+| Mainstem Sacramento River|	  **yes**   |	  **no**   |
+| Upper San Joaquin Rriver |	  **yes**   |	  **yes**  | 
+| Lower San Joaquin River  |	  **yes**   |	  **no**   |
+| Westside Streams	       |	  **yes**   |	  **no**   |
+| Yuba River	             |	  **yes**   |	  **yes**  |
+
+
+
