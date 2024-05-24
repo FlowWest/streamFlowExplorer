@@ -8,21 +8,18 @@ vignette: >
 ---
 
 ```{r setup, include = FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, fig.width=15, fig.height=30)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, fig.width=15, fig.height=10)
 library(tidyverse)
 library(lubridate)
 library(ggplot2)
 library(scales)
 library(streamFlowExplorer)
 library(CDECRetrieve)
+library(dplyr)
 
 colors <- c("#326875", "#899da4", "#9ab293", "#c1c172")
 colors_small <- c("#326875", "#c1c172")
 ```
-
-Some sources to review
-- https://www.sciencedirect.com/science/article/abs/pii/S0022169418309648
-
 
 
 # Introduction
@@ -39,87 +36,90 @@ Using a timeserries interpolation function is a good approach if you have relati
 
 ### Example
 
-I want to study the flow and temperature correlation on ___ system. There is a USGS gage on my system, but it is missing data for _____ window.  
+I want to study the flow and temperature correlation on the American river system. There is a CDEC gage on my system, but it is missing data for for a few month long chunks throughout the timeseries. I use the forecast `forecast::na.interp()` function to fill in these data gaps. 
 
 ```{r}
 # Load necessary libraries
 library(dataRetrieval)
 library(forecastML)
-
+library(forecast)
+library(padr)
 # Make API call to CDEC to retrieve flow data for the specified site and time period
 amk <- cdec_query(station = "AMK", dur_code = "H", sensor_num = "20", start_date = "2017-01-01") |>
   mutate(date = as_date(datetime)) |> 
   group_by(date) |> 
   summarise(flow_cfs = mean(parameter_value, na.rm = TRUE)) |> 
-  # filter(!is.na(date), !is.na(flow_cfs)) |> 
-  mutate(data_type = "gage")
+  mutate(data_type = "gage") |> 
+  pad() # pads so not missing dates
 
-# Plot original and filled data for comparison
-amk |> 
-  ggplot(aes(x = date, y = flow_cfs, color = data_type)) + 
+#create a timeseries that covers all dates of date period
+amk_approx <- amk |> 
+  mutate(old_flow = flow_cfs,
+         flow_cfs = forecast::na.interp(amk$flow_cfs),
+         data_type = ifelse(data_type == "gage", data_type, "aproximated")) |> 
+  pad() 
+
+# plot 
+amk_approx |> 
+  ggplot(aes(x = date, y = flow_cfs, color = colors_small[2])) + 
   geom_line() + 
+  geom_line(aes(x = date, y = old_flow, color = colors_small[1])) + 
   scale_color_manual(values = colors_small) +
   theme_minimal()
-
-# 'gage_data' is the dataset containing CDEC flow data with gaps
-# Fill gaps in flow data using interpolation function 
-# Search to find the right interpolation function 
-# Start with forcast::forecast() before so that might be better 
-# if that doesn't work use this one - `forecastML::fill_gaps()` is one option 
-# And then update documentation above to show which forecast function you are using 
-
-# Create interpolated data 
-
-# Plot new complete data set. Color points by data type (gage, interpolated)
-
-
 ```
 
 
 ## Approach 2: Linear Regression between Stream Gage Data - Filling a temporal data gap 
 
 **Benefit:** Fairly quick and straightforward, linear regression typically does a fairly good job
-**Limitation:** Need at least some gage overlap across different conditions, if you do not have good coverage across different conditions you may loose some of the extreem flow events 
+**Limitation:** Need at least some gage overlap across different conditions, if you do not have good coverage across different conditions you may loose some of the extreme flow events 
 
 One approach is to interpolate flow data for one stream using available stream gage data. In order to do this you need at least some gage data on the system you are trying to model and this data should cover a variety of conditions (water year types). This method establishes a linear correlation between the target site and other sites that experience similar hydrological conditions. The approach requires identifying comparable sites and establishing a relationship between their flow data.
 
 ### Example
 
-I am creating a regional model with data from 4 salmonid bearing streams: Butte Creek, Mill Creek, Deer Creek, and Yuba River . I am interested in flow data from 2000 - 2024 to match with my monitoring data. Unfortunately, on Yuba River, there is only gage data after _____. In order to keep Yuba in my dataset. I need to fill in the gaps. 
+I am creating a regional model with data from 4 salmonid bearing streams: Butte Creek, Mill Creek, Deer Creek, and Yuba River . I am interested in flow data from 2000 - 2024 to match with my monitoring data. Unfortunately, on Yuba River, there is only gage data after 2010. In order to keep Yuba in my dataset. I need to fill in the gaps. 
 
 ```{r}
 ## Data used to build models: Butte Creek
 # Butte Creek is used to build the regression models because the time series is complete and the data are high quality.
-# NOTE _____ THIS IS AN EXAMPLE WITH TEMPERATURE, REDO this example with FLOW 
-cdec_datasets("BCK") # Test out sensor 20 for flow data at BCK - 
-butte <- cdec_query(station = "BCK", dur_code = "H", sensor_num = "25", start_date = "2000-01-01")
+#data range 1997-03-12 to 2024-03-20
+cdec_datasets("BCK")
+butte <- cdec_query(station = "BCK", dur_code = "H", sensor_num = "20", start_date = "1997-01-01")
 butte_format <- butte |> 
     mutate(date = as_date(datetime),
-           temp_degC = SRJPEdata::fahrenheit_to_celsius(parameter_value)) |>
-    filter(temp_degC < 40, temp_degC > 0.5) |>
+           flow = parameter_value) |>
+  filter(parameter_value > 0) |> 
     group_by(date) |> 
-    summarise(mean = mean(temp_degC, na.rm = TRUE),
-              max = max(temp_degC, na.rm = TRUE),
-              min = min(temp_degC, na.rm = TRUE)) |> 
+    summarise(mean = mean(parameter_value, na.rm = TRUE),
+              max = max(parameter_value, na.rm = TRUE),
+              min = min(parameter_value, na.rm = TRUE)) |> 
     pivot_longer(mean:min, names_to = "statistic", values_to = "value") |>
     mutate(stream = "butte creek",
            gage_agency = "CDEC",
            gage_number = "BCK",
-           parameter = "temperature") # TODO change to flow 
+           parameter = "flow") 
 
 butte_format_wide <- butte_format |> 
   ungroup() |> 
   select(-gage_agency, -gage_number) |> 
   pivot_wider(id_cols = c(stream, date), names_from = "statistic", values_from = "value", values_fill = NA)
 
-cdec_datasets("YR7") # NO flow so find different gage - if there is one on the yuba go for that 
-# Gage Data
-YR7_daily_temps <- cdec_query(station = "YR7", dur_code = "E", sensor_num = "146", start_date = "2019-01-01")
+# ggplot(butte_format, aes(x = date, y = value)) +
+#   geom_line()
 
-yuba_format <- YR7_daily_temps |> 
+
+#gage option 1 
+cdec_datasets("YPB") 
+# 2010-10-01	2024-03-20
+#timeserries will be modeled to match dates from BCK (1997-2024)
+# Gage Data
+YR7_daily_flows <- cdec_query(station = "YPB", dur_code = "H", sensor_num = "20", start_date = "2009-01-01")
+
+yuba_format <- YR7_daily_flows |> 
     mutate(date = as_date(datetime),
            year = year(datetime)) |> 
-    filter(parameter_value < 40, parameter_value > 0, !is.na(date)) |> 
+    filter(parameter_value > 0, !is.na(date)) |> 
     group_by(date) |> 
     summarise(mean = mean(parameter_value, na.rm = TRUE),
              max = max(parameter_value, na.rm = TRUE),
@@ -127,75 +127,117 @@ yuba_format <- YR7_daily_temps |>
   pivot_longer(mean:min, names_to = "statistic", values_to = "value") |>
   mutate(stream = "yuba river",
          gage_agency = "CDEC",
-         gage_number = "YR7",
-         parameter = "temperature") |> 
-  glimpse()
+         gage_number = "YPB",
+         parameter = "flow") 
+
+
+# Generate a sequence of dates from 2010-10-01 to 2024-03-20
+all_dates <- seq(as.Date("2010-10-01"), as.Date("2024-03-20"), by = "day")
+
+# Check for missing dates in YPB
+missing_dates <- setdiff(all_dates, yuba_format$date)
+missing_dates <- as.Date(missing_dates, origin = "2010-10-01")
+# Print the missing dates, if any
+if (length(missing_dates) == 0) {
+  print("No missing dates found.")
+} else {
+  print("Missing dates:")
+  print(missing_dates)
+}
+
+# ggplot(yuba_format, aes(x = date, y = value)) +
+#   geom_line()
+
 
 # combine butte and yuba together for regression modeling
 yuba_format_wide <- yuba_format |> 
   ungroup() |> 
   select(-gage_agency, -gage_number) |> 
-  pivot_wider(id_cols = c(stream, date), names_from = "statistic", values_from = "value", values_fill = NA)
+  pivot_wider(id_cols = c(stream, date), names_from = "statistic", values_from = "value", values_fill = NA) |> 
+  filter(!is.na(date)) 
 
 yuba_regression_data_full <- yuba_format_wide |> 
   ungroup() |> 
   select(date, mean) |> 
-  rename(yuba_temp_mean = mean) |> 
+  rename(yuba_flow_mean = mean) |> 
   full_join(butte_format_wide |> 
               select(date, mean) |> 
-              rename(butte_temp_mean = mean))
+              rename(butte_flow_mean = mean)) 
+
+#Plotting butte and yuba flow correlation 
+ggplot(yuba_regression_data_full, aes(x = yuba_flow_mean, y = butte_flow_mean)) +
+  geom_point(color = colors[1]) + 
+  theme_minimal()
 
 # FOR PREDICTIONS identify gaps to predict data
 yuba_gap_mean <- yuba_regression_data_full |> 
-  filter(is.na(yuba_temp_mean), !is.na(butte_temp_mean)) |> 
-  rename(butte_temp = butte_temp_mean)
+  filter(is.na(yuba_flow_mean), !is.na(butte_flow_mean)) |> 
+  rename(butte_flow = butte_flow_mean)
 
 # FOR MODEL use data where there are no missing data for either butte or feather for regression modeling
 yuba_regression_data_mean <- yuba_regression_data_full |> 
-  filter(!is.na(yuba_temp_mean), !is.na(butte_temp_mean)) |> 
-  rename(butte_temp = butte_temp_mean,
-         temp = yuba_temp_mean)
+  filter(!is.na(yuba_flow_mean), !is.na(butte_flow_mean)) |> 
+  rename(butte_flow = butte_flow_mean,
+         flow = yuba_flow_mean)
 
 #### Building Mean Regression
 # MEAN Regression
 split <-rsample::initial_split(yuba_regression_data_mean, prop = 0.8)
 train <- rsample::training(split)
 test <- rsample::testing(split)
-yuba_mod_mean <- lm(temp ~ date + butte_temp, data = train)
+yuba_mod_mean <- lm(flow ~ date + butte_flow, data = train)
 summary(yuba_mod_mean)
 test_predict <- predict(yuba_mod_mean, test)
 test_predict_df <- test |>
   mutate(predicted = test_predict)
 # evaluate predictions - MAPE of 10% is not bad
 mean(abs((
-  test_predict_df$predicted - test_predict_df$temp
-)) / test_predict_df$temp)
+  test_predict_df$predicted - test_predict_df$flow
+)) / test_predict_df$flow)
 
 # Predictions
 yuba_gap_predicted_mean <- predict(yuba_mod_mean, yuba_gap_mean)
 yuba_mean_predicted <- yuba_gap_mean |> 
   mutate(value = yuba_gap_predicted_mean,
          statistic = "mean_predicted") |> 
+  filter(!is.na(date)) |> 
   select(date, value, statistic)
-ggplot(yuba_mean_predicted, aes(x = date, y = value)) +
-  geom_line()
 
+# ggplot(yuba_mean_predicted, aes(x = date, y = value)) +
+#   geom_line()
+  
+#joining predictions to Yuba data
 
-# Plot new complete data set. Color points by data type (gage, interpolated)
+#filling missing values in yuba_format_wide with values from yuba_mean_predicted
+merged_data <- full_join(yuba_format_wide, yuba_mean_predicted, by = "date") 
 
+# mutating predicted and existing flow values into a single column
+flow_modeled <- merged_data |> 
+  mutate(flow = ifelse(is.na(mean), value, mean),
+         source = ifelse(is.na(statistic), "YPB", statistic)) |> 
+  select(c(stream, date, flow, source)) 
+
+#plotting flow data showing modeled and existing flow data 
+ggplot(flow_modeled, aes(date, flow, color = source)) +
+  geom_line(size = .8) +
+  scale_color_manual(values = c(colors_small[1], colors_small[2]), 
+                     labels = c("Modeled Flow Data", "YPB Flow Data")) +
+  labs(color = "Flow Source") +
+  theme_minimal()
 ```
+
 
 ## Approach 3: Representative Stream and Scaling
 
-**Benefit:**
-**Limitation:**
+**Benefit:** Provides daily flow data for your system
+**Limitation:** Will not incorporate in stream specific operations logic, may over or under predict flow depending on scaling factor. 
 
 Using a representative stream with available flow data can also be an effective approach. By selecting a stream with similar characteristics (e.g., drainage area, land use, climate), we can scale its flow data to estimate flows for the target stream.
 
 ### Example
 
 ```{r}
-# Example R code for scaling
+# TODO 
 
 
 
@@ -213,18 +255,15 @@ Existing modeled flow data from sources like Calsim or SACWAM can be utilized. T
 
 ## Approach 5: Expanding Existing Modeled Flow Data
 
-**Benefit:**
-**Limitation:**
+**Benefit:** Provides daily timstep data 
+**Limitation:** Uncertainty in daily flows, lots of different timeserries could produce the same monthly mean flow 
 
 If existing modeled flow data is available but lacks the required resolution, we can expand it to provide daily flow values. 
-
-HOW? 
 
 ### Example
 
 ```{r}
-
+# TODO 
 
 ```
-
 
