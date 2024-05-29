@@ -519,10 +519,10 @@ scenarios through enhancements in the WRIMS software.</li>
 </h4>
 <table class="table">
 <colgroup>
-<col width="19%">
-<col width="7%">
-<col width="6%">
-<col width="66%">
+<col width="15%">
+<col width="15%">
+<col width="15%">
+<col width="54%">
 </colgroup>
 <thead><tr class="header">
 <th>Scenario Name</th>
@@ -578,185 +578,50 @@ scenarios through enhancements in the WRIMS software.</li>
 </h3>
 <p>Data Inputs to CalSim 3 were summarized based on Chapters 4, 5, and 6
 of the main report. Inputs described in the main report are summarized
-in the table below:</p>
+in the table below, see full xlsx for additional information on the data
+sources:</p>
 <table class="table">
 <colgroup>
-<col width="0%">
-<col width="1%">
-<col width="3%">
-<col width="5%">
-<col width="21%">
-<col width="22%">
-<col width="1%">
-<col width="44%">
+<col width="7%">
+<col width="14%">
+<col width="77%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">Category</th>
 <th align="left">SubCategory</th>
-<th align="left">SubModel</th>
 <th align="left">Data Used</th>
-<th align="left">Data Produced</th>
-<th align="left">Use</th>
-<th align="left">Timestep Data Produced</th>
-<th align="left">Source</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
 <td align="left">Hydrology</td>
 <td align="left">Unimpaired Runoff</td>
-<td align="left">Rim Watershed</td>
 <td align="left">Modeled or empirical flow data</td>
-<td align="left">Unimpaired runoff timeserries for each above dam
-watershed/streamflows</td>
-<td align="left">Produce time serries of unimpaired runoff to use for
-rim watershed hydrology</td>
-<td align="left">?</td>
-<td align="left">USGS, DWR, USACE, Reclamation, txt files from DWR’s
-“COMP” model</td>
 </tr>
 <tr class="even">
 <td align="left">Hydrology</td>
 <td align="left">Unimpaired Runoff</td>
-<td align="left">Rim Watershed</td>
 <td align="left">Average Annual Precipitation</td>
-<td align="left">Unimpaired runoff timeserries for each above dam
-watershed/streamflows for ungaged watersheds</td>
-<td align="left">Average annual precipitation for CalSim 3 rim
-watersheds is used to estimate streamflows for ungauged watersheds.</td>
-<td align="left">?</td>
-<td align="left">National Climate Data Center (NCDC), which provides
-daily precipitation records for 32 gauges located within the Central
-Valley. Parameter-Elevation Regressions on Independent Slopes Model
-(PRISM) Climate Group at Oregon State University, which provides
-distributed grids of daily, monthly, and average annual precipitation
-depths.</td>
 </tr>
 <tr class="odd">
 <td align="left">Hydrology</td>
 <td align="left">Surface Runoff</td>
-<td align="left">Valley Floor Watershed, Rainfall-Runoff Model(CalSim
-Hydro)</td>
 <td align="left">Precipitation daily timeserries, Soil type, Hydrologic
 Condition, Land UseAntecedent Moisture Condition</td>
-<td align="left">Surface runoff timeserries by demand unit</td>
-<td align="left">Used to calculate Surface runoff (SR) from
-precipitation in the Rainfall-Runoff Model which is then used as an
-input to the Valley Floor Watershed submodel. Daily precipitation data
-for CalSim 3 valley watersheds are needed to calculate surface runoff,
-infiltration and soil moisture storage, and deep percolation. The SCS
-method is used to divide rainfall into surface runoff and</td>
-<td align="left"></td>
-<td align="left"></td>
-</tr>
-<tr class="even">
-<td align="left">associated “losses” (infiltration and ET).</td>
-<td align="left">Aggregated to Monthly</td>
-<td align="left">Precipitation: National Climate Data Center (NCDC),
-which provides daily precipitation records for 32 gauges located within
-the Central Valley. Parameter-Elevation Regressions on Independent
-Slopes Model (PRISM) Climate Group at Oregon State University, which
-provides distributed grids of daily, monthly, and average annual
-precipitation depths.Soil Type: data available from the State Soil
-Geographic Database (STATSGO). This data wasdigitized at the scale of
-1:250,000 for use in CalSim 3. The State Soil Geographic STATSGO data
-base spatial and tabular data were revised and updated in 2006 and
-renamedHydrologic Condition: No source providedLand Use: See row on Land
-use</td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-</tr>
-<tr class="odd">
-<td align="left">Antecedent Moisture Condition: NEH-4 (SCS, 1972) uses
-the antecedent 5-day precipitation as an antecedent precipitation index
-(see precipition input above for more informaiton).</td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 <tr class="even">
 <td align="left">Demand</td>
 <td align="left">Agricultural Demand</td>
-<td align="left">Valley Floor Watershed, Rice Water Use Model,
-Integrated Demand Calculator</td>
 <td align="left">Agricultural Water Demand</td>
-<td align="left">time series of applied water demands, agricultural
-return flows (tailwater), surface runoff from precipitation and deep
-percolation. AWr, AWo, and AWw are maintained as separate time series
-data. Tailwater from the 3 land classes are combined by demand unit.
-Surface runoff (from precipitation) and deep percolation (from
-precipitation and applied water) from the 3 land classes are aggregated
-by WBA.</td>
-<td align="left">Applied water demand for rice (AWr) and Applied water
-demand for other agricultural crops (AWo) are used to estimate
-diversions for agriculture in the Valley Floor Watershed Submodel. Rice
-specific demand is preprocessed in a Rice Water Use Model before being
-used in CalSim 3. Applied water demand for other agricultural crops is
-preprocessed in the Integrated Demand Calculator</td>
-<td align="left">?</td>
-<td align="left">Water district and water agency boundaries and service
-areas obtained from the Cal-Atlas Geospatial Clearinghouse (formerly the
-California Spatial Information Library), which comprises separate GIS
-layers for Federal, State, and private water districts. These data are
-also available from DWR (2022a). CalSim 3 Main Report 3-4 – August 2022
-• County LAFCO reports on water purveyors in their respective counties
-(LAFCO, 2022).0F 1 • County land-use surveys undertaken by DWR’s
-Division of Regional Assistance (formerly Division of Planning and Local
-Assistance) (DWR, 2022b). • County and regional integrated water
-resources plans and integrated water management plans. • CalSim II
-documentation (Reclamation, 2007). • Reclamation CVP water supply
-contract renewal and supporting environmental documents (Reclamation,
-2022).</td>
 </tr>
 <tr class="odd">
 <td align="left">Demand</td>
 <td align="left">Wetland Demand</td>
-<td align="left">Valley Floor Watershed, Wetland Water Use Model (CalSim
-Hydro)</td>
 <td align="left">Wetland Water Demand</td>
-<td align="left">time series of applied water demands, agricultural
-return flows (tailwater), surface runoff from precipitation and deep
-percolation. AWr, AWo, and AWw are maintained as separate time series
-data. Tailwater from the 3 land classes are combined by demand unit.
-Surface runoff (from precipitation) and deep percolation (from
-precipitation and applied water) from the 3 land classes are aggregated
-by WBA.</td>
-<td align="left">Applied water demand for permanent, semi-permanent, and
-seasonal wetlands (AWw) is preprocessed in a Wetland Water Use Model and
-then utalized in the Valley Floor Watershed component of CalSim 2 to
-water use for wetlands.</td>
-<td align="left">?</td>
-<td align="left">Report on Refuge Water Supply Investigations, Central
-Valley Hydrologic Basin, California (Reclamation, 1989a) • San Joaquin
-Basin Action Plan/Kesterson Mitigation Plan (Reclamation, 1989b) •
-Central Valley Joint Venture Implementation Plan (USFWS, 2006) • Refuge
-water management plans (Reclamation, 2022a) • Refuge water supply
-environmental documentation (Reclamation, 2022b) • Reclamation water
-supply contract documents with Grassland WD, CDFW, USFWS, and MOUs with
-USFWS (Reclamation, 2022c)</td>
 </tr>
 <tr class="even">
 <td align="left">Demand</td>
 <td align="left">Urban Demand</td>
-<td align="left">Valley Floor Watershed, Integrated Demand
-Calculator</td>
 <td align="left">Urban Water Demand</td>
-<td align="left">Simulated surface water diversionsfor urban water
-suppliers</td>
-<td align="left">Urban demand (UD), combining indoor and outdoor
-components is utalized in the Valley Floor Watershed component of CalSim
-2 to water use for urban areas.</td>
-<td align="left">NA</td>
-<td align="left">Urban Water Management Plans (UWMP) • Integrated
-Regional Water Management Plans (IRWMP) • Drinking Water Source
-Assessments • U.S. Environmental Protection Agency (EPA) • California
-Water Plan, Update 2018</td>
 </tr>
 </tbody>
 </table>
@@ -932,16 +797,6 @@ how different operations would cause different flow at a relatively fine
 scale. cons, monthly time scale is limited for use in biological
 modeling, monthly timestep does not capture the fine scale resolution
 that biological organisms experience.</p>
-<div class="section level3">
-<h3 id="questions">Questions<a class="anchor" aria-label="anchor" href="#questions"></a>
-</h3>
-<ul>
-<li>Is there a conceptual model anywhere to describe the CalSim modeling
-framework What are the model validation procedures?</li>
-<li>What are the Applied Water demands used for? Talk through
-diagram.</li>
-</ul>
-</div>
 </div>
   </div>
 

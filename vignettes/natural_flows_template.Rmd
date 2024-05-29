@@ -294,6 +294,3 @@ Of the `r n_comid_total` NHDPlusV2 segments in the Central Valley, `r n_comid_nf
 | **Geomorphic studies and flood modeling**: Alternative source of peak flows (Q2,Q5,Q10) | Quickly accessible for any stream reach regardless of gage present; provides margins of error; likely a more reliable estimate than traditional regional regression | Represents unimpaired flow (although so does regional regression) so not applicable on impaired/dammed streams; does not include estimates above Q10; for gaged streams not as reliable as Bulletin 17C |
 | ... | ... | ... |
 
-## Questions for Data Experts 
-
-- Please list any questions about the data source. 
