@@ -56,6 +56,9 @@
     <li>
       <a href="../articles/usgs_template.html">USGS Overview</a>
     </li>
+    <li>
+      <a href="../articles/natural_flows_template.html">Natural Flows Overview</a>
+    </li>
   </ul>
 </li>
 <li class="dropdown">
@@ -94,7 +97,6 @@
 
     
     
-<p>Some sources to review - <a href="https://www.sciencedirect.com/science/article/abs/pii/S0022169418309648" class="external-link uri">https://www.sciencedirect.com/science/article/abs/pii/S0022169418309648</a></p>
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
@@ -102,16 +104,19 @@
 water resource management, and environmental studies. In cases where
 empirical data for a stream is lacking, several approaches can be
 employed to generate flow estimates. In this document, we explore
-various methods for modeling flow data when empirical data is
+various quick methods for modeling flow data when empirical data is
 unavailable.</p>
+<p>This package also develops more in depth modeling to produce daily
+flow data for a watershed. Please refer to alternative article for an
+overview of that modeling.</p>
 <div class="section level3">
 <h3 id="approach-1-timeserries-interpretation">Approach 1: Timeserries interpretation<a class="anchor" aria-label="anchor" href="#approach-1-timeserries-interpretation"></a>
 </h3>
 <p><strong>Benefit:</strong> Quick and easy, performs relatively well
 for flow data that follows seasonal patterns. Good for data that is
-fairly complete with some shorter gaps. <strong>Limitation:</strong> May
-miss abnormal extreme flow events, may have more uncertainty than other
-approaches</p>
+fairly complete with some shorter gaps.</p>
+<p><strong>Limitation:</strong> May miss abnormal extreme flow events,
+may have more uncertainty than other approaches</p>
 <p>Using a timeserries interpolation function is a good approach if you
 have relatively good data coverage but have a few data gaps. One
 possible interpolation function is the
@@ -121,30 +126,41 @@ documenation.</a></p>
 <div class="section level4">
 <h4 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h4>
-<p>I want to study the flow and temperature correlation on ___ system.
-There is a USGS gage on my system, but it is missing data for _____
-window.</p>
+<p>I want to study the flow and temperature correlation on the American
+river system. There is a CDEC gage on my system, but it is missing data
+for for a few month long chunks throughout the timeseries. I use the
+forecast <code><a href="https://pkg.robjhyndman.com/forecast/reference/na.interp.html" class="external-link">forecast::na.interp()</a></code> function to fill in these
+data gaps.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Load necessary libraries</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://code.usgs.gov/water/dataRetrieval" class="external-link">dataRetrieval</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/nredell/forecastML/" class="external-link">forecastML</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://pkg.robjhyndman.com/forecast/" class="external-link">forecast</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/EdwinTh/padr" class="external-link">padr</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Make API call to USGS to retrieve flow data for the specified site and time period</span></span>
-<span><span class="va">gage_data</span> <span class="op">&lt;-</span> <span class="fu">dataRetrieval</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/dataRetrieval/man/readNWISdv.html" class="external-link">readNWISdv</a></span><span class="op">(</span><span class="fl">11384000</span>, <span class="st">"00060"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span>date <span class="op">=</span> <span class="va">Date</span>, </span>
-<span>         flow_cfs <span class="op">=</span> <span class="va">X_00060_00003</span><span class="op">)</span></span>
-<span><span class="co"># 'gage_data' is the dataset containing USGS flow data with gaps</span></span>
-<span><span class="co"># Fill gaps in flow data using forecastML::fill_gaps() function</span></span>
-<span><span class="va">filled_data</span> <span class="op">&lt;-</span> <span class="fu">forecastML</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/forecastML/man/fill_gaps.html" class="external-link">fill_gaps</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">gage_data</span>,</span>
-<span>                                     date_col <span class="op">=</span> <span class="fl">1</span>, </span>
-<span>                                     frequency <span class="op">=</span> <span class="st">"1 day"</span><span class="op">)</span></span>
+<span><span class="co"># Make API call to CDEC to retrieve flow data for the specified site and time period</span></span>
+<span><span class="va">amk</span> <span class="op">&lt;-</span> <span class="fu">cdec_query</span><span class="op">(</span>station <span class="op">=</span> <span class="st">"AMK"</span>, dur_code <span class="op">=</span> <span class="st">"H"</span>, sensor_num <span class="op">=</span> <span class="st">"20"</span>, start_date <span class="op">=</span> <span class="st">"2017-01-01"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>date <span class="op">=</span> <span class="fu">as_date</span><span class="op">(</span><span class="va">datetime</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">date</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>flow_cfs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">parameter_value</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>data_type <span class="op">=</span> <span class="st">"gage"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/padr/man/pad.html" class="external-link">pad</a></span><span class="op">(</span><span class="op">)</span> <span class="co"># pads so not missing dates</span></span>
 <span></span>
-<span><span class="co"># Plot original and filled data for comparison</span></span>
-<span><span class="va">gage_data</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">date</span>, y <span class="op">=</span> <span class="va">flow_cfs</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu">geom_line</span><span class="op">(</span>color <span class="op">=</span> <span class="va">colors</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span> <span class="op">+</span> </span>
+<span><span class="co">#create a timeseries that covers all dates of date period</span></span>
+<span><span class="va">amk_approx</span> <span class="op">&lt;-</span> <span class="va">amk</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>old_flow <span class="op">=</span> <span class="va">flow_cfs</span>,</span>
+<span>         flow_cfs <span class="op">=</span> <span class="fu">forecast</span><span class="fu">::</span><span class="fu"><a href="https://pkg.robjhyndman.com/forecast/reference/na.interp.html" class="external-link">na.interp</a></span><span class="op">(</span><span class="va">amk</span><span class="op">$</span><span class="va">flow_cfs</span><span class="op">)</span>,</span>
+<span>         data_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">data_type</span> <span class="op">==</span> <span class="st">"gage"</span>, <span class="va">data_type</span>, <span class="st">"aproximated"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/padr/man/pad.html" class="external-link">pad</a></span><span class="op">(</span><span class="op">)</span> </span>
+<span></span>
+<span><span class="co"># plot </span></span>
+<span><span class="va">amk_approx</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">date</span>, y <span class="op">=</span> <span class="va">flow_cfs</span>, color <span class="op">=</span> <span class="va">colors_small</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu">geom_line</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu">geom_line</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">date</span>, y <span class="op">=</span> <span class="va">old_flow</span>, color <span class="op">=</span> <span class="va">colors_small</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu">scale_color_manual</span><span class="op">(</span>values <span class="op">=</span> <span class="va">colors_small</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="flow_modeling_approaches_files/figure-html/unnamed-chunk-1-1.png" width="1440"></p>
+<p><img src="flow_modeling_approaches_files/figure-html/unnamed-chunk-1-1.png" width="960"></p>
 </div>
 </div>
 <div class="section level3">
@@ -152,10 +168,10 @@ window.</p>
 temporal data gap<a class="anchor" aria-label="anchor" href="#approach-2-linear-regression-between-stream-gage-data---filling-a-temporal-data-gap"></a>
 </h3>
 <p><strong>Benefit:</strong> Fairly quick and straightforward, linear
-regression typically does a fairly good job <strong>Limitation:</strong>
-Need at least some gage overlap across different conditions, if you do
-not have good coverage across different conditions you may loose some of
-the extreem flow events</p>
+regression typically does a fairly good job</p>
+<p><strong>Limitation:</strong> Need at least some gage overlap across
+different conditions, if you do not have good coverage across different
+conditions you may loose some of the extreme flow events</p>
 <p>One approach is to interpolate flow data for one stream using
 available stream gage data. In order to do this you need at least some
 gage data on the system you are trying to model and this data should
@@ -170,38 +186,54 @@ their flow data.</p>
 <p>I am creating a regional model with data from 4 salmonid bearing
 streams: Butte Creek, Mill Creek, Deer Creek, and Yuba River . I am
 interested in flow data from 2000 - 2024 to match with my monitoring
-data. Unfortunately, on Yuba River, there is only gage data after _____.
-In order to keeep Yuba in my dataset. I need to fill in the gaps.</p>
+data. Unfortunately, on Yuba River, there is only gage data after 2010.
+In order to keep Yuba in my dataset. I need to fill in the gaps.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## Data used to build models: Butte Creek</span></span>
 <span><span class="co"># Butte Creek is used to build the regression models because the time series is complete and the data are high quality.</span></span>
-<span><span class="va">butte</span> <span class="op">&lt;-</span> <span class="fu">cdec_query</span><span class="op">(</span>station <span class="op">=</span> <span class="st">"BCK"</span>, dur_code <span class="op">=</span> <span class="st">"H"</span>, sensor_num <span class="op">=</span> <span class="st">"25"</span>, start_date <span class="op">=</span> <span class="st">"2000-01-01"</span><span class="op">)</span></span>
+<span><span class="co"># data range 1997-03-12 to 2024-03-20</span></span>
+<span><span class="fu">cdec_datasets</span><span class="op">(</span><span class="st">"BCK"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 9 × 6</span></span></span>
+<span><span class="co">##   sensor_number sensor_name          sensor_units duration start      end       </span></span>
+<span><span class="co">##           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>    </span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span>             1 river stage          feet         event    1997-03-12 2024-05-29</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">2</span>             1 river stage          feet         hourly   1997-03-14 2024-05-29</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">3</span>            14 battery voltage      volts        hourly   1997-03-14 2019-04-15</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">4</span>            20 flow river discharge cfs          event    1997-03-12 2024-05-29</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">5</span>            20 flow river discharge cfs          hourly   1997-03-14 2024-05-29</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">6</span>            25 temperature water    deg f        event    2017-06-06 2024-05-29</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">7</span>            25 temperature water    deg f        hourly   1998-09-16 2024-05-29</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">8</span>            27 water turbidity      ntu          hourly   1999-10-18 2005-01-01</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">9</span>            41 flow mean daily      cfs          daily    1999-07-21 2024-05-29</span></span></code></pre>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">butte</span> <span class="op">&lt;-</span> <span class="fu">cdec_query</span><span class="op">(</span>station <span class="op">=</span> <span class="st">"BCK"</span>, dur_code <span class="op">=</span> <span class="st">"H"</span>, sensor_num <span class="op">=</span> <span class="st">"20"</span>, start_date <span class="op">=</span> <span class="st">"1997-01-01"</span><span class="op">)</span></span>
 <span><span class="va">butte_format</span> <span class="op">&lt;-</span> <span class="va">butte</span> <span class="op">|&gt;</span> </span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>date <span class="op">=</span> <span class="fu">as_date</span><span class="op">(</span><span class="va">datetime</span><span class="op">)</span>,</span>
-<span>           temp_degC <span class="op">=</span> <span class="fu">SRJPEdata</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/SRJPEdata/man/fahrenheit_to_celsius.html" class="external-link">fahrenheit_to_celsius</a></span><span class="op">(</span><span class="va">parameter_value</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">temp_degC</span> <span class="op">&lt;</span> <span class="fl">40</span>, <span class="va">temp_degC</span> <span class="op">&gt;</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>           flow <span class="op">=</span> <span class="va">parameter_value</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">parameter_value</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">date</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>mean <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">temp_degC</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
-<span>              max <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">temp_degC</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
-<span>              min <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">temp_degC</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>mean <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">parameter_value</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>              max <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">parameter_value</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>              min <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">parameter_value</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>    <span class="fu">pivot_longer</span><span class="op">(</span><span class="va">mean</span><span class="op">:</span><span class="va">min</span>, names_to <span class="op">=</span> <span class="st">"statistic"</span>, values_to <span class="op">=</span> <span class="st">"value"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>stream <span class="op">=</span> <span class="st">"butte creek"</span>,</span>
 <span>           gage_agency <span class="op">=</span> <span class="st">"CDEC"</span>,</span>
 <span>           gage_number <span class="op">=</span> <span class="st">"BCK"</span>,</span>
-<span>           parameter <span class="op">=</span> <span class="st">"temperature"</span><span class="op">)</span></span>
+<span>           parameter <span class="op">=</span> <span class="st">"flow"</span><span class="op">)</span> </span>
 <span></span>
 <span><span class="va">butte_format_wide</span> <span class="op">&lt;-</span> <span class="va">butte_format</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">gage_agency</span>, <span class="op">-</span><span class="va">gage_number</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu">pivot_wider</span><span class="op">(</span>id_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">stream</span>, <span class="va">date</span><span class="op">)</span>, names_from <span class="op">=</span> <span class="st">"statistic"</span>, values_from <span class="op">=</span> <span class="st">"value"</span>, values_fill <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># Timeserries will be modeled to match dates from BCK (1997-2024)</span></span>
 <span><span class="co"># Gage Data</span></span>
-<span><span class="va">YR7_daily_temps</span> <span class="op">&lt;-</span> <span class="fu">cdec_query</span><span class="op">(</span>station <span class="op">=</span> <span class="st">"YR7"</span>, dur_code <span class="op">=</span> <span class="st">"E"</span>, sensor_num <span class="op">=</span> <span class="st">"146"</span>, start_date <span class="op">=</span> <span class="st">"2019-01-01"</span><span class="op">)</span></span>
+<span><span class="va">YR7_daily_flows</span> <span class="op">&lt;-</span> <span class="fu">cdec_query</span><span class="op">(</span>station <span class="op">=</span> <span class="st">"YPB"</span>, dur_code <span class="op">=</span> <span class="st">"H"</span>, sensor_num <span class="op">=</span> <span class="st">"20"</span>, start_date <span class="op">=</span> <span class="st">"2009-01-01"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">yuba_format</span> <span class="op">&lt;-</span> <span class="va">YR7_daily_temps</span> <span class="op">|&gt;</span> </span>
+<span><span class="va">yuba_format</span> <span class="op">&lt;-</span> <span class="va">YR7_daily_flows</span> <span class="op">|&gt;</span> </span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>date <span class="op">=</span> <span class="fu">as_date</span><span class="op">(</span><span class="va">datetime</span><span class="op">)</span>,</span>
 <span>           year <span class="op">=</span> <span class="fu">year</span><span class="op">(</span><span class="va">datetime</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">parameter_value</span> <span class="op">&lt;</span> <span class="fl">40</span>, <span class="va">parameter_value</span> <span class="op">&gt;</span> <span class="fl">0</span>, <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">date</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">parameter_value</span> <span class="op">&gt;</span> <span class="fl">0</span>, <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">date</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">date</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>mean <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">parameter_value</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
 <span>             max <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">parameter_value</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
@@ -209,115 +241,173 @@ In order to keeep Yuba in my dataset. I need to fill in the gaps.</p>
 <span>  <span class="fu">pivot_longer</span><span class="op">(</span><span class="va">mean</span><span class="op">:</span><span class="va">min</span>, names_to <span class="op">=</span> <span class="st">"statistic"</span>, values_to <span class="op">=</span> <span class="st">"value"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>stream <span class="op">=</span> <span class="st">"yuba river"</span>,</span>
 <span>         gage_agency <span class="op">=</span> <span class="st">"CDEC"</span>,</span>
-<span>         gage_number <span class="op">=</span> <span class="st">"YR7"</span>,</span>
-<span>         parameter <span class="op">=</span> <span class="st">"temperature"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Rows: 4,956</span></span>
-<span><span class="co">## Columns: 7</span></span>
-<span><span class="co">## $ date        <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 2019-09-03, 2019-09-03, 2019-09-03, 2019-09-04, 2019-09-0…</span></span>
-<span><span class="co">## $ statistic   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "mean", "max", "min", "mean", "max", "min", "mean", "max",…</span></span>
-<span><span class="co">## $ value       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 18.72500, 19.00000, 18.40000, 17.33958, 19.20000, 15.40000…</span></span>
-<span><span class="co">## $ stream      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "yuba river", "yuba river", "yuba river", "yuba river", "y…</span></span>
-<span><span class="co">## $ gage_agency <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "CDEC", "CDEC", "CDEC", "CDEC", "CDEC", "CDEC", "CDEC", "C…</span></span>
-<span><span class="co">## $ gage_number <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "YR7", "YR7", "YR7", "YR7", "YR7", "YR7", "YR7", "YR7", "Y…</span></span>
-<span><span class="co">## $ parameter   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "temperature", "temperature", "temperature", "temperature"…</span></span></code></pre>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<span>         gage_number <span class="op">=</span> <span class="st">"YPB"</span>,</span>
+<span>         parameter <span class="op">=</span> <span class="st">"flow"</span><span class="op">)</span> </span>
+<span></span>
+<span></span>
+<span><span class="co"># Generate a sequence of dates from 2010-10-01 to 2024-03-20</span></span>
+<span><span class="va">all_dates</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2010-10-01"</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2024-03-20"</span><span class="op">)</span>, by <span class="op">=</span> <span class="st">"day"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Check for missing dates in YPB</span></span>
+<span><span class="va">missing_dates</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/setops.html" class="external-link">setdiff</a></span><span class="op">(</span><span class="va">all_dates</span>, <span class="va">yuba_format</span><span class="op">$</span><span class="va">date</span><span class="op">)</span></span>
+<span><span class="va">missing_dates</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="va">missing_dates</span>, origin <span class="op">=</span> <span class="st">"2010-10-01"</span><span class="op">)</span></span>
+<span><span class="co"># Print the missing dates, if any</span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">missing_dates</span><span class="op">)</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"No missing dates found."</span><span class="op">)</span></span>
+<span><span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"Missing dates:"</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">missing_dates</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] "Missing dates:"</span></span>
+<span><span class="co">##   [1] "2051-07-01" "2051-07-02" "2051-07-03" "2051-07-04" "2051-07-05"</span></span>
+<span><span class="co">##   [6] "2051-07-06" "2051-07-07" "2051-07-08" "2051-07-09" "2051-07-10"</span></span>
+<span><span class="co">##  [11] "2051-07-11" "2051-07-12" "2051-07-13" "2051-07-14" "2051-07-15"</span></span>
+<span><span class="co">##  [16] "2051-07-16" "2051-07-17" "2051-07-18" "2051-07-19" "2051-07-20"</span></span>
+<span><span class="co">##  [21] "2051-07-21" "2051-07-22" "2051-07-23" "2051-07-24" "2051-07-25"</span></span>
+<span><span class="co">##  [26] "2051-07-26" "2051-07-27" "2051-07-28" "2051-07-29" "2051-07-30"</span></span>
+<span><span class="co">##  [31] "2051-07-31" "2051-08-01" "2051-08-02" "2051-08-03" "2051-08-04"</span></span>
+<span><span class="co">##  [36] "2051-08-05" "2051-08-06" "2051-08-07" "2051-08-08" "2051-08-09"</span></span>
+<span><span class="co">##  [41] "2051-08-10" "2051-08-11" "2051-08-12" "2051-08-13" "2051-08-14"</span></span>
+<span><span class="co">##  [46] "2051-08-15" "2051-08-16" "2051-08-17" "2051-08-18" "2051-08-19"</span></span>
+<span><span class="co">##  [51] "2051-08-20" "2051-08-21" "2051-08-22" "2051-08-23" "2051-08-24"</span></span>
+<span><span class="co">##  [56] "2051-08-25" "2051-08-26" "2051-08-27" "2051-08-28" "2051-08-29"</span></span>
+<span><span class="co">##  [61] "2051-08-30" "2051-08-31" "2051-09-01" "2051-09-02" "2051-09-03"</span></span>
+<span><span class="co">##  [66] "2051-09-04" "2051-09-05" "2051-09-06" "2051-09-07" "2051-09-08"</span></span>
+<span><span class="co">##  [71] "2051-09-09" "2051-09-10" "2051-09-11" "2051-09-12" "2051-09-13"</span></span>
+<span><span class="co">##  [76] "2051-09-14" "2051-09-15" "2051-09-16" "2051-09-17" "2051-09-18"</span></span>
+<span><span class="co">##  [81] "2051-09-19" "2051-09-20" "2051-09-21" "2051-09-22" "2051-09-23"</span></span>
+<span><span class="co">##  [86] "2051-09-24" "2051-09-25" "2051-09-26" "2051-09-27" "2051-09-28"</span></span>
+<span><span class="co">##  [91] "2051-09-29" "2051-09-30" "2051-10-01" "2051-10-02" "2051-10-03"</span></span>
+<span><span class="co">##  [96] "2051-10-04" "2051-10-05" "2051-10-06" "2051-10-07" "2051-10-08"</span></span>
+<span><span class="co">## [101] "2051-10-09" "2051-10-10" "2051-10-11" "2051-10-12" "2051-10-13"</span></span>
+<span><span class="co">## [106] "2051-10-14" "2051-10-15" "2051-10-16" "2051-10-17" "2051-10-18"</span></span>
+<span><span class="co">## [111] "2051-10-19" "2051-10-20" "2051-10-21" "2051-10-22" "2051-10-23"</span></span>
+<span><span class="co">## [116] "2051-10-24" "2051-10-25" "2051-10-26" "2051-10-27" "2051-10-28"</span></span>
+<span><span class="co">## [121] "2051-10-29" "2051-10-30" "2054-01-06" "2054-01-07" "2054-01-08"</span></span>
+<span><span class="co">## [126] "2054-01-09" "2054-01-10" "2054-01-11" "2054-01-12" "2054-01-13"</span></span>
+<span><span class="co">## [131] "2054-01-14" "2054-01-15" "2054-01-16" "2054-01-17" "2054-01-18"</span></span>
+<span><span class="co">## [136] "2054-01-19" "2054-01-20" "2054-01-21" "2054-01-22" "2054-01-23"</span></span>
+<span><span class="co">## [141] "2054-01-24" "2054-01-25" "2054-01-26" "2054-01-27" "2054-01-28"</span></span>
+<span><span class="co">## [146] "2054-01-29" "2054-01-30" "2054-01-31" "2054-02-01" "2054-02-02"</span></span>
+<span><span class="co">## [151] "2054-02-03" "2054-02-04" "2054-02-05" "2054-02-06" "2054-02-07"</span></span>
+<span><span class="co">## [156] "2054-02-08" "2054-02-09" "2054-02-10" "2054-02-11" "2054-02-12"</span></span>
+<span><span class="co">## [161] "2054-02-13" "2054-02-14" "2054-02-15" "2054-02-16" "2054-02-17"</span></span>
+<span><span class="co">## [166] "2054-02-18" "2054-02-19" "2054-02-20" "2054-07-31" "2054-08-01"</span></span>
+<span><span class="co">## [171] "2054-08-02" "2054-08-03" "2054-08-04" "2057-07-15" "2057-07-16"</span></span>
+<span><span class="co">## [176] "2057-07-17" "2057-07-18" "2057-09-30" "2057-10-01" "2057-10-02"</span></span>
+<span><span class="co">## [181] "2057-11-30" "2057-12-01" "2057-12-02" "2057-12-03" "2060-05-16"</span></span>
+<span><span class="co">## [186] "2062-04-15" "2062-04-16" "2062-04-21" "2062-07-24" "2062-08-06"</span></span>
+<span><span class="co">## [191] "2062-09-05" "2062-09-11" "2062-09-12" "2062-09-15" "2062-09-22"</span></span>
+<span><span class="co">## [196] "2062-09-24" "2062-09-25" "2062-09-28" "2062-10-04" "2063-08-05"</span></span>
+<span><span class="co">## [201] "2063-08-06" "2063-08-21" "2063-08-26" "2063-08-27" "2063-10-16"</span></span>
+<span><span class="co">## [206] "2063-11-11" "2063-11-12" "2064-08-22" "2064-10-05" "2064-10-10"</span></span>
+<span><span class="co">## [211] "2064-10-11" "2064-10-12" "2064-10-13" "2064-10-14" "2064-10-15"</span></span>
+<span><span class="co">## [216] "2064-10-16"</span></span></code></pre>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># combine butte and yuba together for regression modeling</span></span>
 <span><span class="va">yuba_format_wide</span> <span class="op">&lt;-</span> <span class="va">yuba_format</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">gage_agency</span>, <span class="op">-</span><span class="va">gage_number</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu">pivot_wider</span><span class="op">(</span>id_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">stream</span>, <span class="va">date</span><span class="op">)</span>, names_from <span class="op">=</span> <span class="st">"statistic"</span>, values_from <span class="op">=</span> <span class="st">"value"</span>, values_fill <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></span>
+<span>  <span class="fu">pivot_wider</span><span class="op">(</span>id_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">stream</span>, <span class="va">date</span><span class="op">)</span>, names_from <span class="op">=</span> <span class="st">"statistic"</span>, values_from <span class="op">=</span> <span class="st">"value"</span>, values_fill <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">date</span><span class="op">)</span><span class="op">)</span> </span>
 <span></span>
 <span><span class="va">yuba_regression_data_full</span> <span class="op">&lt;-</span> <span class="va">yuba_format_wide</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">date</span>, <span class="va">mean</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span>yuba_temp_mean <span class="op">=</span> <span class="va">mean</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span>yuba_flow_mean <span class="op">=</span> <span class="va">mean</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">full_join</a></span><span class="op">(</span><span class="va">butte_format_wide</span> <span class="op">|&gt;</span> </span>
 <span>              <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">date</span>, <span class="va">mean</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>              <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span>butte_temp_mean <span class="op">=</span> <span class="va">mean</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Joining with `by = join_by(date)`</span></span></code></pre>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<span>              <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span>butte_flow_mean <span class="op">=</span> <span class="va">mean</span><span class="op">)</span><span class="op">)</span> </span>
+<span></span>
+<span><span class="co"># Plotting butte and yuba flow correlation </span></span>
+<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">yuba_regression_data_full</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">yuba_flow_mean</span>, y <span class="op">=</span> <span class="va">butte_flow_mean</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span>color <span class="op">=</span> <span class="va">colors</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="flow_modeling_approaches_files/figure-html/unnamed-chunk-2-1.png" width="960"></p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># FOR PREDICTIONS identify gaps to predict data</span></span>
 <span><span class="va">yuba_gap_mean</span> <span class="op">&lt;-</span> <span class="va">yuba_regression_data_full</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">yuba_temp_mean</span><span class="op">)</span>, <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">butte_temp_mean</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span>butte_temp <span class="op">=</span> <span class="va">butte_temp_mean</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">yuba_flow_mean</span><span class="op">)</span>, <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">butte_flow_mean</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span>butte_flow <span class="op">=</span> <span class="va">butte_flow_mean</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># FOR MODEL use data where there are no missing data for either butte or feather for regression modeling</span></span>
 <span><span class="va">yuba_regression_data_mean</span> <span class="op">&lt;-</span> <span class="va">yuba_regression_data_full</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">yuba_temp_mean</span><span class="op">)</span>, <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">butte_temp_mean</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span>butte_temp <span class="op">=</span> <span class="va">butte_temp_mean</span>,</span>
-<span>         temp <span class="op">=</span> <span class="va">yuba_temp_mean</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">yuba_flow_mean</span><span class="op">)</span>, <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">butte_flow_mean</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span>butte_flow <span class="op">=</span> <span class="va">butte_flow_mean</span>,</span>
+<span>         flow <span class="op">=</span> <span class="va">yuba_flow_mean</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">#### Building Mean Regression</span></span>
 <span><span class="co"># MEAN Regression</span></span>
 <span><span class="va">split</span> <span class="op">&lt;-</span><span class="fu">rsample</span><span class="fu">::</span><span class="fu"><a href="https://rsample.tidymodels.org/reference/initial_split.html" class="external-link">initial_split</a></span><span class="op">(</span><span class="va">yuba_regression_data_mean</span>, prop <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span>
 <span><span class="va">train</span> <span class="op">&lt;-</span> <span class="fu">rsample</span><span class="fu">::</span><span class="fu"><a href="https://rsample.tidymodels.org/reference/initial_split.html" class="external-link">training</a></span><span class="op">(</span><span class="va">split</span><span class="op">)</span></span>
 <span><span class="va">test</span> <span class="op">&lt;-</span> <span class="fu">rsample</span><span class="fu">::</span><span class="fu"><a href="https://rsample.tidymodels.org/reference/initial_split.html" class="external-link">testing</a></span><span class="op">(</span><span class="va">split</span><span class="op">)</span></span>
-<span><span class="va">yuba_mod_mean</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">temp</span> <span class="op">~</span> <span class="va">date</span> <span class="op">+</span> <span class="va">butte_temp</span>, data <span class="op">=</span> <span class="va">train</span><span class="op">)</span></span>
+<span><span class="va">yuba_mod_mean</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">flow</span> <span class="op">~</span> <span class="va">date</span> <span class="op">+</span> <span class="va">butte_flow</span>, data <span class="op">=</span> <span class="va">train</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">yuba_mod_mean</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
 <span><span class="co">## Call:</span></span>
-<span><span class="co">## lm(formula = temp ~ date + butte_temp, data = train)</span></span>
+<span><span class="co">## lm(formula = flow ~ date + butte_flow, data = train)</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## Residuals:</span></span>
-<span><span class="co">##     Min      1Q  Median      3Q     Max </span></span>
-<span><span class="co">## -3.9029 -0.9829 -0.0004  1.0602  3.1772 </span></span>
+<span><span class="co">##    Min     1Q Median     3Q    Max </span></span>
+<span><span class="co">## -43711   -751   -413    240  47302 </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## Coefficients:</span></span>
 <span><span class="co">##               Estimate Std. Error t value Pr(&gt;|t|)    </span></span>
-<span><span class="co">## (Intercept)  2.175e+01  1.541e+00   14.12   &lt;2e-16 ***</span></span>
-<span><span class="co">## date        -8.160e-04  8.082e-05  -10.10   &lt;2e-16 ***</span></span>
-<span><span class="co">## butte_temp   5.886e-01  6.773e-03   86.90   &lt;2e-16 ***</span></span>
+<span><span class="co">## (Intercept) 1427.35354  515.94282   2.766  0.00569 ** </span></span>
+<span><span class="co">## date          -0.02274    0.02948  -0.771  0.44050    </span></span>
+<span><span class="co">## butte_flow     3.78181    0.06274  60.275  &lt; 2e-16 ***</span></span>
 <span><span class="co">## ---</span></span>
 <span><span class="co">## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
 <span><span class="co">## </span></span>
-<span><span class="co">## Residual standard error: 1.403 on 1316 degrees of freedom</span></span>
-<span><span class="co">## Multiple R-squared:  0.8553, Adjusted R-squared:  0.8551 </span></span>
-<span><span class="co">## F-statistic:  3889 on 2 and 1316 DF,  p-value: &lt; 2.2e-16</span></span></code></pre>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<span><span class="co">## Residual standard error: 2542 on 3809 degrees of freedom</span></span>
+<span><span class="co">## Multiple R-squared:  0.4882, Adjusted R-squared:  0.488 </span></span>
+<span><span class="co">## F-statistic:  1817 on 2 and 3809 DF,  p-value: &lt; 2.2e-16</span></span></code></pre>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">test_predict</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">yuba_mod_mean</span>, <span class="va">test</span><span class="op">)</span></span>
 <span><span class="va">test_predict_df</span> <span class="op">&lt;-</span> <span class="va">test</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>predicted <span class="op">=</span> <span class="va">test_predict</span><span class="op">)</span></span>
 <span><span class="co"># evaluate predictions - MAPE of 10% is not bad</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="op">(</span></span>
-<span>  <span class="va">test_predict_df</span><span class="op">$</span><span class="va">predicted</span> <span class="op">-</span> <span class="va">test_predict_df</span><span class="op">$</span><span class="va">temp</span></span>
-<span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="va">test_predict_df</span><span class="op">$</span><span class="va">temp</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] 0.08529317</span></span></code></pre>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<span>  <span class="va">test_predict_df</span><span class="op">$</span><span class="va">predicted</span> <span class="op">-</span> <span class="va">test_predict_df</span><span class="op">$</span><span class="va">flow</span></span>
+<span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="va">test_predict_df</span><span class="op">$</span><span class="va">flow</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] 0.6212044</span></span></code></pre>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Predictions</span></span>
 <span><span class="va">yuba_gap_predicted_mean</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">yuba_mod_mean</span>, <span class="va">yuba_gap_mean</span><span class="op">)</span></span>
 <span><span class="va">yuba_mean_predicted</span> <span class="op">&lt;-</span> <span class="va">yuba_gap_mean</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>value <span class="op">=</span> <span class="va">yuba_gap_predicted_mean</span>,</span>
 <span>         statistic <span class="op">=</span> <span class="st">"mean_predicted"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">date</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">date</span>, <span class="va">value</span>, <span class="va">statistic</span><span class="op">)</span></span>
-<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">yuba_mean_predicted</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">date</span>, y <span class="op">=</span> <span class="va">value</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_line</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="flow_modeling_approaches_files/figure-html/unnamed-chunk-2-1.png" width="1440"></p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># TODO kinda a weird trend line, update</span></span></code></pre></div>
+<span></span>
+<span><span class="co">#joining predictions to Yuba data</span></span>
+<span><span class="co">#filling missing values in yuba_format_wide with values from yuba_mean_predicted</span></span>
+<span><span class="va">merged_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">full_join</a></span><span class="op">(</span><span class="va">yuba_format_wide</span>, <span class="va">yuba_mean_predicted</span>, by <span class="op">=</span> <span class="st">"date"</span><span class="op">)</span> </span>
+<span></span>
+<span><span class="co"># mutating predicted and existing flow values into a single column</span></span>
+<span><span class="va">flow_modeled</span> <span class="op">&lt;-</span> <span class="va">merged_data</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>flow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">mean</span><span class="op">)</span>, <span class="va">value</span>, <span class="va">mean</span><span class="op">)</span>,</span>
+<span>         source <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">statistic</span><span class="op">)</span>, <span class="st">"YPB"</span>, <span class="va">statistic</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">stream</span>, <span class="va">date</span>, <span class="va">flow</span>, <span class="va">source</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="op">(</span><span class="fu">year</span><span class="op">(</span><span class="va">date</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">2010</span> <span class="op">&amp;</span> <span class="va">source</span> <span class="op">!=</span> <span class="st">"YPB"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># plotting flow data showing modeled and existing flow data </span></span>
+<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">flow_modeled</span>, <span class="fu">aes</span><span class="op">(</span><span class="va">date</span>, <span class="va">flow</span>, color <span class="op">=</span> <span class="va">source</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_line</span><span class="op">(</span>size <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_color_manual</span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">colors_small</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="va">colors_small</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span>, </span>
+<span>                     labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Modeled Flow Data"</span>, <span class="st">"YPB Flow Data"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>color <span class="op">=</span> <span class="st">"Flow Source"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="flow_modeling_approaches_files/figure-html/unnamed-chunk-2-2.png" width="960"></p>
 </div>
 </div>
 <div class="section level3">
-<h3 id="approach-3-representative-stream-and-scaling">Approach 3: Representative Stream and Scaling<a class="anchor" aria-label="anchor" href="#approach-3-representative-stream-and-scaling"></a>
-</h3>
-<p><strong>Benefit:</strong> <strong>Limitation:</strong></p>
-<p>Using a representative stream with available flow data can also be an
-effective approach. By selecting a stream with similar characteristics
-(e.g., drainage area, land use, climate), we can scale its flow data to
-estimate flows for the target stream.</p>
-<div class="section level4">
-<h4 id="example-2">Example<a class="anchor" aria-label="anchor" href="#example-2"></a>
-</h4>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Example R code for scaling</span></span></code></pre></div>
-</div>
-</div>
-<div class="section level3">
-<h3 id="approach-4-utilizing-existing-modeled-flow-data">Approach 4: Utilizing Existing Modeled Flow Data<a class="anchor" aria-label="anchor" href="#approach-4-utilizing-existing-modeled-flow-data"></a>
+<h3 id="approach-3-utilizing-existing-modeled-flow-data">Approach 3: Utilizing Existing Modeled Flow Data<a class="anchor" aria-label="anchor" href="#approach-3-utilizing-existing-modeled-flow-data"></a>
 </h3>
 <p><strong>Benefit:</strong> CalSim or SACWAM already modeled it for
-you, no need to repeat the process <strong>Limitation:</strong> Montly
-flow granualarity may be limiting for your use case</p>
+you, no need to repeat the process</p>
+<p><strong>Limitation:</strong> Montly flow granualarity may be limiting
+for your use case</p>
 <p>Existing modeled flow data from sources like Calsim or SACWAM can be
 utilized. Typically these modeled sources have already used an approach
 to fill data gaps. These models simulate hydrological processes and
@@ -327,15 +417,69 @@ timestep, additional modeling may be needed to produce finer scale flow
 data.</p>
 </div>
 <div class="section level3">
-<h3 id="approach-5-expanding-existing-modeled-flow-data">Approach 5: Expanding Existing Modeled Flow Data<a class="anchor" aria-label="anchor" href="#approach-5-expanding-existing-modeled-flow-data"></a>
+<h3 id="approach-4-expanding-existing-modeled-flow-data">Approach 4: Expanding Existing Modeled Flow Data<a class="anchor" aria-label="anchor" href="#approach-4-expanding-existing-modeled-flow-data"></a>
 </h3>
-<p><strong>Benefit:</strong> <strong>Limitation:</strong></p>
+<p><strong>Benefit:</strong> Provides daily timstep data</p>
+<p><strong>Limitation:</strong> Uncertainty in daily flows, lots of
+different timeserries could produce the same monthly mean flow, daily
+predictions are smothed version of what an actual daily flow timeserries
+may look like</p>
 <p>If existing modeled flow data is available but lacks the required
 resolution, we can expand it to provide daily flow values.</p>
-<p>HOW?</p>
 <div class="section level4">
-<h4 id="example-3">Example<a class="anchor" aria-label="anchor" href="#example-3"></a>
+<h4 id="example-2">Example<a class="anchor" aria-label="anchor" href="#example-2"></a>
 </h4>
+<p>I want to use Valley wide data to understand flow survival
+relationships of Chinook Salmon. I plan to use CalSim data but need my
+flow data to have a daily timestep, CalSim data is at a monthly
+timestep. First, I pull in some CalSim monthly flow data from DSMflow.
+<code>DSMflow::flow_cfs</code> and I select the Upper Sacramento
+River</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Load in packages </span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://docs.ropensci.org/tsbox/" class="external-link">tsbox</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://journal.r-project.org/archive/2013-2/sax-steiner.pdf" class="external-link">tempdisagg</a></span><span class="op">)</span></span>
+<span><span class="co"># remotes::install_github("CVPIA-OSC/DSMflow")</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://reorienting-to-recovery.github.io/DSMflow/" class="external-link">DSMflow</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Pull in flow data</span></span>
+<span><span class="va">flow_monthly</span> <span class="op">&lt;-</span> <span class="fu">DSMflow</span><span class="fu">::</span><span class="va"><a href="https://reorienting-to-recovery.github.io/DSMflow/reference/flows_cfs.html" class="external-link">flows_cfs</a></span><span class="op">$</span><span class="va">biop_itp_2018_2019</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span>time <span class="op">=</span> <span class="va">date</span>, value <span class="op">=</span> <span class="va">`Upper Sacramento River`</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu">year</span><span class="op">(</span><span class="va">time</span><span class="op">)</span>, <span class="st">"-"</span>, <span class="fu">month</span><span class="op">(</span><span class="va">time</span><span class="op">)</span>, <span class="st">"-01"</span><span class="op">)</span>, format <span class="op">=</span> <span class="st">"%Y-%m-%d"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu">year</span><span class="op">(</span><span class="va">time</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">1997</span><span class="op">)</span> </span>
+<span></span>
+<span><span class="co"># use a daily flow as an indicator of what it could look like (best to pull same gage)</span></span>
+<span><span class="va">daily_flow_butte</span> <span class="op">&lt;-</span> <span class="va">butte_format_wide</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span>time <span class="op">=</span> <span class="va">date</span>, value <span class="op">=</span> <span class="va">mean</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="co"># filter(!is.na(value)) |&gt; </span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu">year</span><span class="op">(</span><span class="va">time</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">1997</span>, <span class="fu">year</span><span class="op">(</span><span class="va">time</span><span class="op">)</span> <span class="op">&lt;</span> <span class="fl">2003</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/padr/man/pad.html" class="external-link">pad</a></span><span class="op">(</span><span class="op">)</span> <span class="co"># pads so not missing dates</span></span>
+<span></span>
+<span><span class="co">#create a timeseries that covers all dates of date period</span></span>
+<span><span class="co"># td does not allow for any NA values</span></span>
+<span><span class="va">daily_approx</span> <span class="op">&lt;-</span> <span class="va">daily_flow_butte</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>value <span class="op">=</span> <span class="fu">forecast</span><span class="fu">::</span><span class="fu"><a href="https://pkg.robjhyndman.com/forecast/reference/na.interp.html" class="external-link">na.interp</a></span><span class="op">(</span><span class="va">daily_flow_butte</span><span class="op">$</span><span class="va">value</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/padr/man/pad.html" class="external-link">pad</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span></span>
+<span><span class="co"># create model, can choose alternative methods</span></span>
+<span><span class="va">flow_daily_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/tempdisagg/man/td.html" class="external-link">td</a></span><span class="op">(</span><span class="va">flow_monthly</span> <span class="op">~</span> <span class="va">daily_approx</span>, </span>
+<span>                        to <span class="op">=</span> <span class="st">"day"</span>,</span>
+<span>                        conversion <span class="op">=</span> <span class="st">"average"</span>,</span>
+<span>                        method <span class="op">=</span> <span class="st">"chow-lin-fixed"</span>, </span>
+<span>                        fixed.rho <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># predict daily flows using td model </span></span>
+<span><span class="va">flow_daily</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">flow_daily_model</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># plot to show difference </span></span>
+<span><span class="va">flow_daily</span> <span class="op">|&gt;</span> <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">time</span>, y <span class="op">=</span> <span class="va">value</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_line</span><span class="op">(</span>color <span class="op">=</span> <span class="va">colors_small</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span>data <span class="op">=</span> <span class="va">flow_monthly</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">time</span>, y <span class="op">=</span> <span class="va">value</span><span class="op">)</span>, color <span class="op">=</span> <span class="va">colors_small</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Date"</span>, </span>
+<span>       y <span class="op">=</span> <span class="st">"Flow (cfs)"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="flow_modeling_approaches_files/figure-html/unnamed-chunk-3-1.png" width="960"></p>
 </div>
 </div>
 </div>

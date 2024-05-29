@@ -376,6 +376,8 @@ station_table <-
   mutate(pct_complete = coalesce(pct_complete,0))
 
 station_table |> write_csv("out/station_table.csv")
+# cdec_stations <- read_csv("data-raw/cdec_exploration/station_table.csv")
+# usethis::use_data(cdec_stations, overwrite = TRUE)
 
 if(interactive() | coalesce(knitr::pandoc_to(),"")=="html"){
   station_table |> st_drop_geometry() |> 

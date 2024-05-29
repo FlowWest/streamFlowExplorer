@@ -352,7 +352,7 @@ Simulation Period and Software Enhancements:
 #### Scenarios Produced
 
 | Scenario Name                               | CalSim Version | Year Released | Description                                                                                                                                          |
-|---------------------------------------------|----------------|---------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
+|-----------|-----------|-----------|---------------------------------------|
 | 2008 2009 BiOp                              | CalSim II      |               |                                                                                                                                                      |
 | 2008 2009 BiOp                              | CalSim II      |               |                                                                                                                                                      |
 | 2019 BiOp 2020 ITP                          | CalSim II      |               |                                                                                                                                                      |
@@ -364,12 +364,14 @@ Simulation Period and Software Enhancements:
 
 Data Inputs to CalSim 3 were summarized based on Chapters 4, 5, and 6 of
 the main report. Inputs described in the main report are summarized in
-the table below:
+the table below, see full xlsx for additional information on the data
+sources:
 
 ```{r, echo = FALSE}
 # Fill in additional info based on page 169. 
 data_inputs <- readxl::read_excel(system.file("extdata", "calsim", "calsim_inputs.xlsx", 
-                        package = "streamFlowExplorer", mustWork = TRUE), sheet = 1)
+                        package = "streamFlowExplorer", mustWork = TRUE), sheet = 1) |> 
+  select(Category, SubCategory, `Data Used`) 
 knitr::kable(head(data_inputs))
 ```
 
@@ -528,9 +530,3 @@ different operations would cause different flow at a relatively fine
 scale. cons, monthly time scale is limited for use in biological
 modeling, monthly timestep does not capture the fine scale resolution
 that biological organisms experience.
-
-### Questions
-
--   Is there a conceptual model anywhere to describe the CalSim modeling
-    framework What are the model validation procedures?
--   What are the Applied Water demands used for? Talk through diagram.
