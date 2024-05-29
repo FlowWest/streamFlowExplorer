@@ -2,16 +2,13 @@
 title: "USGS Overview Document"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{calsim_template}
+  %\VignetteIndexEntry{usgs_overview}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
-editor_options: 
-  markdown: 
-    wrap: 72
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, warning = FALSE, fig.width=15, fig.height=10, dpi=300)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, fig.width=10, fig.height=10, dpi=300)
 library(tidyverse)
 library(lubridate)
 library(googleCloudStorageR)
@@ -70,25 +67,137 @@ ggplot(usgs_overview, aes(x = min_date,
                           xend = max_date, 
                           y = tributary, 
                           yend = tributary)) +
-  geom_segment(size = 4, alpha = 0.6, show.legend = FALSE, alpha = .4, color = "#326875") +  
+  geom_segment(size = 4, alpha = 0.6, show.legend = FALSE, alpha = .5, color = "#326875") +  
   labs(title = "Date Coverage for Tributaries",
        x = "Date",
        y = "") +
   scale_x_date(date_breaks = "10 years", date_labels = "%Y") +
-  theme_minimal()
+  theme_minimal() + 
+  scale_color_gradient(low="white", high = "#326875", aesthetics = c("color"), name = "Number of Gages") 
+
 ```
 
 #### Percent non-missing
 
 ```{r na-count, message=FALSE}
-# TODO 
+retrieve_usgs_csv <- function(sta=character(), 
+                     start_date=ymd("1900-10-01"), end_date=ymd("2023-09-30"),
+                     dir="temp") {
+  name <- str_to_upper(paste0(sta))
+  filename <- file.path(dir, paste0(name,".csv.gz"))
+  if(!file.exists(filename)){
+    message(paste0("downloading to ",filename))
+    dir.create(dir, recursive = TRUE)
+    data_raw <- dataRetrieval::readNWISdv(sta, "00060")
+    gzf <- gzcon(file(filename, "wb"))
+    write_csv(data_raw, filename)
+  } else {
+    message(paste0(filename, " exists, loading"))
+  }
+  return(filename)
+}
+
+count_obs_by_wy <- function(filename) {
+  data <- read_csv(filename) 
+  if (nrow(data) > 0){
+    data |> 
+    select(date_time = Date, value = X_00060_00003) |> 
+    mutate(date_time = as.Date(date_time)) |> 
+    janitor::clean_names() |>
+    mutate(water_year = if_else(month(date_time)>=10, year(date_time)+1, year(date_time))) |>
+    group_by(water_year) |> 
+    summarize(obs=n(),
+              err_brt=sum(value==-9998),
+              err_art=sum(value==-9997),
+              err_mis=sum(is.na(value)),) |>
+    as.list()
+  } else {
+    list(water_year = NA, 
+         obs = NA,
+         err_brt = NA, 
+         err_art = NA, 
+         err_mis = NA)
+  }
+}
+
+usgs_overview_updated <- usgs_overview |>
+  rename(start = min_date, end = max_date, station_id = gage, stream = tributary)
+# obs_counts <- usgs_overview_updated |> 
+#     rowwise() |> 
+#     mutate(result = list(count_obs_by_wy(retrieve_usgs_csv(sta = station_id)))) |> 
+#     unnest_wider(result) |> 
+#     unnest(c(water_year, obs, err_brt, err_art, err_mis)) |> 
+#     mutate(n_days = if_else(water_year%%4==0,366,365),
+#            hyp_obs = n_days,
+#            pct_complete = (obs - (err_brt + err_art + err_mis)) / hyp_obs)
+#   
+
+# write_csv(obs_counts, "inst/extdata/usgs/usgs_obs_counts.csv")
+  
+obs_counts <- read_csv(system.file("extdata", "usgs", "usgs_obs_counts.csv", 
+                        package = "streamFlowExplorer", mustWork = TRUE))
+  
+if(interactive() | coalesce(knitr::pandoc_to(),"")=="html"){
+  usgs_overview_updated |>
+    mutate(station_id = as.numeric(station_id)) |> 
+    select(station_id) |>
+    left_join(select(obs_counts, station_id, water_year, pct_complete)) |>
+    mutate(pct_complete=round(pct_complete*100,1)) |>
+    DT::datatable(filter = list(position = 'top', clear = FALSE),
+                  options = list(pageLength = 5, dom = 't'))
+} else {
+usgs_overview_updated |>
+    mutate(station_id = as.numeric(station_id)) |> 
+    select(station_id) |>   
+    left_join(select(obs_counts, station_id, water_year, pct_complete)) |>
+    mutate(pct_complete=num(pct_complete, label = "%", scale=100)) |>
+    head(10) |> knitr::kable()
+}
+```
+```{r}
+obs_counts_summary <- 
+  obs_counts |> 
+  group_by(station_id, water_year) |>
+  filter(water_year <= 2023)
+
+overall_pct_complete_by_station <-
+  obs_counts_summary |>
+  group_by( station_id) |>
+  summarize(pct_complete = coalesce(mean(pct_complete),0))
+
+overall_pct_complete_by_section <-
+  overall_pct_complete_by_station |>
+  summarize(pct_complete = coalesce(max(pct_complete),0))
+
+obs_counts_summary |>
+  group_by(stream, water_year) |>
+  summarize(pct_complete = max(pct_complete, na.rm = TRUE)) |> 
+  ungroup() |> 
+  mutate(pct_complete = ifelse(is.na(pct_complete), 0, pct_complete),
+         pct_complete = ifelse(pct_complete == "-Inf", 0, pct_complete),
+         date = as.Date(paste(water_year, "-01-01"), format = "%y-%m-%d")) |> 
+  ggplot() + 
+  facet_grid(rows = vars(stream), scales="free_y", space="free_y") +
+  geom_tile(aes(x = water_year, y = stream, fill = pct_complete*100)) +
+  xlab("Water Year") + 
+  ylab("") + 
+  theme_minimal() + 
+  theme(legend.position = "left", 
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size = 12), 
+        strip.text = element_blank(),
+        panel.margin=unit(0,"lines"),
+        panel.grid = element_blank(),
+        ) + 
+  scale_y_discrete(limits=rev, position="right") +
+  scale_fill_gradient(low="white", high = "#326875") + 
+  guides(fill=guide_colorbar(barwidth=1, barheight=30, label.position = "left", title = "% Complete"))
 ```
 
 ### Spatial Coverage
 
 The map below shows USGS gage locations
 
-```{r import-watersheds, eval=TRUE, echo=TRUE, include=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=TRUE, include=FALSE, message=FALSE, warning=FALSE}
 # import a few different watershed files
 # use intersection with these polys to detect if in the basin
 watersheds_huc8 <- 
@@ -97,16 +206,19 @@ watersheds_huc8 <-
   janitor::clean_names() |>
   st_transform("EPSG:3310") |>
   select(huc_8, huc_8_name, wshed_id)
+
 subwatersheds_huc12 <- 
   st_read(system.file("extdata", "cdec", "shp", "wbd_subwatershed_selected.shp", 
                         package = "streamFlowExplorer", mustWork = TRUE), as_tibble=TRUE) |>
   janitor::clean_names() |>
   st_transform("EPSG:3310")
+
 subwatersheds_calw221 <-
   st_read(system.file("extdata", "cdec", "shp", "calw221_selected.shp", 
                         package = "streamFlowExplorer", mustWork = TRUE), as_tibble=TRUE) |>
   janitor::clean_names() |>
   st_transform("EPSG:3310")
+
 watershed_labels <- 
   st_read(system.file("extdata", "cdec", "shp", "wbd_huc10_group_by_river_name.shp", 
                         package = "streamFlowExplorer", mustWork = TRUE), as_tibble=TRUE) |>
@@ -123,6 +235,7 @@ stream_flowlines <-
   st_zm() |>
   st_transform("EPSG:3310") |>
   mutate(label = coalesce(name, paste0("Tributary of ",down_name)))
+
 bypass_polys <- 
   st_read(system.file("extdata", "cdec", "shp", "yolo_sutter_bypass_extents.shp", 
                         package = "streamFlowExplorer", mustWork = TRUE), as_tibble=TRUE) |>
@@ -150,9 +263,9 @@ map_data <- usgs_overview |>
   left_join(usgs_flow_gages, by = join_by(gage == site_no)) |>
   st_as_sf(coords = c("dec_long_va", "dec_lat_va")) 
 
-  watersheds_wgs84 <- st_transform(watershed_labels, "EPSG:4326")
-  flowlines_wgs84 <- st_transform(stream_flowlines, "EPSG:4326")
-  bypasses_wgs84 <- st_transform(filter(bypass_polys,name %in% c("Sutter Bypass", "Yolo Bypass")), "EPSG:4326")
+watersheds_wgs84 <- st_transform(watershed_labels, "EPSG:4326")
+flowlines_wgs84 <- st_transform(stream_flowlines, "EPSG:4326")
+bypasses_wgs84 <- st_transform(filter(bypass_polys,name %in% c("Sutter Bypass", "Yolo Bypass")), "EPSG:4326")
 
 # leaflet::leaflet() |> 
 # leaflet::addTiles(urlTemplate = 'https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}',
@@ -170,20 +283,65 @@ map_data <- usgs_overview |>
 #                           fillOpacity = 1, radius = 5, 
 #                           color = "#c1c172") 
 #                           
- map_data |> sf::st_set_crs(4326)
+# map_data |> sf::st_set_crs(4326)
+
 ggplot() +
     geom_sf(data=watershed_labels, color="#888888") +
     geom_sf(data=filter(bypass_polys,name %in% c("Sutter Bypass", "Yolo Bypass")), fill="#326875", color=NA, alpha=0.5) +
     geom_sf(data=stream_flowlines, color="#326875") +
-    geom_sf(data=map_data |> sf::st_set_crs(4326), color="#c1c172")
+    geom_sf(data=map_data |> sf::st_set_crs(4326), color="#c1c172") + 
+    scale_color_gradient(low="white", high = "#326875", aesthetics = c("color", "fill")) +
+  theme_minimal()
 ```
 
+#### Years of data available by stream
 
+The following map illustrates the data availability length by stream. This is based on the published start and end dates and does not account for NA values within these ranges. 
+
+```{r map-n-years, message=FALSE, warning=FALSE}
+
+river_names <- watershed_labels$river_basin |> unique() |> c("Yolo Bypass", "Sutter Bypass")
+match_name <- function(x) paste0(river_names[which(str_detect(x, river_names))][1],"")
+
+flowlines_first_year_available <- 
+  stream_flowlines |>
+  mutate(
+    river_name = coalesce(name, down_name),
+    matched = map_lgl(river_name, function(x) any(str_detect(x, river_names))),
+    river_name = if_else(matched, map_chr(river_name, match_name), NA)) |>
+  filter(!is.na(river_name)) |>
+  group_by(river_name) |>
+  summarize() |>
+  st_union(by_feature = TRUE) |>
+  left_join(usgs_overview_updated |> 
+              mutate(river_name = stream,
+                     matched = map_lgl(river_name, function(x) any(str_detect(x, river_names))),
+                     river_name = if_else(matched, map_chr(river_name, match_name), NA)), 
+            by = join_by(river_name == river_name)) |> 
+  mutate(n_years = year(end) - year(start),
+         n_years = ifelse(is.na(n_years), 0, n_years)) 
+
+bypasses_first_year_available <- 
+  bypass_polys |>
+  filter(name %in% c("Yolo Bypass", "Sutter Bypass")) |>
+  left_join(usgs_overview_updated, by = join_by(name == stream)) |>
+  mutate(n_years = year(end) - year(start)) 
+
+ggplot() +
+  geom_sf(data=watershed_labels, color="#888888", alpha = .5, aes(label = river_basin)) +
+  geom_sf_text(data=watershed_labels, aes(label = river_basin),  # override the fill from aes()
+                size = 2, fun.geometry = sf::st_centroid, fill = NA) +
+  geom_sf(data = bypasses_first_year_available, aes(fill = n_years), color=NA) + 
+  # geom_sf(data = bypasses_first_year_available |> filter(n_years==0), fill="#c1c172", color=NA) +
+  geom_sf(data = flowlines_first_year_available, aes(color = n_years)) + 
+  # geom_sf(data = flowlines_first_year_available |> filter(n_years==0), color="#c1c172") +
+  scale_color_gradient(low="white", high = "#326875", aesthetics = c("color", "fill"), name = "Number of Years") +
+  theme_minimal()
+```
 ## Quality Checks 
 
 The USGS QA/QC process commences with automated electronic processing software designed to detect errors or inconsistencies. Once identified, USGS staff conduct thorough reviews and implement necessary changes. For stream flow and other surface-water gauging stations, QA/QC documentation is reported in an annual station analysis report.
 
 Source: [USGS Standards for the Analysis and Processing of Surface-Water Data and Information Using Electronic Methods. Section 19. Quality Assurance and Quality Control](https://water.usgs.gov/osw/pubs/WRIR01-4044.pdf)
 
-## Questions for Data Experts 
 

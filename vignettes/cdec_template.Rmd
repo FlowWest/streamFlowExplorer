@@ -11,7 +11,7 @@ editor_options:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, warning = FALSE, fig.width=15, fig.height=10, dpi=300)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, fig.width=10, fig.height=10, dpi=300)
 library(tidyverse)
 library(lubridate)
 library(googleCloudStorageR)
@@ -350,7 +350,10 @@ overall_pct_complete_by_section <-
 
 obs_counts_summary |>
   group_by(channel, section, water_year) |>
-  summarize(pct_complete = max(pct_complete)) |>
+  summarize(pct_complete = max(pct_complete, na.rm = TRUE)) |>
+  ungroup() |> 
+  mutate(pct_complete = ifelse(is.na(pct_complete), 0, pct_complete),
+         pct_complete = ifelse(pct_complete == "-Inf", 0, pct_complete)) |> 
   ggplot() + 
   facet_grid(rows = vars(channel), scales="free_y", space="free_y") +
   geom_tile(aes(x = factor(water_year), y = factor(section), fill = pct_complete*100)) +
@@ -358,7 +361,7 @@ obs_counts_summary |>
   ylab("") + 
   theme_minimal() + 
   theme(legend.position = "left", 
-        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), 
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size = 15), 
         strip.text = element_blank(),
         panel.margin=unit(0,"lines"),
         panel.grid = element_blank(),
@@ -523,11 +526,15 @@ bypasses_first_year_available <-
   mutate(n_years = coalesce(n_years, 0)) 
 
 ggplot() +
+  geom_sf(data=watershed_labels, color="#888888") +
+    geom_sf_text(data=watershed_labels, aes(label = river_basin),  # override the fill from aes()
+                size = 2, fun.geometry = sf::st_centroid, fill = NA) +
   geom_sf(data = bypasses_first_year_available, aes(fill = n_years), color=NA) + 
-  geom_sf(data = bypasses_first_year_available |> filter(n_years==0), fill="#c1c172", color=NA) +
+  # geom_sf(data = bypasses_first_year_available |> filter(n_years==0), fill="#c1c172", color=NA) +
   geom_sf(data = flowlines_first_year_available, aes(color = n_years)) + 
-  geom_sf(data = flowlines_first_year_available |> filter(n_years==0), color="#c1c172") +
-  scale_color_gradient(low="white", high = "#326875", aesthetics = c("color", "fill")) 
+  # geom_sf(data = flowlines_first_year_available |> filter(n_years==0), color="#c1c172") +
+  scale_color_gradient(low="white", high = "#326875", aesthetics = c("color", "fill"), name = "Number of Years") + 
+  theme_minimal()
 ```
 
 Summary statistics indicating the proportion of major streams that are gaged at various time points.
@@ -547,7 +554,7 @@ first_year_available_by_section <-
 
 tibble(yr = c(1949, 1984, 1997, 2015, 2022)) |>
   mutate(percent_of_data = map(yr, function(x) 100*mean(coalesce(first_year_available_by_section$first_year,0)<=x))) |>
-  unnest(percent_of_data) |> knitr::kable()
+  unnest(percent_of_data) |> knitr::kable(col.names = c("Year", "Percent of Data"))
 
 ```
 
@@ -567,7 +574,4 @@ Flow data include  the following error codes when downloaded direct from CDEC us
 
 *According to the CDEC FAQ: "River flow data for stations with river stage data are computed using a specific rating table/rating curve for each particular station. When the river stage is above or below the available rating table, a flow cannot be computed."
 
-## Questions for Data Experts 
-
-- Please list any questions about the data source. 
 
