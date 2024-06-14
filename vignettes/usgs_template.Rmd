@@ -69,6 +69,7 @@ ggplot(usgs_overview, aes(x = min_date,
                           yend = tributary)) +
   geom_segment(size = 4, alpha = 0.6, show.legend = FALSE, alpha = .5, color = "#326875") +  
   labs(title = "Date Coverage for Tributaries",
+       subtitle = "Shaded by # of gages, darker color indicates multiple gages on one system.",
        x = "Date",
        y = "") +
   scale_x_date(date_breaks = "10 years", date_labels = "%Y") +
@@ -329,13 +330,13 @@ bypasses_first_year_available <-
 
 ggplot() +
   geom_sf(data=watershed_labels, color="#888888", alpha = .5, aes(label = river_basin)) +
-  geom_sf_text(data=watershed_labels, aes(label = river_basin),  # override the fill from aes()
-                size = 2, fun.geometry = sf::st_centroid, fill = NA) +
   geom_sf(data = bypasses_first_year_available, aes(fill = n_years), color=NA) + 
   # geom_sf(data = bypasses_first_year_available |> filter(n_years==0), fill="#c1c172", color=NA) +
   geom_sf(data = flowlines_first_year_available, aes(color = n_years)) + 
   # geom_sf(data = flowlines_first_year_available |> filter(n_years==0), color="#c1c172") +
   scale_color_gradient(low="white", high = "#326875", aesthetics = c("color", "fill"), name = "Number of Years") +
+  geom_sf_text(data=watershed_labels, aes(label = river_basin),  # override the fill from aes()
+                size = 2, fun.geometry = sf::st_centroid, fill = NA) +
   theme_minimal()
 ```
 ## Quality Checks 

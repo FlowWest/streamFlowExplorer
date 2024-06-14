@@ -196,15 +196,15 @@ In order to keep Yuba in my dataset. I need to fill in the gaps.</p>
 <pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 9 × 6</span></span></span>
 <span><span class="co">##   sensor_number sensor_name          sensor_units duration start      end       </span></span>
 <span><span class="co">##           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>    </span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span>             1 river stage          feet         event    1997-03-12 2024-05-29</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">2</span>             1 river stage          feet         hourly   1997-03-14 2024-05-29</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span>             1 river stage          feet         event    1997-03-12 2024-06-14</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">2</span>             1 river stage          feet         hourly   1997-03-14 2024-06-14</span></span>
 <span><span class="co">## <span style="color: #BCBCBC;">3</span>            14 battery voltage      volts        hourly   1997-03-14 2019-04-15</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">4</span>            20 flow river discharge cfs          event    1997-03-12 2024-05-29</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">5</span>            20 flow river discharge cfs          hourly   1997-03-14 2024-05-29</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">6</span>            25 temperature water    deg f        event    2017-06-06 2024-05-29</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">7</span>            25 temperature water    deg f        hourly   1998-09-16 2024-05-29</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">4</span>            20 flow river discharge cfs          event    1997-03-12 2024-06-14</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">5</span>            20 flow river discharge cfs          hourly   1997-03-14 2024-06-14</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">6</span>            25 temperature water    deg f        event    2017-06-06 2024-06-14</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">7</span>            25 temperature water    deg f        hourly   1998-09-16 2024-06-14</span></span>
 <span><span class="co">## <span style="color: #BCBCBC;">8</span>            27 water turbidity      ntu          hourly   1999-10-18 2005-01-01</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">9</span>            41 flow mean daily      cfs          daily    1999-07-21 2024-05-29</span></span></code></pre>
+<span><span class="co">## <span style="color: #BCBCBC;">9</span>            41 flow mean daily      cfs          daily    1999-07-21 2024-06-14</span></span></code></pre>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">butte</span> <span class="op">&lt;-</span> <span class="fu">cdec_query</span><span class="op">(</span>station <span class="op">=</span> <span class="st">"BCK"</span>, dur_code <span class="op">=</span> <span class="st">"H"</span>, sensor_num <span class="op">=</span> <span class="st">"20"</span>, start_date <span class="op">=</span> <span class="st">"1997-01-01"</span><span class="op">)</span></span>
 <span><span class="va">butte_format</span> <span class="op">&lt;-</span> <span class="va">butte</span> <span class="op">|&gt;</span> </span>
@@ -349,19 +349,19 @@ In order to keep Yuba in my dataset. I need to fill in the gaps.</p>
 <span><span class="co">## </span></span>
 <span><span class="co">## Residuals:</span></span>
 <span><span class="co">##    Min     1Q Median     3Q    Max </span></span>
-<span><span class="co">## -43711   -751   -413    240  47302 </span></span>
+<span><span class="co">## -46417   -724   -390    242  46007 </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## Coefficients:</span></span>
 <span><span class="co">##               Estimate Std. Error t value Pr(&gt;|t|)    </span></span>
-<span><span class="co">## (Intercept) 1427.35354  515.94282   2.766  0.00569 ** </span></span>
-<span><span class="co">## date          -0.02274    0.02948  -0.771  0.44050    </span></span>
-<span><span class="co">## butte_flow     3.78181    0.06274  60.275  &lt; 2e-16 ***</span></span>
+<span><span class="co">## (Intercept)  1.010e+03  5.406e+02   1.868   0.0618 .  </span></span>
+<span><span class="co">## date        -2.037e-03  3.088e-02  -0.066   0.9474    </span></span>
+<span><span class="co">## butte_flow   4.001e+00  6.383e-02  62.679   &lt;2e-16 ***</span></span>
 <span><span class="co">## ---</span></span>
 <span><span class="co">## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
 <span><span class="co">## </span></span>
-<span><span class="co">## Residual standard error: 2542 on 3809 degrees of freedom</span></span>
-<span><span class="co">## Multiple R-squared:  0.4882, Adjusted R-squared:  0.488 </span></span>
-<span><span class="co">## F-statistic:  1817 on 2 and 3809 DF,  p-value: &lt; 2.2e-16</span></span></code></pre>
+<span><span class="co">## Residual standard error: 2683 on 3821 degrees of freedom</span></span>
+<span><span class="co">## Multiple R-squared:  0.507,  Adjusted R-squared:  0.5067 </span></span>
+<span><span class="co">## F-statistic:  1965 on 2 and 3821 DF,  p-value: &lt; 2.2e-16</span></span></code></pre>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">test_predict</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">yuba_mod_mean</span>, <span class="va">test</span><span class="op">)</span></span>
 <span><span class="va">test_predict_df</span> <span class="op">&lt;-</span> <span class="va">test</span> <span class="op">|&gt;</span></span>
@@ -370,7 +370,7 @@ In order to keep Yuba in my dataset. I need to fill in the gaps.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="op">(</span></span>
 <span>  <span class="va">test_predict_df</span><span class="op">$</span><span class="va">predicted</span> <span class="op">-</span> <span class="va">test_predict_df</span><span class="op">$</span><span class="va">flow</span></span>
 <span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="va">test_predict_df</span><span class="op">$</span><span class="va">flow</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] 0.6212044</span></span></code></pre>
+<pre><code><span><span class="co">## [1] 0.642678</span></span></code></pre>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Predictions</span></span>
 <span><span class="va">yuba_gap_predicted_mean</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">yuba_mod_mean</span>, <span class="va">yuba_gap_mean</span><span class="op">)</span></span>
