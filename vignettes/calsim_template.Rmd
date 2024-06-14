@@ -352,7 +352,7 @@ Simulation Period and Software Enhancements:
 #### Scenarios Produced
 
 | Scenario Name                               | CalSim Version | Year Released | Description                                                                                                                                          |
-|-----------|-----------|-----------|---------------------------------------|
+|-------------|-------------|-------------|---------------------------------|
 | 2008 2009 BiOp                              | CalSim II      |               |                                                                                                                                                      |
 | 2008 2009 BiOp                              | CalSim II      |               |                                                                                                                                                      |
 | 2019 BiOp 2020 ITP                          | CalSim II      |               |                                                                                                                                                      |
@@ -510,10 +510,6 @@ agricultural, urban, wetland refuge
 
 CalSim produces .DSS file model outputs at a monthly timestep.
 
-### Model Validation procedures
-
--   Ask expert
-
 ## Spatial & Temporal Coverage
 
 Watershed boundaries were developed using CalWater 2.2.1 and the USGS
@@ -525,8 +521,14 @@ to download the full model network schematic.
 
 ## Data use and limitations
 
-Valley Wide Analysis - pros, good coverage of the system, can model how
+CalSIM is a good modeled data source to use for a Sacramento Valley Wide
+Analysis because it has good coverage of the system and can model how
 different operations would cause different flow at a relatively fine
-scale. cons, monthly time scale is limited for use in biological
-modeling, monthly timestep does not capture the fine scale resolution
-that biological organisms experience.
+scale. However, CalSIM produces results at a monthly time scale is
+limited for use in biological modeling. Monthly timestep flow data does
+not capture the fine scale resolution that biological organisms
+experience.
+
+## Questions
+
+What are the model validation procedures?

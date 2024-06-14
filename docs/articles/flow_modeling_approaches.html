@@ -59,6 +59,9 @@
     <li>
       <a href="../articles/natural_flows_template.html">Natural Flows Overview</a>
     </li>
+    <li>
+      <a href="../articles/sacwam_template.html">Sacwam Overview</a>
+    </li>
   </ul>
 </li>
 <li class="dropdown">
@@ -349,19 +352,19 @@ In order to keep Yuba in my dataset. I need to fill in the gaps.</p>
 <span><span class="co">## </span></span>
 <span><span class="co">## Residuals:</span></span>
 <span><span class="co">##    Min     1Q Median     3Q    Max </span></span>
-<span><span class="co">## -46417   -724   -390    242  46007 </span></span>
+<span><span class="co">## -41342   -776   -443    209  45299 </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## Coefficients:</span></span>
 <span><span class="co">##               Estimate Std. Error t value Pr(&gt;|t|)    </span></span>
-<span><span class="co">## (Intercept)  1.010e+03  5.406e+02   1.868   0.0618 .  </span></span>
-<span><span class="co">## date        -2.037e-03  3.088e-02  -0.066   0.9474    </span></span>
-<span><span class="co">## butte_flow   4.001e+00  6.383e-02  62.679   &lt;2e-16 ***</span></span>
+<span><span class="co">## (Intercept)  1.174e+03  5.381e+02   2.181   0.0293 *  </span></span>
+<span><span class="co">## date        -4.833e-03  3.070e-02  -0.157   0.8749    </span></span>
+<span><span class="co">## butte_flow   3.643e+00  6.549e-02  55.629   &lt;2e-16 ***</span></span>
 <span><span class="co">## ---</span></span>
 <span><span class="co">## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
 <span><span class="co">## </span></span>
-<span><span class="co">## Residual standard error: 2683 on 3821 degrees of freedom</span></span>
-<span><span class="co">## Multiple R-squared:  0.507,  Adjusted R-squared:  0.5067 </span></span>
-<span><span class="co">## F-statistic:  1965 on 2 and 3821 DF,  p-value: &lt; 2.2e-16</span></span></code></pre>
+<span><span class="co">## Residual standard error: 2657 on 3821 degrees of freedom</span></span>
+<span><span class="co">## Multiple R-squared:  0.4475, Adjusted R-squared:  0.4472 </span></span>
+<span><span class="co">## F-statistic:  1548 on 2 and 3821 DF,  p-value: &lt; 2.2e-16</span></span></code></pre>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">test_predict</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">yuba_mod_mean</span>, <span class="va">test</span><span class="op">)</span></span>
 <span><span class="va">test_predict_df</span> <span class="op">&lt;-</span> <span class="va">test</span> <span class="op">|&gt;</span></span>
@@ -370,7 +373,7 @@ In order to keep Yuba in my dataset. I need to fill in the gaps.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="op">(</span></span>
 <span>  <span class="va">test_predict_df</span><span class="op">$</span><span class="va">predicted</span> <span class="op">-</span> <span class="va">test_predict_df</span><span class="op">$</span><span class="va">flow</span></span>
 <span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="va">test_predict_df</span><span class="op">$</span><span class="va">flow</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] 0.642678</span></span></code></pre>
+<pre><code><span><span class="co">## [1] 0.6541242</span></span></code></pre>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Predictions</span></span>
 <span><span class="va">yuba_gap_predicted_mean</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">yuba_mod_mean</span>, <span class="va">yuba_gap_mean</span><span class="op">)</span></span>
