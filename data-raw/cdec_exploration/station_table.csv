@@ -181,7 +181,7 @@ Tuolumne River,Tuolumne River,tmp,Tuolumne River at Merals Pool,2022-05-01,2024-
 Tuolumne River,Tuolumne River,trh,Tuolumne River near Hetch Hetchy,1997-06-13,2009-01-09,hourly,"c(17709.353349585, -8757.26659107115)",0.9589107432313168
 Tuolumne River,Tuolumne River,trt,Tuolumne River at Tuolumne City,2019-12-18,2024-02-14,hourly,"c(-99737.6892948719, -45341.8047616235)",0.9413583344249818
 Tuolumne River,Tuolumne River,trw,Tuolumne River at Waterford,2012-08-22,2024-02-14,hourly,"c(-67466.2431453455, -42278.3756750464)",0.979641540886067
-Upper Sacramento River,Upper Sacramento River,dlt,Sacramento River at Delta,1991-07-01,2024-02-14,hourly,"c(-203637.303829569, 327392.478499992)",0.9430372858005914
+Sacramento River,Lower Sacramento River,dlt,Sacramento River at Delta,1991-07-01,2024-02-14,hourly,"c(-203637.303829569, 327392.478499992)",0.9430372858005914
 Yolo Bypass,Yolo Bypass,lis,Yolo Bypass at Lisbon,2004-01-22,2010-01-25,hourly,"c(-138393.618783517, 52118.6328582005)",0.9690689290303666
 Yolo Bypass,Yolo Bypass,toe,Toe Drain at Liberty Island near Courtland,2021-05-28,2024-02-14,hourly,"c(-143558.262673153, 38241.1735831886)",0.6969082952815829
 Yolo Bypass,Yolo Bypass,yby,Yolo Bypass near Woodland,1997-03-05,1998-07-13,hourly,"c(-142873.094932537, 74752.3091963311)",0.9560963952262266

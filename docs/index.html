@@ -59,6 +59,9 @@
     <li>
       <a href="articles/natural_flows_template.html">Natural Flows Overview</a>
     </li>
+    <li>
+      <a href="articles/sacwam_template.html">Sacwam Overview</a>
+    </li>
   </ul>
 </li>
 <li class="dropdown">
@@ -120,7 +123,73 @@
 <p><img src="reference/figures/mwd-flows%20-%20clean%20version.png"></p>
 <p>If you find that for your flow data use, you ended in a brown square where additional modeling is needed, please refer to the article on Flow Modeling Approaches.</p>
 <p>The following table provides a brief overview of the benefits and limitations of each data type for some potential use cases. Since this review is focused on flow data for ecological analysis this table primary focuses on that, but it also includes a few use cases for non-ecological analysis since some of these datasets are primarily developed for non ecological purposes.</p>
-<p><img src="reference/figures/use_table_readme.png"></p>
+<table class="table">
+<colgroup>
+<col width="14%">
+<col width="16%">
+<col width="21%">
+<col width="18%">
+<col width="28%">
+</colgroup>
+<tbody>
+<tr class="odd">
+<td><strong>Use Category</strong></td>
+<td><strong>Scale</strong></td>
+<td><strong>Use Case</strong></td>
+<td><strong>Data Type</strong></td>
+<td><strong>Limitations</strong></td>
+</tr>
+<tr class="even">
+<td>Ecological Modeling</td>
+<td>Single system/ regional analysis  </td>
+<td>Studying the effects of streamflow changes on aquatic ecosystems</td>
+<td>Empirical Flow Data (USGS or CDEC)</td>
+<td>Availability and coverage vary by system, there are data gaps on some systems making regional analysis challenging </td>
+</tr>
+<tr class="odd">
+<td>Ecological Modeling</td>
+<td>Single system/ regional analysis  </td>
+<td>Analyzing long term trends on in streamflow data to understand the effect of climate change on aquatic ecosystems</td>
+<td>Empirical Flow Data (USGS or CDEC)</td>
+<td>Availability and coverage vary by system, there are data gaps on some systems making regional analysis challenging </td>
+</tr>
+<tr class="even">
+<td>Ecological Modeling</td>
+<td>Regional analysis</td>
+<td>Analyzing long term trends on in streamflow data to understand the effect of climate change on aquatic ecosystems</td>
+<td>CalSim and SacWam</td>
+<td>Monthly timestep is limiting, summarized flows can miss critical flow events that may have ecological effects </td>
+</tr>
+<tr class="odd">
+<td>Ecological Modeling</td>
+<td>Single system </td>
+<td>Hydraulic modeling for planning a restoration project</td>
+<td>Empirical Flow Data (USGS or CDEC)</td>
+<td>Availability and coverage vary by system, there are data gaps on some systems </td>
+</tr>
+<tr class="even">
+<td>Ecological Modeling</td>
+<td>Single system </td>
+<td>Hydraulic modeling for planning a restoration project</td>
+<td>CalSim and SacWam</td>
+<td>Monthly timestep is limiting, summarized flows can miss critical flow events that may have ecological effects </td>
+</tr>
+<tr class="odd">
+<td>Water Resource Management</td>
+<td>Regional analysis </td>
+<td>Assessing water availability for agriculture, urban use, and ecosystems.</td>
+<td>Empirical Flow Data (USGS or CDEC)</td>
+<td>Does not allow for testing alternatives, only provides empirical data on the system </td>
+</tr>
+<tr class="even">
+<td>Water Resource Management</td>
+<td>Regional analysis </td>
+<td>Assessing water availability for agriculture, urban use, and ecosystems.</td>
+<td>CalSim and SacWam</td>
+<td>Only available for certain scenarios, high level of effort and experience needed to model additional operations scenarios </td>
+</tr>
+</tbody>
+</table>
 </div>
 <div class="section level2">
 <h2 id="modeling-methods-to-fill-data-gaps">Modeling Methods to Fill Data Gaps<a class="anchor" aria-label="anchor" href="#modeling-methods-to-fill-data-gaps"></a>

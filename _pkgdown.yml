@@ -20,6 +20,8 @@ navbar:
         href: articles/usgs_template.html
       - text: 'Natural Flows Overview'
         href: articles/natural_flows_template.html
+      - text: 'Sacwam Overview'
+        href: articles/sacwam_template.html
   - text: 'Modeling Methods'
     menu:
       - text: 'Flow Modeling Approaches'

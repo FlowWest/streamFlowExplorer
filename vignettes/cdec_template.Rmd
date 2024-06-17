@@ -527,12 +527,12 @@ bypasses_first_year_available <-
 
 ggplot() +
   geom_sf(data=watershed_labels, color="#888888") +
-    geom_sf_text(data=watershed_labels, aes(label = river_basin),  # override the fill from aes()
-                size = 2, fun.geometry = sf::st_centroid, fill = NA) +
   geom_sf(data = bypasses_first_year_available, aes(fill = n_years), color=NA) + 
   # geom_sf(data = bypasses_first_year_available |> filter(n_years==0), fill="#c1c172", color=NA) +
   geom_sf(data = flowlines_first_year_available, aes(color = n_years)) + 
   # geom_sf(data = flowlines_first_year_available |> filter(n_years==0), color="#c1c172") +
+  geom_sf_text(data=watershed_labels, aes(label = river_basin),  # override the fill from aes()
+               size = 2, fun.geometry = sf::st_centroid, fill = NA) +
   scale_color_gradient(low="white", high = "#326875", aesthetics = c("color", "fill"), name = "Number of Years") + 
   theme_minimal()
 ```
