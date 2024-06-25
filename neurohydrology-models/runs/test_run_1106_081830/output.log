@@ -1,0 +1,120 @@
+2024-06-11 08:18:30,896: Logging to c:\Users\Inigo\Projects\neuralhydrology\examples\01-Introduction\runs\test_run_1106_081830\output.log initialized.
+2024-06-11 08:18:30,897: ### Folder structure created at c:\Users\Inigo\Projects\neuralhydrology\examples\01-Introduction\runs\test_run_1106_081830
+2024-06-11 08:18:30,897: ### Run configurations for test_run
+2024-06-11 08:18:30,897: experiment_name: test_run
+2024-06-11 08:18:30,899: train_basin_file: 1_basin.txt
+2024-06-11 08:18:30,900: validation_basin_file: 1_basin.txt
+2024-06-11 08:18:30,901: test_basin_file: 1_basin.txt
+2024-06-11 08:18:30,901: train_start_date: 1999-10-01 00:00:00
+2024-06-11 08:18:30,901: train_end_date: 2008-09-30 00:00:00
+2024-06-11 08:18:30,903: validation_start_date: 1980-10-01 00:00:00
+2024-06-11 08:18:30,903: validation_end_date: 1989-09-30 00:00:00
+2024-06-11 08:18:30,904: test_start_date: 1989-10-01 00:00:00
+2024-06-11 08:18:30,904: test_end_date: 1999-09-30 00:00:00
+2024-06-11 08:18:30,906: device: cpu
+2024-06-11 08:18:30,906: validate_every: 3
+2024-06-11 08:18:30,907: validate_n_random_basins: 1
+2024-06-11 08:18:30,907: metrics: ['NSE']
+2024-06-11 08:18:30,908: model: cudalstm
+2024-06-11 08:18:30,909: head: regression
+2024-06-11 08:18:30,909: output_activation: linear
+2024-06-11 08:18:30,910: hidden_size: 20
+2024-06-11 08:18:30,910: initial_forget_bias: 3
+2024-06-11 08:18:30,910: output_dropout: 0.4
+2024-06-11 08:18:30,910: optimizer: Adam
+2024-06-11 08:18:30,910: loss: MSE
+2024-06-11 08:18:30,910: learning_rate: {0: 0.01, 30: 0.005, 40: 0.001}
+2024-06-11 08:18:30,910: batch_size: 256
+2024-06-11 08:18:30,910: epochs: 50
+2024-06-11 08:18:30,910: clip_gradient_norm: 1
+2024-06-11 08:18:30,910: predict_last_n: 1
+2024-06-11 08:18:30,910: seq_length: 365
+2024-06-11 08:18:30,916: num_workers: 8
+2024-06-11 08:18:30,916: log_interval: 5
+2024-06-11 08:18:30,916: log_tensorboard: True
+2024-06-11 08:18:30,916: log_n_figures: 1
+2024-06-11 08:18:30,916: save_weights_every: 1
+2024-06-11 08:18:30,916: dataset: camels_us
+2024-06-11 08:18:30,916: data_dir: ..\..\data\CAMELS_US
+2024-06-11 08:18:30,916: forcings: ['maurer', 'daymet', 'nldas']
+2024-06-11 08:18:30,916: dynamic_inputs: ['PRCP(mm/day)_nldas', 'PRCP(mm/day)_maurer', 'prcp(mm/day)_daymet', 'srad(W/m2)_daymet', 'tmax(C)_daymet', 'tmin(C)_daymet', 'vp(Pa)_daymet']
+2024-06-11 08:18:30,916: target_variables: ['QObs(mm/d)']
+2024-06-11 08:18:30,922: clip_targets_to_zero: ['QObs(mm/d)']
+2024-06-11 08:18:30,923: number_of_basins: 1
+2024-06-11 08:18:30,923: run_dir: c:\Users\Inigo\Projects\neuralhydrology\examples\01-Introduction\runs\test_run_1106_081830
+2024-06-11 08:18:30,924: train_dir: c:\Users\Inigo\Projects\neuralhydrology\examples\01-Introduction\runs\test_run_1106_081830\train_data
+2024-06-11 08:18:30,924: img_log_dir: c:\Users\Inigo\Projects\neuralhydrology\examples\01-Introduction\runs\test_run_1106_081830\img_log
+2024-06-11 08:18:30,928: ### Device cpu will be used for training
+2024-06-11 08:18:30,940: Loading basin data into xarray data set.
+2024-06-11 08:18:31,910: Create lookup table and convert to pytorch tensor
+2024-06-11 08:19:17,897: Epoch 1 average loss: avg_loss: 0.36699, avg_total_loss: 0.36699
+2024-06-11 08:19:59,311: Epoch 2 average loss: avg_loss: 0.25297, avg_total_loss: 0.25297
+2024-06-11 08:20:42,263: Epoch 3 average loss: avg_loss: 0.19238, avg_total_loss: 0.19238
+2024-06-11 08:20:45,448: Epoch 3 average validation loss: 0.44461 -- Median validation metrics: avg_loss: 0.44461, NSE: 0.57002
+2024-06-11 08:21:34,386: Epoch 4 average loss: avg_loss: 0.17059, avg_total_loss: 0.17059
+2024-06-11 08:22:16,685: Epoch 5 average loss: avg_loss: 0.14161, avg_total_loss: 0.14161
+2024-06-11 08:23:00,053: Epoch 6 average loss: avg_loss: 0.12997, avg_total_loss: 0.12997
+2024-06-11 08:23:00,800: Epoch 6 average validation loss: 0.31463 -- Median validation metrics: avg_loss: 0.31463, NSE: 0.69652
+2024-06-11 08:23:59,179: Epoch 7 average loss: avg_loss: 0.11413, avg_total_loss: 0.11413
+2024-06-11 08:24:45,026: Epoch 8 average loss: avg_loss: 0.10745, avg_total_loss: 0.10745
+2024-06-11 08:25:24,353: Epoch 9 average loss: avg_loss: 0.09127, avg_total_loss: 0.09127
+2024-06-11 08:25:24,953: Epoch 9 average validation loss: 0.25476 -- Median validation metrics: avg_loss: 0.25476, NSE: 0.75328
+2024-06-11 08:26:05,686: Epoch 10 average loss: avg_loss: 0.08722, avg_total_loss: 0.08722
+2024-06-11 08:26:43,714: Epoch 11 average loss: avg_loss: 0.08984, avg_total_loss: 0.08984
+2024-06-11 08:27:22,431: Epoch 12 average loss: avg_loss: 0.08844, avg_total_loss: 0.08844
+2024-06-11 08:27:23,084: Epoch 12 average validation loss: 0.22109 -- Median validation metrics: avg_loss: 0.22109, NSE: 0.78596
+2024-06-11 08:28:01,901: Epoch 13 average loss: avg_loss: 0.08698, avg_total_loss: 0.08698
+2024-06-11 08:28:39,155: Epoch 14 average loss: avg_loss: 0.07529, avg_total_loss: 0.07529
+2024-06-11 08:29:16,608: Epoch 15 average loss: avg_loss: 0.07086, avg_total_loss: 0.07086
+2024-06-11 08:29:17,143: Epoch 15 average validation loss: 0.20269 -- Median validation metrics: avg_loss: 0.20269, NSE: 0.80313
+2024-06-11 08:29:55,638: Epoch 16 average loss: avg_loss: 0.06653, avg_total_loss: 0.06653
+2024-06-11 08:30:33,258: Epoch 17 average loss: avg_loss: 0.07397, avg_total_loss: 0.07397
+2024-06-11 08:31:12,086: Epoch 18 average loss: avg_loss: 0.07038, avg_total_loss: 0.07038
+2024-06-11 08:31:12,637: Epoch 18 average validation loss: 0.18296 -- Median validation metrics: avg_loss: 0.18296, NSE: 0.82246
+2024-06-11 08:31:51,790: Epoch 19 average loss: avg_loss: 0.07230, avg_total_loss: 0.07230
+2024-06-11 08:32:28,902: Epoch 20 average loss: avg_loss: 0.06189, avg_total_loss: 0.06189
+2024-06-11 08:33:06,814: Epoch 21 average loss: avg_loss: 0.06437, avg_total_loss: 0.06437
+2024-06-11 08:33:07,362: Epoch 21 average validation loss: 0.19059 -- Median validation metrics: avg_loss: 0.19059, NSE: 0.81522
+2024-06-11 08:33:44,666: Epoch 22 average loss: avg_loss: 0.06272, avg_total_loss: 0.06272
+2024-06-11 08:34:22,840: Epoch 23 average loss: avg_loss: 0.06916, avg_total_loss: 0.06916
+2024-06-11 08:34:59,777: Epoch 24 average loss: avg_loss: 0.06197, avg_total_loss: 0.06197
+2024-06-11 08:35:00,449: Epoch 24 average validation loss: 0.15455 -- Median validation metrics: avg_loss: 0.15455, NSE: 0.84887
+2024-06-11 08:35:38,008: Epoch 25 average loss: avg_loss: 0.05525, avg_total_loss: 0.05525
+2024-06-11 08:36:16,232: Epoch 26 average loss: avg_loss: 0.07942, avg_total_loss: 0.07942
+2024-06-11 08:36:53,459: Epoch 27 average loss: avg_loss: 0.06584, avg_total_loss: 0.06584
+2024-06-11 08:36:54,037: Epoch 27 average validation loss: 0.14411 -- Median validation metrics: avg_loss: 0.14411, NSE: 0.85928
+2024-06-11 08:37:31,396: Epoch 28 average loss: avg_loss: 0.05811, avg_total_loss: 0.05811
+2024-06-11 08:38:07,774: Epoch 29 average loss: avg_loss: 0.05103, avg_total_loss: 0.05103
+2024-06-11 08:38:07,774: Setting learning rate to 0.005
+2024-06-11 08:38:49,254: Epoch 30 average loss: avg_loss: 0.05010, avg_total_loss: 0.05010
+2024-06-11 08:38:50,336: Epoch 30 average validation loss: 0.15603 -- Median validation metrics: avg_loss: 0.15603, NSE: 0.84792
+2024-06-11 08:39:31,953: Epoch 31 average loss: avg_loss: 0.05892, avg_total_loss: 0.05892
+2024-06-11 08:40:12,228: Epoch 32 average loss: avg_loss: 0.04762, avg_total_loss: 0.04762
+2024-06-11 08:40:52,560: Epoch 33 average loss: avg_loss: 0.04793, avg_total_loss: 0.04793
+2024-06-11 08:40:53,583: Epoch 33 average validation loss: 0.14227 -- Median validation metrics: avg_loss: 0.14227, NSE: 0.86094
+2024-06-11 08:41:33,745: Epoch 34 average loss: avg_loss: 0.04517, avg_total_loss: 0.04517
+2024-06-11 08:42:13,964: Epoch 35 average loss: avg_loss: 0.05413, avg_total_loss: 0.05413
+2024-06-11 08:42:53,898: Epoch 36 average loss: avg_loss: 0.04423, avg_total_loss: 0.04423
+2024-06-11 08:42:54,925: Epoch 36 average validation loss: 0.15375 -- Median validation metrics: avg_loss: 0.15375, NSE: 0.85000
+2024-06-11 08:43:36,693: Epoch 37 average loss: avg_loss: 0.04612, avg_total_loss: 0.04612
+2024-06-11 08:44:16,521: Epoch 38 average loss: avg_loss: 0.04846, avg_total_loss: 0.04846
+2024-06-11 08:44:56,948: Epoch 39 average loss: avg_loss: 0.05606, avg_total_loss: 0.05606
+2024-06-11 08:44:57,867: Epoch 39 average validation loss: 0.15414 -- Median validation metrics: avg_loss: 0.15414, NSE: 0.84949
+2024-06-11 08:44:57,868: Setting learning rate to 0.001
+2024-06-11 08:45:37,698: Epoch 40 average loss: avg_loss: 0.04351, avg_total_loss: 0.04351
+2024-06-11 08:46:19,675: Epoch 41 average loss: avg_loss: 0.04533, avg_total_loss: 0.04533
+2024-06-11 08:47:00,124: Epoch 42 average loss: avg_loss: 0.05500, avg_total_loss: 0.05500
+2024-06-11 08:47:01,177: Epoch 42 average validation loss: 0.14284 -- Median validation metrics: avg_loss: 0.14284, NSE: 0.86040
+2024-06-11 08:47:41,507: Epoch 43 average loss: avg_loss: 0.04219, avg_total_loss: 0.04219
+2024-06-11 08:48:23,056: Epoch 44 average loss: avg_loss: 0.04750, avg_total_loss: 0.04750
+2024-06-11 08:49:03,514: Epoch 45 average loss: avg_loss: 0.04488, avg_total_loss: 0.04488
+2024-06-11 08:49:04,583: Epoch 45 average validation loss: 0.14356 -- Median validation metrics: avg_loss: 0.14356, NSE: 0.85982
+2024-06-11 08:49:44,698: Epoch 46 average loss: avg_loss: 0.03886, avg_total_loss: 0.03886
+2024-06-11 08:50:24,735: Epoch 47 average loss: avg_loss: 0.04782, avg_total_loss: 0.04782
+2024-06-11 08:51:04,824: Epoch 48 average loss: avg_loss: 0.04567, avg_total_loss: 0.04567
+2024-06-11 08:51:05,900: Epoch 48 average validation loss: 0.13671 -- Median validation metrics: avg_loss: 0.13671, NSE: 0.86639
+2024-06-11 08:51:47,200: Epoch 49 average loss: avg_loss: 0.05178, avg_total_loss: 0.05178
+2024-06-11 08:52:27,628: Epoch 50 average loss: avg_loss: 0.05645, avg_total_loss: 0.05645
+2024-06-11 09:13:39,098: Using the model weights from runs\test_run_1106_081830\model_epoch050.pt
+2024-06-11 09:13:40,363: Stored metrics at runs\test_run_1106_081830\test\model_epoch050\test_metrics.csv
+2024-06-11 09:13:40,363: Stored results at runs\test_run_1106_081830\test\model_epoch050\test_results.p
